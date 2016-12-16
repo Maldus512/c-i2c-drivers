@@ -489,12 +489,17 @@ unsigned int HDSequentialWriteI2C(unsigned char ControlByte, unsigned char HighA
     unsigned char page_size = 0;
     unsigned char device = 0;
     unsigned char block = 0;
+    unsigned char high_add_limit = 0;
     
 #ifdef HIGH_ADD_LIMIT
     if (HighAdd > HIGH_ADD_LIMIT) {
         return 1;
     }
+    high_add_limit = HIGH_ADD_LIMIT
+#else
+    high_add_limit = 0xFF;
 #endif
+
     
 #if RAM_TYPE == MEM_24XX16
     ControlByte &= 0xF1;
@@ -528,7 +533,7 @@ unsigned int HDSequentialWriteI2C(unsigned char ControlByte, unsigned char HighA
         
         //Adjust addresses
         if (LowAdd + page_size  > 0xFF) {
-            if (HighAdd == HIGH_ADD_LIMIT) {
+            if (HighAdd == high_add_limit) {
 #if RAM_TYPE == MEM_24XX1025
                     block++;
                     HighAdd = 0x00;
@@ -658,7 +663,7 @@ unsigned int HDSequentialReadI2C(unsigned char ControlByte, unsigned char HighAd
     block = (ControlByte & 0x08) >> 3;
     
 #if RAM_TYPE == MEM_24XX1025
-    if (fullAdd + Length >= BLOCK_SIZE && block == 1) {
+    if (fullAdd + length >= BLOCK_SIZE && block == 1) {
         //Trying to read more bytes than the memory is actually capable of storing
         return 1;
     }
