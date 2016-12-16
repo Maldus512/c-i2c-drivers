@@ -3,6 +3,15 @@
 #include "MyI2C2.h"
 
 
+static inline __attribute__((always_inline)) void disableInt() {
+        IEC0bits.T1IE = 0;
+        IEC0bits.T2IE = 0;
+}
+
+static inline __attribute__((always_inline)) void enableInt() {
+        IEC0bits.T1IE = 1;
+        IEC0bits.T2IE = 1;
+}
 
 void Init_I2C()
 {
@@ -11,7 +20,7 @@ void Init_I2C()
     I2C2TRN = 0x0000;
     IFS3bits.MI2C2IF = 0;
     IEC3bits.MI2C2IE = 0;
-    
+    CloseI2C2();
     OpenI2C2(I2C2_ON & I2C2_IDLE_CON & I2C2_CLK_HLD &
             I2C2_IPMI_DIS & I2C2_7BIT_ADD & I2C2_SLW_EN &
             I2C2_SM_DIS & I2C2_GCALL_DIS & I2C2_STR_DIS &
@@ -21,10 +30,8 @@ void Init_I2C()
     IdleI2C2();
 }
 
-void I2CWriteReg(unsigned char reg, unsigned char data, unsigned char addr)
-{
-    INTCON2bits.GIE = 0; // Disable ALL INTERRUPT
-    
+void I2CWriteReg(unsigned char reg, unsigned char data, unsigned char addr) {
+    disableInt();
     MyStartI2C2();
 
     MasterWriteI2C2(addr);
@@ -56,16 +63,12 @@ void I2CWriteReg(unsigned char reg, unsigned char data, unsigned char addr)
     } while(I2C2STATbits.ACKSTAT);
     
     MyStopI2C2();
-    
-    INTCON2bits.GIE = 1; // Enable ALL INTERRUPT
+    enableInt();
 }
 
-unsigned char I2CReadReg(unsigned char reg, unsigned char addr)
-{
-    unsigned char valore = 0;
-
-    INTCON2bits.GIE = 0; // Disable ALL INTERRUPT
-    
+unsigned char I2CReadReg(unsigned char reg, unsigned char addr) {
+    unsigned char valore;
+    disableInt();
     MyStartI2C2();
 
     MasterWriteI2C2(addr);
@@ -95,8 +98,7 @@ unsigned char I2CReadReg(unsigned char reg, unsigned char addr)
     valore = MasterReadI2C2();
 
     MyStopI2C2();
-    
-    INTCON2bits.GIE = 1; // Enable ALL INTERRUPT
+    enableInt();
 
     return valore;
 }
@@ -105,17 +107,16 @@ unsigned char
 I2CWriteRegN(unsigned char addr, unsigned char reg, unsigned char *Data, unsigned char N)
 {
     unsigned char *ptr;
-    
-    ptr = Data;
-    
-    INTCON2bits.GIE = 0; // Disable ALL INTERRUPT
-    
+    unsigned char len;
+    disableInt();
     MyStartI2C2();
     MasterWriteI2C2(addr);
     MyIdleI2C2();
     
     do
     {
+        ptr = Data;
+        len = N;
         if (I2C2STATbits.ACKSTAT)
         {
             MyRestartI2C2();
@@ -129,20 +130,20 @@ I2CWriteRegN(unsigned char addr, unsigned char reg, unsigned char *Data, unsigne
         }
         MasterWriteI2C2(reg);
         MyIdleI2C2();
+        
+        while (len--) {
+            MasterWriteI2C2(*ptr++);
+            MyIdleI2C2();
+            if (I2C2STATbits.ACKSTAT) {
+                break;
+            }
+        }
     }
     while (I2C2STATbits.ACKSTAT);
 
-    while (N--)
-    {
-        MasterWriteI2C2(*ptr++);
-        MyIdleI2C2();
-        MyAckI2C2();
-    }
     MyStopI2C2();
     MyIdleI2C2();
-    
-    INTCON2bits.GIE = 1; // Enable ALL INTERRUPT
-    
+    enableInt();
     return 1;
 }
 
@@ -151,9 +152,7 @@ unsigned char I2CReadRegN(unsigned char addr, unsigned char reg, unsigned char *
     unsigned char *ptr;
     
     ptr = Data;
-    
-    INTCON2bits.GIE = 0; // Disable ALL INTERRUPT
-    
+    disableInt();
     MyStartI2C2();
     MasterWriteI2C2(addr);
     MyIdleI2C2();
@@ -185,9 +184,7 @@ unsigned char I2CReadRegN(unsigned char addr, unsigned char reg, unsigned char *
     
     MastergetsI2C2(N, ptr, 50000);
     MyStopI2C2(); //Send the Stop condition
-    
-    INTCON2bits.GIE = 1; // Enable ALL INTERRUPT
-    
+    enableInt();
     return 1;
 }
 
@@ -276,9 +273,20 @@ unsigned int EEAckPolling(unsigned char control)
  *
  * Note:			None
  ********************************************************************/
-unsigned int HDByteWriteI2C(unsigned char ControlByte, unsigned char HighAdd, unsigned char LowAdd, unsigned char data)
-{
-    INTCON2bits.GIE = 0; // Disable ALL INTERRUPT
+unsigned int HDByteWriteI2C(unsigned char ControlByte, unsigned char HighAdd, unsigned char LowAdd, unsigned char data) {
+
+#ifdef HIGH_ADD_LIMIT
+    if (HighAdd > HIGH_ADD_LIMIT) {
+        return 1;
+    }
+#endif
+    
+#if RAM_TYPE == MEM_24XX16
+    ControlByte &= 0xF1;
+    ControlByte |= HighAdd << 1;
+#endif
+    INTCON2bits.GIE = 0;
+    MyIdleI2C2(); //Ensure Module is Idle  
     
     MyIdleI2C2(); //Ensure Module is Idle
     MyStartI2C2(); //Generate Start COndition
@@ -336,10 +344,19 @@ unsigned int HDByteWriteI2C(unsigned char ControlByte, unsigned char HighAdd, un
  *
  * Note:			None
  ********************************************************************/
-unsigned int HDByteReadI2C(unsigned char ControlByte, unsigned char HighAdd, unsigned char LowAdd, unsigned char *Data)
-{
-    INTCON2bits.GIE = 0; // Disable ALL INTERRUPT
+unsigned int HDByteReadI2C(unsigned char ControlByte, unsigned char HighAdd, unsigned char LowAdd, unsigned char *Data) {
     
+#ifdef HIGH_ADD_LIMIT
+    if (HighAdd > HIGH_ADD_LIMIT) {
+        return 1;
+    }
+#endif
+    
+#if RAM_TYPE == MEM_24XX16
+    ControlByte &= 0xF1;
+    ControlByte |= HighAdd << 1;
+#endif
+    disableInt();
     MyIdleI2C2(); //Wait for bus Idle
     MyStartI2C2(); //Generate Start condition
     MasterWriteI2C2(ControlByte); //send control byte for write
@@ -357,11 +374,12 @@ unsigned int HDByteReadI2C(unsigned char ControlByte, unsigned char HighAdd, uns
                 continue;
             }
         }
+#if HIGH_ADDRESS
         MasterWriteI2C2(HighAdd); //Send High Address
         MyIdleI2C2(); //Wait for bus Idle
+#endif
         MasterWriteI2C2(LowAdd); //Send Low Address
         MyIdleI2C2(); //Wait for bus Idle
-        
         if (I2C2STATbits.ACKSTAT)
         {
             continue;
@@ -377,9 +395,7 @@ unsigned int HDByteReadI2C(unsigned char ControlByte, unsigned char HighAdd, uns
 
     NotAckI2C2(); //send Not Ack
     MyStopI2C2(); //Send Stop Condition
-    
-    INTCON2bits.GIE = 1; // Enable ALL INTERRUPT
-    
+    enableInt();
     return (0);
 }
 
@@ -402,10 +418,13 @@ unsigned int HDByteReadI2C(unsigned char ControlByte, unsigned char HighAdd, uns
  *              controls are carried on in thos function
  ********************************************************************/
 
-void HDPageWriteI2C(unsigned char ControlByte, unsigned char HighAdd, unsigned char LowAdd, unsigned char *wrptr, int Length)
-{
-    INTCON2bits.GIE = 0; // Disable ALL INTERRUPT
+void HDPageWriteI2C(unsigned char ControlByte, unsigned char HighAdd, unsigned char LowAdd, unsigned char *wrptr, int Length) {
     
+#if RAM_TYPE == MEM_24XX16
+    ControlByte &= 0xF1;
+    ControlByte |= HighAdd << 1;
+#endif
+    INTCON2bits.GIE = 0;
     MyIdleI2C2(); //wait for bus Idle
     MyStartI2C2(); //Generate Start condition
     MasterWriteI2C2(ControlByte); //send controlbyte for a write
@@ -424,8 +443,10 @@ void HDPageWriteI2C(unsigned char ControlByte, unsigned char HighAdd, unsigned c
                 continue;
             }
         }
+#if HIGH_ADDRESS
         MasterWriteI2C2(HighAdd); //send High Address
         MyIdleI2C2(); //wait for bus Idle
+#endif
         MasterWriteI2C2(LowAdd); //send Low Address
         MyIdleI2C2(); //wait for bus Idle
     }
@@ -469,16 +490,31 @@ unsigned int HDSequentialWriteI2C(unsigned char ControlByte, unsigned char HighA
     unsigned char device = 0;
     unsigned char block = 0;
     
-    int fullAdd = (HighAdd << 8) | LowAdd;
+#ifdef HIGH_ADD_LIMIT
+    if (HighAdd > HIGH_ADD_LIMIT) {
+        return 1;
+    }
+#endif
     
+#if RAM_TYPE == MEM_24XX16
+    ControlByte &= 0xF1;
+    ControlByte |= HighAdd << 1;
+#endif
+    
+    int fullAdd = (HighAdd << 8) | LowAdd;
     device = (ControlByte & 0x06) >> 1;
     block = (ControlByte & 0x08) >> 3;
     
-    if (fullAdd + Length >= BLOCK_SIZE && block == 1)
-    {
+#if RAM_TYPE == MEM_24XX1025
+    if (fullAdd + Length >= BLOCK_SIZE && block == 1) {
         //Trying to write more bytes than the memory is actually capable of storing
         return 1;
     }
+#elif RAM_TYPE == MEM_24XX16
+    if (fullAdd + Length >= MEM_SIZE) {
+        return 1;
+    }
+#endif
     
     while (Length > 0)
     {
@@ -491,27 +527,33 @@ unsigned int HDSequentialWriteI2C(unsigned char ControlByte, unsigned char HighA
         wrptr += page_size;
         
         //Adjust addresses
-        if (LowAdd >= 128)
-        {
-            if (HighAdd == 0xFF)
-            {
-                block++;
-                HighAdd = 0x00;
-                LowAdd = 0x00;
-            }
-            else
-            {
-                HighAdd++;
-                LowAdd = 0x00;
-            }
+        if (LowAdd + page_size  > 0xFF) {
+            if (HighAdd == HIGH_ADD_LIMIT) {
+#if RAM_TYPE == MEM_24XX1025
+                    block++;
+                    HighAdd = 0x00;
+                    LowAdd = 0x00;
+#elif RAM_TYPE == MEM_24XX16
+                    return 1; //Overflow - should not happen here but in the previous control
+#endif
+                }
+                else {
+                    HighAdd++;
+                    LowAdd = 0x00;
+                }
         }
         else
         {
             LowAdd += page_size;
         }
         ControlByte &= 0xF0;
+#if RAM_TYPE == MEM_24XX1025
         ControlByte |= block << 3;
         ControlByte |= device << 1;
+#elif RAM_TYPE == MEM_24XX16
+        ControlByte &= 0xF1;
+        ControlByte |= HighAdd << 1;
+#endif
         ControlByte |= 0x00; //R/W - write operation
     }
     return (0);
@@ -533,10 +575,14 @@ unsigned int HDSequentialWriteI2C(unsigned char ControlByte, unsigned char HighA
  *
  * Note:			No check on address and length are issued
  ********************************************************************/
-void HDBlockReadI2C(unsigned char ControlByte, unsigned char HighAdd, unsigned char LowAdd, unsigned char *rdptr, unsigned int length)
-{
-    INTCON2bits.GIE = 0; // Disable ALL INTERRUPT
-    
+
+void HDBlockReadI2C(unsigned char ControlByte, unsigned char HighAdd, unsigned char LowAdd, unsigned char *rdptr, unsigned int length) {
+        
+#if RAM_TYPE == MEM_24XX16
+    ControlByte &= 0xF1;
+    ControlByte |= HighAdd << 1;
+#endif
+    INTCON2bits.GIE = 0;
     MyIdleI2C2(); //Ensure Module is Idle
     MyStartI2C2(); //Initiate start condition
     MasterWriteI2C2(ControlByte); //write 1 byte
@@ -555,8 +601,10 @@ void HDBlockReadI2C(unsigned char ControlByte, unsigned char HighAdd, unsigned c
                 continue;
             }
         }
+#if HIGH_ADDRESS
         MasterWriteI2C2(HighAdd); //Write High word address
         MyIdleI2C2(); //Ensure module is idle
+#endif
         MasterWriteI2C2(LowAdd); //Write Low word address
         MyIdleI2C2(); //Ensure module is idle
     }
@@ -594,21 +642,35 @@ unsigned int HDSequentialReadI2C(unsigned char ControlByte, unsigned char HighAd
     unsigned int block_size;
     unsigned char block, device;
     
-    int fullAdd = (HighAdd << 8) | LowAdd;
+#ifdef HIGH_ADD_LIMIT
+    if (HighAdd > HIGH_ADD_LIMIT) {
+        return 1;
+    }
+#endif
     
+#if RAM_TYPE == MEM_24XX16
+    ControlByte &= 0xF1;
+    ControlByte |= HighAdd << 1;
+#endif
+    
+    int fullAdd = (HighAdd << 8) | LowAdd;
     device = (ControlByte & 0x06) >> 1;
     block = (ControlByte & 0x08) >> 3;
     
-    if (fullAdd + length >= BLOCK_SIZE && block == 1)
-    {
-        //attempting to read overflows
+#if RAM_TYPE == MEM_24XX1025
+    if (fullAdd + Length >= BLOCK_SIZE && block == 1) {
+        //Trying to read more bytes than the memory is actually capable of storing
         return 1;
     }
+#elif RAM_TYPE == MEM_24XX16
+    if (fullAdd + length >= MEM_SIZE) {
+        return 1;
+    }
+#endif
     
-    while (length > 0)
-    {
-        if (fullAdd == 0x0000)
-        {
+    while (length > 0) {
+#if RAM_TYPE == MEM_24XX1025
+        if (fullAdd == 0x0000) {
             block_size = BLOCK_SIZE - 1;
         }
         else
@@ -616,6 +678,9 @@ unsigned int HDSequentialReadI2C(unsigned char ControlByte, unsigned char HighAd
             block_size = BLOCK_SIZE - fullAdd;
         }
         block_size = (length < block_size) ? length : block_size;
+#elif RAM_TYPE == MEM_24XX16
+        block_size = length;
+#endif
         /*Read the data*/
         HDBlockReadI2C(ControlByte, HighAdd, LowAdd, rdptr, block_size);
         
@@ -633,8 +698,13 @@ unsigned int HDSequentialReadI2C(unsigned char ControlByte, unsigned char HighAd
         fullAdd = 0x0000;
         
         ControlByte &= 0xF0;
+#if RAM_TYPE == MEM_24XX1025
         ControlByte |= block << 3;
         ControlByte |= device << 1;
+#elif RAM_TYPE == MEM_24XX16
+        ControlByte &= 0xF1;
+        ControlByte |= HighAdd << 1;
+#endif
         ControlByte |= 0x00; //R/W - write operation
     }
     return (0);
