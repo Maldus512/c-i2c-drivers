@@ -495,7 +495,7 @@ unsigned int HDSequentialWriteI2C(unsigned char ControlByte, unsigned char HighA
     if (HighAdd > HIGH_ADD_LIMIT) {
         return 1;
     }
-    high_add_limit = HIGH_ADD_LIMIT
+    high_add_limit = HIGH_ADD_LIMIT;
 #else
     high_add_limit = 0xFF;
 #endif
