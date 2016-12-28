@@ -68,6 +68,7 @@ void CK_I2C (unsigned char ck)
 void CK_I2C_b (unsigned char ck)
 {
     CLK_I2C_B = ck;
+    delay_us(5);
 }
 
 
