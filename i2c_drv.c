@@ -39,8 +39,55 @@ void CK_I2C (unsigned char ck)
 
 
 static inline __attribute__((always_inline)) void startCondition() {
+    DD_DATA_I2C_B = OUTPUT_PIN;
     CLK_I2C_B = HIGH;
     DATA_I2C_B = LOW;
+}
+
+static inline __attribute((always_inline)) void stopCondition() {
+    DD_DATA_I2C_B = OUTPUT_PIN;//1;      /* dati in uscita dal micro             */
+    DATA_I2C_B = 0;         /* stop condition                       */
+    CK_I2C(1);
+    DATA_I2C_B = 1;         /* stop condition                       */
+    CK_I2C(0);
+    CK_I2C(1);
+}
+
+static inline __attribute__((always_inline)) void I2CByteWrite(unsigned char byte) {
+    int x = 0;
+    DD_DATA_I2C_B = OUTPUT_PIN;
+    for ( x = 0; x < 8; x++)
+    {
+        CK_I2C(0);
+        DATA_I2C_B = (byte >> (7 - x)) & 0x01;
+        CK_I2C(1);
+    }
+}
+
+static inline __attribute__((always_inline)) void I2CByteRead(unsigned char* byte) {
+    DD_DATA_I2C_B = INPUT_PIN;//0;  /* dati in ingesso                      */
+    unsigned char x = 0;
+    for (x = 0; x < 8; x++)
+    {
+        CK_I2C(1);
+        *byte = (*byte << 1) | DATA_I2C_INPUT;//DATA_I2C_B; /* dato in input */
+        CK_I2C(0);
+    }
+    DD_DATA_I2C_B = OUTPUT_PIN;//1;  /* dati in uscita dal micro             */
+    DATA_I2C_B = 0;     /* invia ack                            */
+    CK_I2C(1);
+    CK_I2C(0);
+}
+
+static inline __attribute__((always_inline)) unsigned char readAck() {
+    unsigned char x;
+    CK_I2C(0);
+    DATA_I2C_B = 1;         //Set Nack
+    DD_DATA_I2C_B = INPUT_PIN;
+    CK_I2C(1);
+    x = DATA_I2C_INPUT;//DATA_I2C_B;
+    CK_I2C(0);
+    return x;
 }
 
 
@@ -69,244 +116,71 @@ void Init_I2C_b (void)
 /*----------------------------------------------------------------------------*/
 int I2C_Write_b (unsigned char cDevAddr, unsigned char cRegAddr, const unsigned char* pData, int nLen)
 {
-    unsigned int x;
     unsigned int y;
     unsigned char ack;
     
     //TODO: REMOVE THIS
     if (nLen > PAGE_SIZE)
         return -2;
-    
-    DD_DATA_I2C_B = OUTPUT_PIN;//1;      /* dati in uscita dal micro             */
 
-    DATA_I2C_B = 0;         /* DATI I2C */    /* start condition    */
-
-    /*--------------------------------------------------------------*/
-    /* invio indirizzo dispositivo                                  */
-    /*--------------------------------------------------------------*/
-    for (x = 0; x < 8; x++)
-    {
-        CK_I2C(0);
-        DATA_I2C_B = (cDevAddr >> (7 - x)) & 0x01;
-        CK_I2C(1);
-    }
+    startCondition();
+    I2CByteWrite(cDevAddr);
     
-    CK_I2C(0);
-    DD_DATA_I2C_B = INPUT_PIN;//0;      /* dati in ingresso                     */
-    CK_I2C(1);
-    ack = DATA_I2C_INPUT;//DATA_I2C_B;
-    
+    ack = readAck();
     if (ack != 0)
          return (-1);       /* busy                                 */
-    
-    CK_I2C(0);
-    DD_DATA_I2C_B = OUTPUT_PIN;// 1;      /* dati in uscita dal micro             */
-    
-    /*--------------------------------------------------------------*/
-    /* invio indirizzo registro                                     */
-    /*--------------------------------------------------------------*/
-    for (x = 0; x < 8; x++)
-    {
-        CK_I2C(0);
-        DATA_I2C_B = (cRegAddr >> (7 - x)) & 0x01;
-        CK_I2C(1);
-    }
-    
-    CK_I2C(0);
-    DD_DATA_I2C_B = INPUT_PIN;//0;        /* dati in ingresso                     */
-    CK_I2C(1);
-    ack = DATA_I2C_INPUT;//DATA_I2C_B;
-    
+
+    I2CByteWrite(cRegAddr);
+    ack = readAck();
     if (ack != 0)
          return (-1);
     
-    CK_I2C(0);
-    
-    /*--------------------------------------------------------------*/
-    /* invio DATI al dispositivo                                    */
-    /*--------------------------------------------------------------*/
     for (y = 0; y < nLen; y++)
     {
-        DD_DATA_I2C_B = OUTPUT_PIN;//1;  /* dati in uscita                       */
-        
-        for (x = 0; x < 8; x++)
-        {
-            CK_I2C(0);
-            DATA_I2C_B = (*pData >> (7 - x)) & 0x01;
-            CK_I2C(1);
-        }
-        
+        I2CByteWrite(*pData);
         pData ++;
-        CK_I2C(0);
-        DD_DATA_I2C_B = INPUT_PIN;//0;  /* dati in ingresso                     */
-        CK_I2C(1);
-        ack = DATA_I2C_INPUT;//DATA_I2C_B;
-        
+        ack = readAck();        
         if (ack != 0)
             return (-1);
-        
-        CK_I2C(0);
     }
     
-    DD_DATA_I2C_B = OUTPUT_PIN;//1;      /* dati in uscita dal micro             */
-    DATA_I2C_B = 0;         /* stop condition                       */
-    CK_I2C(1);
-    DATA_I2C_B = 1;         /* stop condition                       */
-    CK_I2C(0);
-    CK_I2C(1);
-    
+    stopCondition();
     return (0);
 }
 
 
 
-
-
-
-
-// 
-// 
-// 
-// 
-// /*----------------------------------------------------------------------------*/
-// /*  I2C_Write_512                                                             */
-// /*----------------------------------------------------------------------------*/
-// int I2C_Write_512 (unsigned char cDevAddr, unsigned char cRegAddr_h, unsigned char cRegAddr_l, const unsigned char* pData, unsigned int nLen)
-// {
-//     unsigned int x;
-//     unsigned int y;
-//     unsigned char ack;
-//     
-//     DD_DATA_I2C = OUTPUT_PIN;   /* dati in uscita dal micro         */
-//     
-//     CK_I2C(1);
-//     CK_I2C(0);
-//     CK_I2C(1);
-//     DATA_I2C = 0;               /* DATI I2C */ /* start condition   */
-//     CK_I2C(1);
-//     CK_I2C(0);
-//     
-//     /*--------------------------------------------------------------*/
-//     /* invio indirizzo dispositivo                                  */
-//     /*--------------------------------------------------------------*/
-//     for (x = 0; x < 8; x++)
-//     {
-//         CK_I2C(0);
-//         DATA_I2C = (cDevAddr >> (7 - x));
-//         CK_I2C(1);
-//     }
-//     
-//     CK_I2C(0);
-//     DD_DATA_I2C = INPUT_PIN;    /* dati in ingresso                 */
-//     CK_I2C(1);
-//     ack = DATA_I2C;
-//     
-// //     if (ack != 0)
-// //          return (-1);           /* busy                             */
-//          
-//     while(ack!=0)
-//     {
-//         ack = DATA_I2C;
-//         Nop();
-//     }
-// 
-//     CK_I2C(0);
-//     DD_DATA_I2C = OUTPUT_PIN;   /* dati in uscita dal micro         */
-//     
-//     /*--------------------------------------------------------------*/
-//     /* invio indirizzo registro h                                   */
-//     /*--------------------------------------------------------------*/
-//     for (x = 0; x < 8; x++)
-//     {
-//         CK_I2C(0);
-//         DATA_I2C = (cRegAddr_h >> (7 - x));
-//         CK_I2C(1);
-//     }
-//     
-//     CK_I2C(0);
-//     DD_DATA_I2C = INPUT_PIN;    /* dati in ingresso                 */
-//     CK_I2C(1);
-//     ack = DATA_I2C;
-//     
-// //     if (ack != 0)
-// //          return (-1);           /* busy                             */
-//          
-//     while(ack!=0)
-//     {
-//         ack = DATA_I2C;
-//         Nop();
-//     }
-//     
-//     CK_I2C(0);
-//     DD_DATA_I2C = OUTPUT_PIN;   /* dati in uscita dal micro         */
-//     
-//     /*--------------------------------------------------------------*/
-//     /* invio indirizzo registro l                                   */
-//     /*--------------------------------------------------------------*/
-//     for (x = 0; x < 8; x++)
-//     {
-//         CK_I2C(0);
-//         DATA_I2C = (cRegAddr_l >> (7 - x));
-//         CK_I2C(1);
-//     }
-//     
-//     CK_I2C(0);
-//     DD_DATA_I2C = INPUT_PIN;    /* dati in ingresso                 */
-//     CK_I2C(1);
-//     ack = DATA_I2C;
-//     
-// //     if (ack != 0)
-// //          return (-1);           /* busy                             */
-//          
-//     while(ack!=0)
-//     {
-//         ack = DATA_I2C;
-//         Nop();
-//     }
-//     
-//     CK_I2C(0);
-//     
-//     /*--------------------------------------------------------------*/
-//     /* invio DATI al dispositivo                                    */
-//     /*--------------------------------------------------------------*/
-//     for (y = 0; y < nLen; y++)
-//     {
-//         DD_DATA_I2C = OUTPUT_PIN;   /* dati in uscita dal micro     */
-//         
-//         for (x = 0; x < 8; x++)
-//         {
-//             CK_I2C(0);
-//             DATA_I2C = (*pData >> (7 - x));
-//             CK_I2C(1);
-//         }
-//         
-//         pData ++;
-//         CK_I2C(0);
-//         DD_DATA_I2C = INPUT_PIN;    /* dati in ingresso             */
-//         CK_I2C(1);
-//         ack = DATA_I2C;
-//         
-// //     if (ack != 0)
-// //          return (-1);           /* busy                             */
-//          
-//         while(ack!=0)
-//         {
-//             ack = DATA_I2C;
-//             Nop();
-//         }
-//         CK_I2C(0);
-//     }
-//     
-//     DD_DATA_I2C = OUTPUT_PIN;   /* dati in uscita dal micro         */
-//     DATA_I2C = 0;               /* stop condition                   */
-//     CK_I2C(1);
-//     DATA_I2C = 1;               /* stop condition                   */
-//     CK_I2C(0);
-//     CK_I2C(1);
-//     
-//     return (1);
-// }
-
+/*----------------------------------------------------------------------------*/
+/* I2C_Read_b                                                                 */
+/*----------------------------------------------------------------------------*/
+int I2C_Read_b (unsigned char cDevAddr, unsigned char cRegAddr, unsigned char* buffer, int nLen)
+{
+    unsigned int y;
+    unsigned char ack;
+    
+    startCondition();
+    cDevAddr |=0x01;
+    
+    I2CByteWrite(cDevAddr);
+    
+    ack = readAck();
+    
+    if (ack)
+         return (-1);       /* busy                                 */
+        
+    /*--------------------------------------------------------------*/
+    /* Legge la ram del dispositivo                                 */
+    /*--------------------------------------------------------------*/
+    
+    for(y = 0; y < nLen; y++)
+    {
+        I2CByteRead(buffer);    
+        buffer++;
+    }
+    
+    stopCondition();
+    return (0);
+}
 
 
 
@@ -520,291 +394,6 @@ void I2C_Write_1024_b2(unsigned char cDevAddr, unsigned char cRegAddr_h, unsigne
         delay_ms(3);
     }
     // INTCON2bits.GIE = 1; // Enable global interrupt
-}
-
-
-
-// /*----------------------------------------------------------------------------*/
-// /*  I2C_Write_512_b2                                                          */
-// /*----------------------------------------------------------------------------*/
-// int I2C_Write_512_b2 (unsigned char cDevAddr, unsigned char cRegAddr_h, unsigned char cRegAddr_l, const unsigned char* pData, unsigned int nLen)
-// {
-//     unsigned int x;
-//     unsigned int y;
-//     unsigned char ack;
-//     
-//     f_no_agg_dis  = 1; // -DDDD
-//     
-//     DD_DATA_I2C_B = 1;      /* dati in uscita dal micro             */
-//     CK_I2C_b(1);
-//     CK_I2C_b(0);
-//     CK_I2C_b(1);
-//     DATA_I2C_B = 0;         /* DATI I2C */    /* start condition    */
-//     CK_I2C_b(1);
-//     CK_I2C_b(0);
-//     
-//     /*--------------------------------------------------------------*/
-//     /* invio indirizzo dispositivo                                  */
-//     /*--------------------------------------------------------------*/
-//     for (x = 0; x < 8; x++)
-//     {
-//         CK_I2C_b(0);
-//         DATA_I2C_B = (cDevAddr >> (7 - x));
-//         CK_I2C_b(1);
-//     }
-//     
-//     CK_I2C_b(0);
-//     DD_DATA_I2C_B = 0;      /* dati in ingresso                     */
-//     CK_I2C_b(1);
-//     ack = DATA_I2C_B;
-//     
-//     if (ack != 0)
-//          return (-1);       /* busy                                 */
-//     
-//     CK_I2C_b(0);
-//     DD_DATA_I2C_B = 1;      /* dati in uscita dal micro             */
-//     
-//     /*--------------------------------------------------------------*/
-//     /* invio indirizzo registro h                                   */
-//     /*--------------------------------------------------------------*/
-//     for (x = 0; x < 8; x++)
-//     {
-//         CK_I2C_b(0);
-//         DATA_I2C_B = (cRegAddr_h >> (7 - x));
-//         CK_I2C_b(1);
-//     }
-//     
-//     CK_I2C_b(0);
-//     DD_DATA_I2C_B = 0;        /* dati in ingresso                     */
-//     CK_I2C_b(1);
-//     ack = DATA_I2C_B;
-//     
-//     if (ack != 0)
-//          return (-1);
-//     
-//     CK_I2C_b(0);
-//     DD_DATA_I2C_B = 1;      /* dati in uscita dal micro             */
-//     
-//     /*--------------------------------------------------------------*/
-//     /* invio indirizzo registro l                                   */
-//     /*--------------------------------------------------------------*/
-//     for (x = 0; x < 8; x++)
-//     {
-//         CK_I2C_b(0);
-//         DATA_I2C_B = (cRegAddr_l >> (7 - x));
-//         CK_I2C_b(1);
-//     }
-//     
-//     CK_I2C_b(0);
-//     DD_DATA_I2C_B = 0;        /* dati in ingresso                     */
-//     CK_I2C_b(1);
-//     ack = DATA_I2C_B;
-//     
-//     if (ack != 0)
-//          return (0);
-//     
-//     CK_I2C_b(0);
-//     
-//     /*--------------------------------------------------------------*/
-//     /* invio DATI al dispositivo                                    */
-//     /*--------------------------------------------------------------*/
-//     for (y = 0; y < nLen; y++)
-//     {
-//         DD_DATA_I2C_B = 1;  /* dati in uscita                       */
-//         
-//         for (x = 0; x < 8; x++)
-//         {
-//             CK_I2C_b(0);
-//             DATA_I2C_B = (*pData >> (7 - x));
-//             CK_I2C_b(1);
-//         }
-//         
-//         pData ++;
-//         CK_I2C_b(0);
-//         DD_DATA_I2C_B = 0;  /* dati in ingresso                     */
-//         CK_I2C_b(1);
-//         ack = DATA_I2C_B;
-//         
-//         if (ack)
-//             return (0);
-//         
-//         CK_I2C_b(0);
-//     }
-//     
-//     DD_DATA_I2C_B = 1;      /* dati in uscita dal micro             */
-//     DATA_I2C_B = 0;         /* stop condition                       */
-//     CK_I2C_b(1);
-//     DATA_I2C_B = 1;         /* stop condition                       */
-//     CK_I2C_b(0);
-//     CK_I2C_b(1);
-//     
-//     f_no_agg_dis  = 0; // -DDDD
-//     
-//     return (1);
-// }
-// 
-// 
-// 
-// 
-// 
-// 
-// 
-// 
-// 
-// 
-// /*----------------------------------------------------------------------------*/
-// /* I2C_Read                                                                   */
-// /*----------------------------------------------------------------------------*/
-// int I2C_Read (unsigned char cDevAddr, unsigned char cRegAddr, unsigned char* buffer, int nLen)
-// {
-//     unsigned int x;
-//     unsigned int y;
-//     unsigned char ack;
-//     
-//     Set_I2C_Add (cRegAddr, cDevAddr);
-//     DD_DATA_I2C = 1;        /* dati in uscita dal micro             */
-//     
-//     CK_I2C(1);
-//     DATA_I2C = 0;           /* DATI I2C */    /* start condition    */
-//     CK_I2C(1);
-//     CK_I2C(0);
-//     cDevAddr |=1;
-//     
-//     /*--------------------------------------------------------------*/
-//     /* invio indirizzo dispositivo                                  */
-//     /*--------------------------------------------------------------*/
-//     for (x = 0; x < 8; x++)
-//     {
-//         CK_I2C(0);
-//         DATA_I2C = (cDevAddr >> (7 - x));
-//         CK_I2C(1);
-//     }
-//     
-//     CK_I2C(0);
-//     DD_DATA_I2C = 0;        /* dati in ingresso                     */
-//     CK_I2C(1);
-//     ack = DATA_I2C;
-//     
-//     if (ack)
-//     
-//          return (-1);       /* busy                                 */
-//     
-//          
-//     CK_I2C(0);
-//     
-//     /*--------------------------------------------------------------*/
-//     /* Legge la ram del dispositivo                                 */
-//     /*--------------------------------------------------------------*/
-//     DD_DATA_I2C = 0;        /* dati in ingresso                     */
-//     
-//     for(y = 0; y < nLen; y++)
-//     {
-//         for (x = 0; x < 8; x++)
-//         {
-//             CK_I2C(1);
-//             *buffer = (*buffer << 1) | DATA_I2C; /* dato in input   */
-//             CK_I2C(0);
-//         }
-//         
-//         buffer++;
-//         DD_DATA_I2C = 1;    /* dati in uscita dal micro             */
-//         DATA_I2C = 0;       /* invia ack                            */
-//         
-//         if (y ==  nLen -1)
-//             DATA_I2C = 1;
-//         
-//         CK_I2C(1);
-//         CK_I2C(0);
-//         DD_DATA_I2C = 0;    /* dati in ingesso                      */
-//     }
-//     
-//     DD_DATA_I2C = 1;        /* dati in uscita dal micro             */
-//     DATA_I2C = 0;           /* DATI I2C */   /* stop condition      */
-//     CK_I2C(1);
-//     DATA_I2C = 1;           /* DATI I2C */   /* stop condition      */
-//     CK_I2C(0);
-//     CK_I2C(1);
-//     
-//     return (1);
-// }
-
-
-
-
-
-/*----------------------------------------------------------------------------*/
-/* I2C_Read_b                                                                 */
-/*----------------------------------------------------------------------------*/
-int I2C_Read_b (unsigned char cDevAddr, unsigned char cRegAddr, unsigned char* buffer, int nLen)
-{
-//     return;
-    
-    unsigned int x;
-    unsigned int y;
-    unsigned char ack;
-    
-    Set_I2C_Add_b (cRegAddr, cDevAddr);
-    DD_DATA_I2C_B = OUTPUT_PIN;//1;      /* dati in uscita dal micro             */
-    
-    CK_I2C(1);
-    DATA_I2C_B = 0;         /* DATI I2C */    /* start condition    */
-    /*CK_I2C_b(1);
-    CK_I2C_b(0);*/
-    cDevAddr |=0x01;
-    
-    /*--------------------------------------------------------------*/
-    /* invio indirizzo dispositivo                                  */
-    /*--------------------------------------------------------------*/
-    for (x = 0; x < 8; x++)
-    {
-        CK_I2C(0);
-        DATA_I2C_B = (cDevAddr >> (7 - x)) & 0x01;
-        CK_I2C(1);
-    }
-    
-    CK_I2C(0);
-    DD_DATA_I2C_B = INPUT_PIN;//0;      /* dati in ingresso                     */
-    CK_I2C(1);
-    ack = DATA_I2C_INPUT;//DATA_I2C_B;
-    
-    if (ack)
-         return (-1);       /* busy                                 */
-    
-    CK_I2C(0);
-    
-    /*--------------------------------------------------------------*/
-    /* Legge la ram del dispositivo                                 */
-    /*--------------------------------------------------------------*/
-    
-    for(y = 0; y < nLen; y++)
-    {
-        DD_DATA_I2C_B = INPUT_PIN;//0;  /* dati in ingesso                      */
-        for (x = 0; x < 8; x++)
-        {
-            CK_I2C(1);
-            *buffer = (*buffer << 1) | DATA_I2C_INPUT;//DATA_I2C_B; /* dato in input */
-            CK_I2C(0);
-        }
-        
-        buffer++;
-        DD_DATA_I2C_B = OUTPUT_PIN;//1;  /* dati in uscita dal micro             */
-        DATA_I2C_B = 0;     /* invia ack                            */
-        
-        if (y == nLen -1)
-            DATA_I2C_B = 1;
-        
-        CK_I2C(1);
-        CK_I2C(0);
-    }
-    
-    DD_DATA_I2C_B = OUTPUT_PIN;//1;      /* dati in uscita dal micro             */
-    DATA_I2C_B = 0;         /* DATI I2C */   /* stop condition      */
-    CK_I2C(1);
-    DATA_I2C_B = 1;         /* DATI I2C */   /* stop condition      */
-    CK_I2C(0);
-    CK_I2C(1);
-    
-    return (0);
 }
 
 
