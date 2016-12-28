@@ -81,7 +81,7 @@ int I2C_Read_1024_b (unsigned char cDevAddr, unsigned char cRegAddr_h, unsigned 
 void I2C_Read_1024_b2(unsigned char cDevAddr, unsigned char cRegAddr_h, unsigned char cRegAddr_l, unsigned char* buffer, unsigned int nLen);
 
 //void CK_I2C (unsigned char ck);
-void CK_I2C_b (unsigned char ck);
+void CK_I2C (unsigned char ck);
 
 //void Set_I2C_Add (unsigned char add, unsigned char slave_add);
 void Set_I2C_Add_b (unsigned char add, unsigned char slave_add);
