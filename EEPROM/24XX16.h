@@ -23,12 +23,8 @@ unsigned int byteWrite_24XX16(unsigned char ControlByte,
         unsigned char HighAdd, unsigned char LowAdd, unsigned char data);
 unsigned int byteRead_24XX16(unsigned char ControlByte, 
         unsigned char HighAdd, unsigned char LowAdd, unsigned char *Data);
-void pageWrite_24XX16(unsigned char ControlByte, unsigned char HighAdd, 
-        unsigned char LowAdd, unsigned char *wrptr, int Length);
 unsigned int sequentialWrite_24XX16(unsigned char ControlByte, 
         unsigned char HighAdd, unsigned char LowAdd, unsigned char *wrptr, unsigned int Length);
-void blockRead_24XX16(unsigned char ControlByte, unsigned char HighAdd,
-        unsigned char LowAdd, unsigned char *rdptr, unsigned int length);
 unsigned int sequentialRead_24XX16(unsigned char ControlByte, 
         unsigned char HighAdd, unsigned char LowAdd, unsigned char *rdptr, unsigned int length);
 
