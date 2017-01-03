@@ -17,6 +17,10 @@
 
 
 #include "HardwareProfile.h"
+#include "i2c_drv.h"
+
+
+#if I2CMODE == I2CMODULE
 #include "MyI2C2.h"
 
 unsigned int byteWrite_24XX16(unsigned char ControlByte, unsigned char HighAdd, unsigned char LowAdd, unsigned char data) {
@@ -299,3 +303,133 @@ unsigned int sequentialRead_24XX16(unsigned char ControlByte, unsigned char High
     }
     return (0);
 }
+
+#elif I2CMODE == BITBANG
+
+unsigned int byteWrite_24XX16(unsigned char ControlByte, unsigned char HighAdd, unsigned char LowAdd, unsigned char data) {
+    unsigned char ret;
+    ControlByte &= 0xF1;
+    ControlByte |= HighAdd << 1;
+    
+    if (HighAdd > HIGH_ADD_LIMIT) {
+        return 1;
+    }
+    
+    ret = I2C_Write_b(ControlByte, LowAdd, &data, 1);
+    EEAckPolling_b(ControlByte);
+    return ret;
+}
+
+
+unsigned int byteRead_24XX16(unsigned char ControlByte, unsigned char HighAdd, unsigned char LowAdd, unsigned char *data) { 
+    if (HighAdd > HIGH_ADD_LIMIT) {
+        return 1;
+    }
+    ControlByte &= 0xF1;
+    ControlByte |= HighAdd << 1;
+    
+    return I2C_Read_b(ControlByte, LowAdd, data, 1);
+}
+
+
+unsigned int sequentialWrite_24XX16(unsigned char ControlByte, unsigned char HighAdd, unsigned char LowAdd, unsigned char *wrptr, unsigned int Length)
+{
+    unsigned char page_size = 0;
+    unsigned char res = 0;
+    
+    if (HighAdd > HIGH_ADD_LIMIT) {
+        return 1;
+    }
+
+    ControlByte &= 0xF1;
+    ControlByte |= HighAdd << 1;
+    
+    int fullAdd = (HighAdd << 8) | LowAdd;
+    
+    if (fullAdd + Length >= MEM_SIZE) {
+        return 1;
+    }
+    
+    while (Length > 0)
+    {
+        page_size = PAGE_SIZE - (LowAdd % PAGE_SIZE);
+        page_size = (Length < page_size) ? Length : page_size;
+        do {
+            res = I2C_Write_b(ControlByte, LowAdd, wrptr, page_size);
+        } while(res != 0);
+        
+        Length -= page_size;
+        wrptr += page_size;
+        //Adjust addresses
+        if (LowAdd + page_size  > 0xFF) {
+            if (HighAdd == HIGH_ADD_LIMIT) {
+                    return 1; //Overflow - should not happen here but in the previous control
+                }
+                else {
+                    HighAdd++;
+                    LowAdd = 0x00;
+                }
+        }
+        else
+        {
+            LowAdd += page_size;
+        }
+        ControlByte &= 0xF1;
+        ControlByte |= HighAdd << 1;
+    }
+    return (0);
+}
+
+
+unsigned int sequentialRead_24XX16(unsigned char ControlByte, unsigned char HighAdd, unsigned char LowAdd, unsigned char *rdptr, unsigned int length)
+{
+    //TODO check for page/block/device overlapping
+    unsigned int block_size;
+    unsigned char block, device, res;
+    
+    if (HighAdd > HIGH_ADD_LIMIT) {
+        return 1;
+    }
+
+    ControlByte &= 0xF1;
+    ControlByte |= HighAdd << 1;
+  
+    int fullAdd = (HighAdd << 8) | LowAdd;
+    device = (ControlByte & 0x06) >> 1;
+    block = (ControlByte & 0x08) >> 3;
+    
+    if (fullAdd + length >= MEM_SIZE) {
+        return 1;
+    }
+    
+    while (length > 0) {
+        block_size = length;
+        /*Read the data*/
+        res = I2C_Read_b(ControlByte, LowAdd, rdptr, block_size);
+        
+        if (res != 0)
+            return res;
+        
+        /*Adjust addresses and pointers*/
+        rdptr += block_size;
+        length -= block_size;
+        
+        if (length == 0)
+        {
+            break;
+        }
+        
+        block++;
+        HighAdd = LowAdd = 0x00;
+        fullAdd = 0x0000;
+        
+        ControlByte &= 0xF0;
+        ControlByte &= 0xF1;
+        ControlByte |= HighAdd << 1;
+        ControlByte |= 0x00; //R/W - write operation
+    }
+    return (0);
+}
+
+
+#endif
