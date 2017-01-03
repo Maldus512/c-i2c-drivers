@@ -15,12 +15,15 @@
 /*                                                                            */
 /******************************************************************************/
 
-#include <string.h>
 #include <p24FJ256GA106.h>
-#include "HardwareProfile.h"
-//#include "variabili_parametri_sistema.h"
+
+#include <string.h>
+#include <libpic30.h>
 
 #include "I2C_drv.h"
+
+#include "HardwareProfile.h"
+#include "parametri_standard.h"
 
 #define TRUE    1
 #define FALSE   0
