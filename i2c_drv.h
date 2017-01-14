@@ -20,13 +20,18 @@
 #define CLK_I2C_B       CLK_I2C
 #define DATA_I2C_B      D_I2C
 #define DATA_I2C_I_B    D_I2C_I
+#define WP_I2C_B        WP_I2C
 
 #define DD_CLK_I2C_B    CLK_I2C_TRIS
 #define DD_DATA_I2C_B   D_I2C_TRIS
+#define DD_WP_I2C_B     D_WP_I2C_TRIS
 
 #define EEPROM_0_ADDR     '\xD0'
 #define EEPROM_1_ADDR     '\xD0'
 #define EEPROM_2_ADDR     '\xD0'
+
+
+
 
 
 static inline __attribute__((always_inline)) void CK_I2C (unsigned char ck)

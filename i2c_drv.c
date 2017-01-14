@@ -39,15 +39,17 @@ void Init_I2C_b (void)
     CLK_I2C_B       = 1;    /* CLK I2C  */
     DATA_I2C_B      = 1;    /* DATI I2C */
     
+    WP_I2C_B        = 1;    /* WRITE PROTECT BIT */
+    
     DD_CLK_I2C_B    = OUTPUT_PIN;   /* abilita la porta come uscita CK        */
     DD_DATA_I2C_B   = OUTPUT_PIN;   /* abilita la porta come uscita DATI      */
                                     /* il pin deve essere riprogrammato per   */
                                     /* leggere i dati in ingresso e ACK       */
                                     /* dall' I2C                              */
     
-    D_WP_TRIS       = OUTPUT_PIN;
-    D_WP = 0;
+    DD_WP_I2C_B     = OUTPUT_PIN;   /* se H sono in WRITE PROTECT, se L -> WR */
 }
+
 
 
 /*********************************************************************
@@ -68,6 +70,7 @@ unsigned int EEAckPolling_b(unsigned char control)
 
     I2CByteWrite(WRITE_CB(control));
     ack = readAck();
+    
     while (ack)
     {
         stopCondition();
@@ -81,39 +84,49 @@ unsigned int EEAckPolling_b(unsigned char control)
 }
 
 
+
 /*----------------------------------------------------------------------------*/
 /*  I2C_Write_b                                                               */
 /*----------------------------------------------------------------------------*/
 int I2C_Write_b (unsigned char cDevAddr, unsigned char cRegAddr, const unsigned char* pData, int nLen)
 {
     unsigned int y;
+    
+    WP_I2C_B = 0;
 
     startCondition();
     I2CByteWrite(cDevAddr);
     
-    do {
-        if (readAck() != 0) {
+    do
+    {
+        if (readAck() != 0)
+        {
             startCondition();
             I2CByteWrite(cDevAddr);
+            
             if (readAck() != 0)
                 continue;
         }
-  
         I2CByteWrite(cRegAddr);
-    } while(readAck() != 0);
+    }
+    while(readAck() != 0);
     
     for (y = 0; y < nLen; y++)
     {
         I2CByteWrite(*pData);
+        
         if (readAck() != 0)
+        {
+            WP_I2C_B = 1;
             return -1;
-        /*while(readAck() != 0)
-            I2CByteWrite(pData);*/
+        }
         pData ++;
     }
     
     stopCondition();
     EEAckPolling_b(cDevAddr);
+    
+    WP_I2C_B = 1;
     return (0);
 }
 
