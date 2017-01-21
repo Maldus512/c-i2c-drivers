@@ -53,10 +53,10 @@ void calc_day_of_week(RTC_TIME *pTime);
 extern unsigned char    stringa[64];
 
 
-unsigned char str_curr_time[13];
+unsigned char str_curr_time[13] = "0000000000000";
 unsigned char str_date_display[9] = "GG/MM/AA";
 unsigned char str_time_display[9] = "hh:mm:ss";
-unsigned char str_prog_time[13];
+unsigned char str_prog_time[13] = "0000000000000";
 
 RTC_TIME CurrTime; /* orologio di sitema */ 
 RTC_TIME ProgTime; /* orologio di sitema programmato */ 
