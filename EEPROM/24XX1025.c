@@ -234,7 +234,7 @@ void blockRead_24XX1025(unsigned char ControlByte, unsigned char HighAdd,
     NotAckI2C2(); //Send Not Ack
     MyStopI2C2(); //Send stop condition
     
-    disableInt();
+    enableInt();
 }
 
 
