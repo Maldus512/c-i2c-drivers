@@ -103,7 +103,7 @@ static inline __attribute__((always_inline)) int HDByteWriteI2C(unsigned char Co
 static inline __attribute__((always_inline)) unsigned int HDByteReadI2C(unsigned char ControlByte,
         unsigned char HighAdd, unsigned char LowAdd, unsigned char *Data) {
     #if RAM_TYPE == MEM_24XX16
-        return byteRead_24XX16(ControlByte, HighAdd, LowAdd, data);
+        return byteRead_24XX16(ControlByte, HighAdd, LowAdd, Data);
 #elif RAM_TYPE == MEM_24XX1025
         return byteRead_24XX1025(ControlByte, HighAdd, LowAdd, Data);
 #endif
@@ -152,7 +152,7 @@ static inline __attribute__((always_inline)) unsigned int HDSequentialWriteI2C(u
 static inline __attribute__((always_inline)) unsigned int HDSequentialReadI2C(unsigned char ControlByte,
         unsigned char HighAdd, unsigned char LowAdd, unsigned char *rdptr, unsigned int length) {
     #if RAM_TYPE == MEM_24XX16
-        return sequentialRead_24XX16(ControlByte, HighAdd, LowAdd, wrptr, length);
+        return sequentialRead_24XX16(ControlByte, HighAdd, LowAdd, rdptr, length);
 #elif RAM_TYPE == MEM_24XX1025
         return sequentialRead_24XX1025(ControlByte, HighAdd, LowAdd, rdptr, length);
 #endif

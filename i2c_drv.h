@@ -15,46 +15,16 @@
 /*                                                                            */
 /******************************************************************************/
 
-// #define CLK_I2C         P8.3
-// #define DATA_I2C        P8.2
-// #define DD_CLK_I2C      PD8.3
-// #define DD_DATA_I2C     PD8.2
-// 
-// #define CLK_I2C         CLK_I2C
-// #define DATA_I2C        D_I2C
-// #define DD_CLK_I2C      CLK_I2C_TRIS
-// #define DD_DATA_I2C     D_I2C_TRIS
-
-
-
-// #define CLK_I2C         P7.1
-// #define DATA_I2C        P7.0
-// #define DD_CLK_I2C      PD7.1
-// #define DD_DATA_I2C     PD7.0
-
-// #define KEY_IN_I2C      P8.6
-// #define DD_KEY_IN_I2C   PD8.6
-
-
-
-// #define CLK_I2C_B       P7.1
-// #define DATA_I2C_B      P7.0
-// #define DD_CLK_I2C_B    PD7.1
-// #define DD_DATA_I2C_B   PD7.0
-
+#include "HardwareProfile.h"
 
 #define CLK_I2C_B       CLK_I2C
 #define DATA_I2C_B      D_I2C
 #define DATA_I2C_I_B    D_I2C_I
+#define WP_I2C_B        WP_I2C
 
 #define DD_CLK_I2C_B    CLK_I2C_TRIS
 #define DD_DATA_I2C_B   D_I2C_TRIS
-
-
-// #define CLK_I2C_B       P8.3
-// #define DATA_I2C_B      P8.2
-// #define DD_CLK_I2C_B    PD8.3
-// #define DD_DATA_I2C_B   PD8.2
+#define DD_WP_I2C_B     D_WP_I2C_TRIS
 
 #define EEPROM_0_ADDR     '\xD0'
 #define EEPROM_1_ADDR     '\xD0'
@@ -62,6 +32,65 @@
 
 
 
+
+
+static inline __attribute__((always_inline)) void CK_I2C (unsigned char ck)
+{
+    CLK_I2C_B = ck;
+    //delay_us(3);
+}
+
+static inline __attribute__((always_inline)) void startCondition() {
+    DD_DATA_I2C_B = OUTPUT_PIN;
+    CLK_I2C_B = HIGH;
+    DATA_I2C_B = LOW;
+}
+
+static inline __attribute((always_inline)) void stopCondition() {
+    DD_DATA_I2C_B = OUTPUT_PIN;//1;      /* dati in uscita dal micro             */
+    DATA_I2C_B = 0;         /* stop condition                       */
+    CK_I2C(1);
+    DATA_I2C_B = 1;         /* stop condition                       */
+    CK_I2C(0);
+    CK_I2C(1);
+}
+
+static inline __attribute__((always_inline)) void I2CByteWrite(unsigned char byte) {
+    int x = 0;
+    DD_DATA_I2C_B = OUTPUT_PIN;
+    for ( x = 0; x < 8; x++)
+    {
+        CK_I2C(0);
+        DATA_I2C_B = (byte >> (7 - x)) & 0x01;
+        CK_I2C(1);
+    }
+}
+
+static inline __attribute__((always_inline)) void I2CByteRead(unsigned char* byte, unsigned char ack) {
+    DD_DATA_I2C_B = INPUT_PIN;//0;  /* dati in ingesso                      */
+    unsigned char x = 0;
+    for (x = 0; x < 8; x++)
+    {
+        CK_I2C(1);
+        *byte = (*byte << 1) | DATA_I2C_INPUT;//DATA_I2C_B; /* dato in input */
+        CK_I2C(0);
+    }
+    DD_DATA_I2C_B = OUTPUT_PIN;//1;  /* dati in uscita dal micro             */
+    DATA_I2C_B = ack;     /* invia ack                            */
+    CK_I2C(1);
+    CK_I2C(0);
+}
+
+static inline __attribute__((always_inline)) unsigned char readAck() {
+    unsigned char x;
+    CK_I2C(0);
+    DATA_I2C_B = 1;         //Set Nack
+    DD_DATA_I2C_B = INPUT_PIN;
+    CK_I2C(1);
+    x = DATA_I2C_INPUT;//DATA_I2C_B;
+    CK_I2C(0);
+    return x;
+}
 
 void Init_I2C (void);
 void Init_I2C_b (void);
@@ -81,7 +110,7 @@ int I2C_Read_1024_b (unsigned char cDevAddr, unsigned char cRegAddr_h, unsigned 
 void I2C_Read_1024_b2(unsigned char cDevAddr, unsigned char cRegAddr_h, unsigned char cRegAddr_l, unsigned char* buffer, unsigned int nLen);
 
 //void CK_I2C (unsigned char ck);
-void CK_I2C_b (unsigned char ck);
+void CK_I2C (unsigned char ck);
 
 //void Set_I2C_Add (unsigned char add, unsigned char slave_add);
 void Set_I2C_Add_b (unsigned char add, unsigned char slave_add);
