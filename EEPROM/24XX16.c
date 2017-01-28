@@ -17,7 +17,7 @@
 
 #include "HardwareProfile.h"
 #include "24XX16.h"
-#include "i2c_drv.h"
+
 
 
 #if I2C_MODE == I2C_MODULE
@@ -27,7 +27,7 @@
 /*----------------------------------------------------------------------------*/
 /*  byteWrite_24XX16                                                          */
 /*----------------------------------------------------------------------------*/
-unsigned int byteWrite_24XX16(unsigned char ControlByte, unsigned char HighAdd, unsigned char LowAdd, unsigned char data)
+unsigned char byteWrite_24XX16(unsigned char ControlByte, unsigned char HighAdd, unsigned char LowAdd, unsigned char data)
 {
     ControlByte &= 0xF1;
     ControlByte |= HighAdd << 1;
@@ -86,7 +86,7 @@ unsigned int byteWrite_24XX16(unsigned char ControlByte, unsigned char HighAdd, 
 /*----------------------------------------------------------------------------*/
 /*  byteRead_24XX16                                                           */
 /*----------------------------------------------------------------------------*/
-unsigned int byteRead_24XX16(unsigned char ControlByte, unsigned char HighAdd, unsigned char LowAdd, unsigned char *Data)
+unsigned char byteRead_24XX16(unsigned char ControlByte, unsigned char HighAdd, unsigned char LowAdd, unsigned char *Data)
 { 
     if (HighAdd > HIGH_ADD_LIMIT)
     {
@@ -185,7 +185,7 @@ void pageWrite_24XX16(unsigned char ControlByte, unsigned char HighAdd, unsigned
 /*----------------------------------------------------------------------------*/
 /*  sequentialWrite_24XX16                                                    */
 /*----------------------------------------------------------------------------*/
-unsigned int sequentialWrite_24XX16(unsigned char ControlByte, unsigned char HighAdd, unsigned char LowAdd, unsigned char *wrptr, unsigned int Length)
+unsigned char sequentialWrite_24XX16(unsigned char ControlByte, unsigned char HighAdd, unsigned char LowAdd, unsigned char *wrptr, unsigned int Length)
 {
     unsigned char page_size = 0;
     unsigned char device = 0;
@@ -287,7 +287,7 @@ void blockRead_24XX16(unsigned char ControlByte, unsigned char HighAdd, unsigned
 /*----------------------------------------------------------------------------*/
 /*  sequentialRead_24XX16                                                     */
 /*----------------------------------------------------------------------------*/
-unsigned int sequentialRead_24XX16(unsigned char ControlByte, unsigned char HighAdd, unsigned char LowAdd, unsigned char *rdptr, unsigned int length)
+unsigned char sequentialRead_24XX16(unsigned char ControlByte, unsigned char HighAdd, unsigned char LowAdd, unsigned char *rdptr, unsigned int length)
 {
     //TODO check for page/block/device overlapping
     unsigned int block_size;
@@ -340,7 +340,7 @@ unsigned int sequentialRead_24XX16(unsigned char ControlByte, unsigned char High
 
 #elif I2C_MODE == I2C_BITBANG
 
-
+#include "i2c_drv.h"
 
 /*----------------------------------------------------------------------------*/
 /*  byteWrite_24XX16                                                          */
