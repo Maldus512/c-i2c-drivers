@@ -152,6 +152,7 @@ void pageWrite_24XX1025(unsigned char ControlByte, unsigned char HighAdd, unsign
 void pageWrite_24XX1025_eds(unsigned char ControlByte, unsigned char HighAdd,
         unsigned char LowAdd, __eds__ unsigned char *wrptr, int Length) {
     disableInt();
+    unsigned char x;
     MyIdleI2C2(); //wait for bus Idle
     MyStartI2C2(); //Generate Start condition
     MasterWriteI2C2(ControlByte); //send controlbyte for a write
@@ -179,7 +180,9 @@ void pageWrite_24XX1025_eds(unsigned char ControlByte, unsigned char HighAdd,
 
     while ( Length-- > 0)
     {
-        MasterWriteI2C2(*wrptr++);
+        x = *wrptr;
+        MasterWriteI2C2((unsigned char)x);
+        wrptr++;
         while (I2C2STATbits.TBF);
         MyIdleI2C2();
     }
@@ -263,7 +266,7 @@ unsigned int sequentialWrite_24XX1025_eds(unsigned char ControlByte, unsigned ch
         page_size = PAGE_SIZE - (LowAdd % PAGE_SIZE);
         page_size = (Length < page_size) ? Length : page_size;
         
-        pageWrite_24XX1025_eds(ControlByte, HighAdd, LowAdd, wrptr, page_size);
+        pageWrite_24XX1025_eds(ControlByte, HighAdd, LowAdd, (__eds__ unsigned char*) wrptr, page_size);
         
         Length -= page_size;
         wrptr += page_size;
@@ -385,7 +388,7 @@ unsigned int sequentialRead_24XX1025(unsigned char ControlByte, unsigned char Hi
 unsigned int sequentialRead_24XX1025_eds(unsigned char ControlByte, unsigned char HighAdd,
         unsigned char LowAdd, __eds__ unsigned char *rdptr, unsigned int length)
 {
-    unsigned int block_size;
+    unsigned int block_size, written = 0;
     unsigned char block, device;
     unsigned char buffer[BUFFER_SIZE];
     
@@ -414,9 +417,9 @@ unsigned int sequentialRead_24XX1025_eds(unsigned char ControlByte, unsigned cha
         block_size = (block_size < BUFFER_SIZE) ? block_size : BUFFER_SIZE;
         /*Read the data*/
         blockRead_24XX1025(ControlByte, HighAdd, LowAdd, buffer, block_size);
-        memwrite_eds(rdptr, buffer, block_size);
+        memwrite_eds(&rdptr[written], buffer, block_size);
         /*Adjust addresses and pointers*/
-        rdptr += block_size;
+        written += block_size;
         length -= block_size;
         
         if (length == 0)
