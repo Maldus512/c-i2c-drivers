@@ -27,9 +27,13 @@ void pageWrite_24XX1025(unsigned char ControlByte, unsigned char HighAdd,
         unsigned char LowAdd, unsigned char *wrptr, int Length);
 unsigned int sequentialWrite_24XX1025(unsigned char ControlByte, 
         unsigned char HighAdd, unsigned char LowAdd, unsigned char *wrptr, unsigned int Length);
+unsigned int sequentialWrite_24XX1025_eds(unsigned char ControlByte, 
+        unsigned char HighAdd, unsigned char LowAdd,__eds__ unsigned char *wrptr, unsigned int Length);
 void blockRead_24XX1025(unsigned char ControlByte, unsigned char HighAdd,
         unsigned char LowAdd, unsigned char *rdptr, unsigned int length);
 unsigned int sequentialRead_24XX1025(unsigned char ControlByte, 
         unsigned char HighAdd, unsigned char LowAdd, unsigned char *rdptr, unsigned int length);
+unsigned int sequentialRead_24XX1025_eds(unsigned char ControlByte, 
+        unsigned char HighAdd, unsigned char LowAdd,__eds__ unsigned char *rdptr, unsigned int length);
 
 #endif
