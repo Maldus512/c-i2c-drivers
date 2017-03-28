@@ -376,6 +376,9 @@ unsigned int sequentialRead_24XX1025(unsigned char ControlByte, unsigned char Hi
         block++;
         HighAdd = LowAdd = 0x00;
         fullAdd = 0x0000;
+        if (block > 3) {
+            return 1;
+        }
         
         ControlByte &= 0xF0;
         ControlByte |= block << 3;
@@ -422,15 +425,23 @@ unsigned int sequentialRead_24XX1025_eds(unsigned char ControlByte, unsigned cha
         written += block_size;
         length -= block_size;
         
-        if (length == 0)
-        {
+        if (length == 0) {
             break;
         }
         
-        block++;
-        HighAdd = LowAdd = 0x00;
-        fullAdd = 0x0000;
-        
+        if ((unsigned long)fullAdd + (unsigned long)block_size < 0xFFFF) {
+            fullAdd += block_size;
+            HighAdd = (fullAdd >> 8) & 0xFF;
+            LowAdd = fullAdd & 0xFF;
+        } else {
+            block++;
+            HighAdd = LowAdd = 0x00;
+            fullAdd = 0x0000;
+            if (block > 3) {
+                return 1;
+            }
+        }
+
         ControlByte &= 0xF0;
         ControlByte |= block << 3;
         ControlByte |= device << 1;
