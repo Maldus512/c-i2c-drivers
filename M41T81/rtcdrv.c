@@ -12,11 +12,12 @@
 /*                                                                            */
 /*  Data  : 20/01/2003      REV  : 00.0                                       */
 /*                                                                            */
-/*  U.mod.: 21/05/2016      REV  : 01.0                                       */
+/*  U.mod.: 28/03/2017      REV  : 01.0                                       */
 /*                                                                            */
 /******************************************************************************/
 
-#include   <string.h>
+#include <string.h>
+#include "utility.h"
 
 #include "HardwareProfile.h"
 
@@ -593,45 +594,4 @@ void Get_Str_From_Time (RTC_TIME time, unsigned char *str_raw, unsigned char *st
     str_time[6] = str_raw [10];
     str_time[7] = str_raw [11];
     str_time[8] = 0;
-}
-
-
-
-/*----------------------------------------------------------------------------*/
-/* BCD_to_ASCII.                                                              */
-/*----------------------------------------------------------------------------*/
-void BCD_to_ASCII (char BCD, char*string)
-{
-    *string = (((unsigned int)BCD & 0xf0)>>4) | 0x30;
-    
-    if (*string<'0' || *string>'9')
-    {
-        *string = '0';
-    }
-    string++;
-    
-    *string = ((BCD & 0x0f)) | 0x30;
-    
-    if (*string<'0' || *string>'9')
-    {
-        *string = '0';
-    }
-}
-/*----------------------------------------------------------------------------*/
-/* ASCII_to_BCD                                                               */
-/*----------------------------------------------------------------------------*/
-void ASCII_to_BCD (char *string, char BCD)
-{
-    BCD = 0;
-    
-    if (*string>'0' || *string<'9')
-    {
-        BCD = ((*string - 0x30) << 4);
-    }
-    string++;
-    
-    if (*string>'0' || *string<'9')
-    {
-        BCD |= (*string - 0x30);
-    }
 }
