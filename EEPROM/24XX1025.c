@@ -393,7 +393,7 @@ unsigned int sequentialRead_24XX1025_eds(unsigned char ControlByte, unsigned cha
 {
     unsigned int block_size, written = 0;
     unsigned char block, device;
-    unsigned char buffer[BUFFER_SIZE];
+    unsigned char buffer1[BUFFER_SIZE];
     
     if (HighAdd > HIGH_ADD_LIMIT) {
         return 1;
@@ -419,8 +419,8 @@ unsigned int sequentialRead_24XX1025_eds(unsigned char ControlByte, unsigned cha
         block_size = (length < block_size) ? length : block_size;
         block_size = (block_size < BUFFER_SIZE) ? block_size : BUFFER_SIZE;
         /*Read the data*/
-        blockRead_24XX1025(ControlByte, HighAdd, LowAdd, buffer, block_size);
-        memwrite_eds(&rdptr[written], buffer, block_size);
+        blockRead_24XX1025(ControlByte, HighAdd, LowAdd, buffer1, block_size);
+        memwrite_eds(&rdptr[written], buffer1, block_size);
         /*Adjust addresses and pointers*/
         written += block_size;
         length -= block_size;
