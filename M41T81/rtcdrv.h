@@ -11,7 +11,7 @@
 /*                                                                            */
 /*  Data  : 20/01/2003      REV  : 00.0                                       */
 /*                                                                            */
-/*  U.mod.: 28/03/2017      REV  : 01.0                                       */
+/*  U.mod.: 03/06/2017      REV  : 01.0                                       */
 /*                                                                            */
 /******************************************************************************/
 
@@ -34,7 +34,7 @@ typedef struct _RTC_TIME
     unsigned char cCtrl;
 }RTC_TIME;
 
-int RTC_Init (void);
+int Init_RTC (void);
 void InitRTCport (void);
 
 int SetTime (const RTC_TIME *pTime);

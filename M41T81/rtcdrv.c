@@ -12,25 +12,17 @@
 /*                                                                            */
 /*  Data  : 20/01/2003      REV  : 00.0                                       */
 /*                                                                            */
-/*  U.mod.: 28/03/2017      REV  : 01.0                                       */
+/*  U.mod.: 03/06/2017      REV  : 01.0                                       */
 /*                                                                            */
 /******************************************************************************/
 
 #include <string.h>
-#include "utility.h"
 
 #include "HardwareProfile.h"
-
-//#include    "I2C_Drv.h"
-#include "MyI2C2.h"
 #include "RtcDrv.h"
 
-#include "display.h"
-#include "sgtypes.h"
-#include "gdispcfg.h"
-#include "gdisphw.h"
-#include "GDISP.h"
-#include "gi_fonts.h"
+#include "MyI2C2.h"
+
 
 
 #define     TRUE  1
@@ -70,9 +62,9 @@ RTC_TIME ProgTime; /* orologio di sitema programmato */
 
 
 /*----------------------------------------------------------------------------*/
-/* RTC_Init                                                                   */
+/* Init_RTC                                                                   */
 /*----------------------------------------------------------------------------*/
-int RTC_Init (void)
+int Init_RTC (void)
 {
     unsigned char cData;
     RTC_TIME tCurrTime;
