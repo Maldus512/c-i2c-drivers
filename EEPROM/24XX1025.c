@@ -22,6 +22,7 @@
 
 unsigned int byteWrite_24XX1025(unsigned char ControlByte, unsigned char HighAdd, unsigned char LowAdd, unsigned char data) {
     disableInt();
+    write_protect_disable();
     MyIdleI2C2(); //Ensure Module is Idle  
     
     MyIdleI2C2(); //Ensure Module is Idle
@@ -60,6 +61,7 @@ unsigned int byteWrite_24XX1025(unsigned char ControlByte, unsigned char HighAdd
     EEAckPolling(ControlByte); //perform Ack Polling
     
     enableInt();
+    write_protect_enable();
     return (0);
 }
 
@@ -110,6 +112,7 @@ unsigned int byteRead_24XX1025(unsigned char ControlByte, unsigned char HighAdd,
 
 void pageWrite_24XX1025(unsigned char ControlByte, unsigned char HighAdd, unsigned char LowAdd, unsigned char *wrptr, int Length) {
     disableInt();
+    write_protect_disable();
     MyIdleI2C2(); //wait for bus Idle
     MyStartI2C2(); //Generate Start condition
     MasterWriteI2C2(ControlByte); //send controlbyte for a write
@@ -146,12 +149,14 @@ void pageWrite_24XX1025(unsigned char ControlByte, unsigned char HighAdd, unsign
     EEAckPolling(ControlByte); //perform Ack Polling
     
     enableInt(); // Enable ALL INTERRUPT
+    write_protect_enable();
 }
 
 
 void pageWrite_24XX1025_eds(unsigned char ControlByte, unsigned char HighAdd,
         unsigned char LowAdd, __eds__ unsigned char *wrptr, int Length) {
     disableInt();
+    write_protect_disable();
     unsigned char x;
     MyIdleI2C2(); //wait for bus Idle
     MyStartI2C2(); //Generate Start condition
@@ -191,6 +196,7 @@ void pageWrite_24XX1025_eds(unsigned char ControlByte, unsigned char HighAdd,
     EEAckPolling(ControlByte); //perform Ack Polling
     
     enableInt(); // Enable ALL INTERRUPT
+    write_protect_enable();
 }
 
 
