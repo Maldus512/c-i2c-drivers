@@ -32,6 +32,13 @@
 
 
 
+#define HIGH                1
+#define LOW                 0
+
+
+#ifndef DATA_I2C_INPUT
+#define DATA_I2C_INPUT  0 //STUB
+#endif
 
 
 static inline __attribute__((always_inline)) void CK_I2C (unsigned char ck)

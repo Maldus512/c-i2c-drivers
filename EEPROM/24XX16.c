@@ -20,7 +20,7 @@
 
 
 
-#if I2C_MODE == I2C_MODULE
+#if I2C_MODE == I2C_MODULE && RAM_TYPE == MEM_24XX16
 
 #include "MyI2C2.h"
 
@@ -342,7 +342,7 @@ unsigned char sequentialRead_24XX16(unsigned char ControlByte, unsigned char Hig
 
 
 
-#elif I2C_MODE == I2C_BITBANG
+#elif I2C_MODE == I2C_BITBANG && RAM_TYPE == MEM_24XX16
 
 #include "i2c_drv.h"
 
