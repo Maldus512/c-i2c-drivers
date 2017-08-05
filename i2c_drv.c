@@ -15,7 +15,7 @@
 /*                                                                            */
 /******************************************************************************/
 
-#include <p24FJ256GA106.h>
+#include <p24FJ128GA306.h>
 
 #include <string.h>
 #include <libpic30.h>
@@ -39,7 +39,7 @@ void Init_I2C_b (void)
     CLK_I2C_B       = 1;    /* CLK I2C  */
     DATA_I2C_B      = 1;    /* DATI I2C */
     
-    WP_I2C_B        = 1;    /* WRITE PROTECT BIT */
+//    WP_I2C_B        = 1;    /* WRITE PROTECT BIT */
     
     DD_CLK_I2C_B    = OUTPUT_PIN;   /* abilita la porta come uscita CK        */
     DD_DATA_I2C_B   = OUTPUT_PIN;   /* abilita la porta come uscita DATI      */
@@ -90,15 +90,16 @@ unsigned int EEAckPolling_b(unsigned char control)
 /*----------------------------------------------------------------------------*/
 int I2C_Write_b (unsigned char cDevAddr, unsigned char cRegAddr, const unsigned char* pData, int nLen)
 {
-    unsigned int y;
+    unsigned int counter, y;
     
-    WP_I2C_B = 0;
-
+//    WP_I2C_B = 0;
+    counter = 0;
     startCondition();
     I2CByteWrite(cDevAddr);
     
     do
     {
+        counter++;
         if (readAck() != 0)
         {
             startCondition();
@@ -109,7 +110,11 @@ int I2C_Write_b (unsigned char cDevAddr, unsigned char cRegAddr, const unsigned 
         }
         I2CByteWrite(cRegAddr);
     }
-    while(readAck() != 0);
+    while(readAck() != 0 && counter <= 10);
+    
+    if (counter > 10) {
+        return -1;
+    }
     
     for (y = 0; y < nLen; y++)
     {
@@ -117,7 +122,7 @@ int I2C_Write_b (unsigned char cDevAddr, unsigned char cRegAddr, const unsigned 
         
         if (readAck() != 0)
         {
-            WP_I2C_B = 1;
+//            WP_I2C_B = 1;
             return -1;
         }
         pData ++;
@@ -126,7 +131,7 @@ int I2C_Write_b (unsigned char cDevAddr, unsigned char cRegAddr, const unsigned 
     stopCondition();
     EEAckPolling_b(cDevAddr);
     
-    WP_I2C_B = 1;
+//    WP_I2C_B = 1;
     return (0);
 }
 
@@ -137,12 +142,15 @@ int I2C_Write_b (unsigned char cDevAddr, unsigned char cRegAddr, const unsigned 
 /*----------------------------------------------------------------------------*/
 int I2C_Read_b (unsigned char cDevAddr, unsigned char cRegAddr, unsigned char* buffer, int nLen)
 {
-    unsigned int y;   
+    unsigned int counter, y;   
     startCondition();
     cDevAddr = WRITE_CB(cDevAddr);
     I2CByteWrite(cDevAddr);
     
+    counter = 0;
+    
     do {
+        counter++;
         if (readAck() != 0) {
             startCondition();
             I2CByteWrite(cDevAddr);
@@ -151,7 +159,11 @@ int I2C_Read_b (unsigned char cDevAddr, unsigned char cRegAddr, unsigned char* b
         }
   
         I2CByteWrite(cRegAddr);
-    } while(readAck() != 0);
+    } while(readAck() != 0 && counter <= 10);
+    
+    if (counter > 10) {
+        return -1;
+    }
     
     startCondition();
     cDevAddr = READ_CB(cDevAddr);
@@ -178,3 +190,35 @@ int I2C_Read_b (unsigned char cDevAddr, unsigned char cRegAddr, unsigned char* b
 }
 
 
+int I2C_CurrentRead_b (unsigned char cDevAddr, unsigned char* buffer, int nLen)
+{
+    unsigned int y;   
+    startCondition();
+    cDevAddr = READ_CB(cDevAddr);
+    I2CByteWrite(cDevAddr);
+        
+    do {
+        if (readAck() != 0) {
+            startCondition();
+            I2CByteWrite(cDevAddr);
+            if (readAck() != 0)
+                continue;
+        }
+  
+    } while(readAck() != 0);
+    /*--------------------------------------------------------------*/
+    /* Legge la ram del dispositivo                                 */
+    /*--------------------------------------------------------------*/
+    
+    for(y = 0; y < nLen; y++)
+    {
+        if (y == nLen - 1)
+            I2CByteRead(buffer, 1); 
+        else 
+            I2CByteRead(buffer, 0); 
+        buffer++;
+    }
+    
+    stopCondition();
+    return (0);
+}

@@ -109,6 +109,15 @@ static inline __attribute__((always_inline)) unsigned int HDByteReadI2C(unsigned
 #endif
 }
 
+static inline __attribute__((always_inline)) unsigned int ByteReadI2C(unsigned char ControlByte,
+        unsigned int Add, unsigned char *Data) {
+    #if RAM_TYPE == MEM_24XX16
+        return byteRead_24XX16(ControlByte, (Add >> 8) & 0xFF, Add & 0xFF, Data);
+#elif RAM_TYPE == MEM_24XX1025
+        return byteRead_24XX1025(ControlByte, (Add >> 8) & 0xFF, Add & 0xFF, Data);
+#endif
+}
+
 
 
 /*********************************************************************
