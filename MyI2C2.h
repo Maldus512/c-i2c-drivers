@@ -153,7 +153,7 @@ static inline __attribute__((always_inline)) unsigned int HDSequentialWriteI2C(u
 static inline __attribute__((always_inline)) unsigned int HDSequentialWriteI2C_eds(unsigned char ControlByte,
         unsigned char HighAdd, unsigned char LowAdd,__eds__ unsigned char *wrptr, unsigned int length) {
     #if RAM_TYPE == MEM_24XX16
-        return sequentialWrite_24XX16(ControlByte, HighAdd, LowAdd, wrptr, length);
+        return -1;//sequentialWrite_24XX16(ControlByte, HighAdd, LowAdd, wrptr, length);
 #elif RAM_TYPE == MEM_24XX1025
         return sequentialWrite_24XX1025_eds(ControlByte, HighAdd, LowAdd, wrptr, length);
 #endif
@@ -172,7 +172,7 @@ static inline __attribute__((always_inline)) unsigned int AbsSequentialWriteI2C(
 static inline __attribute__((always_inline)) unsigned int AbsSequentialWriteI2C_eds(unsigned char ControlByte,
         unsigned int address, __eds__ unsigned char *wrptr, unsigned int length) {
     #if RAM_TYPE == MEM_24XX16
-        return sequentialWrite_24XX16(ControlByte,  address/256, address%256, wrptr, length);
+        return -1;// sequentialWrite_24XX16(ControlByte,  address/256, address%256, wrptr, length);
 #elif RAM_TYPE == MEM_24XX1025
         return sequentialWrite_24XX1025_eds(ControlByte,  address/256, address%256, wrptr, length);
 #endif
@@ -207,7 +207,7 @@ static inline __attribute__((always_inline)) unsigned int HDSequentialReadI2C(un
 static inline __attribute__((always_inline)) unsigned int HDSequentialReadI2C_eds(unsigned char ControlByte,
         unsigned char HighAdd, unsigned char LowAdd,__eds__ unsigned char *rdptr, unsigned int length) {
     #if RAM_TYPE == MEM_24XX16
-        return sequentialRead_24XX16(ControlByte, HighAdd, LowAdd, rdptr, length);
+        return -1;// sequentialRead_24XX16(ControlByte, HighAdd, LowAdd, rdptr, length);
 #elif RAM_TYPE == MEM_24XX1025
         return sequentialRead_24XX1025_eds(ControlByte, HighAdd, LowAdd, rdptr, length);
 #endif
@@ -226,7 +226,7 @@ static inline __attribute__((always_inline)) unsigned int AbsSequentialReadI2C(u
 static inline __attribute__((always_inline)) unsigned int AbsSequentialReadI2C_eds(unsigned char ControlByte,
         unsigned int address,__eds__ unsigned char *rdptr, unsigned int length) {
     #if RAM_TYPE == MEM_24XX16
-        return sequentialRead_24XX16(ControlByte, address/256, address%256, rdptr, length);
+        return -1;// sequentialRead_24XX16(ControlByte, address/256, address%256, rdptr, length);
 #elif RAM_TYPE == MEM_24XX1025
         return sequentialRead_24XX1025_eds(ControlByte, address/256, address%256, rdptr, length);
 #endif
