@@ -12,6 +12,12 @@
 #include "EEPROM/24XX1025.h"
 #include "EEPROM/24XX16.h"
 #include "HardwareProfile.h"
+#include "utility.h"
+
+
+
+void write_protect_disable();
+void write_protect_enable();
 
 static inline __attribute__((always_inline)) void disableInt() {
         IEC0bits.T1IE = 0;
@@ -143,6 +149,36 @@ static inline __attribute__((always_inline)) unsigned int HDSequentialWriteI2C(u
         return sequentialWrite_24XX1025(ControlByte, HighAdd, LowAdd, wrptr, Length);
 #endif
 }
+/*Wrapper con compatibilità per l'eds*/
+static inline __attribute__((always_inline)) unsigned int HDSequentialWriteI2C_eds(unsigned char ControlByte,
+        unsigned char HighAdd, unsigned char LowAdd,__eds__ unsigned char *wrptr, unsigned int length) {
+    #if RAM_TYPE == MEM_24XX16
+        return sequentialWrite_24XX16(ControlByte, HighAdd, LowAdd, wrptr, length);
+#elif RAM_TYPE == MEM_24XX1025
+        return sequentialWrite_24XX1025_eds(ControlByte, HighAdd, LowAdd, wrptr, length);
+#endif
+}
+
+static inline __attribute__((always_inline)) unsigned int AbsSequentialWriteI2C(unsigned char ControlByte,
+        unsigned int address, unsigned char *wrptr, unsigned int Length) {
+    #if RAM_TYPE == MEM_24XX16
+        return sequentialWrite_24XX16(ControlByte, address/256, address%256, wrptr, Length);
+#elif RAM_TYPE == MEM_24XX1025
+        return sequentialWrite_24XX1025(ControlByte, address/256, address%256, wrptr, Length);
+#endif
+}
+
+
+static inline __attribute__((always_inline)) unsigned int AbsSequentialWriteI2C_eds(unsigned char ControlByte,
+        unsigned int address, __eds__ unsigned char *wrptr, unsigned int length) {
+    #if RAM_TYPE == MEM_24XX16
+        return sequentialWrite_24XX16(ControlByte,  address/256, address%256, wrptr, length);
+#elif RAM_TYPE == MEM_24XX1025
+        return sequentialWrite_24XX1025_eds(ControlByte,  address/256, address%256, wrptr, length);
+#endif
+}
+
+
 
 
 
@@ -166,6 +202,36 @@ static inline __attribute__((always_inline)) unsigned int HDSequentialReadI2C(un
         return sequentialRead_24XX1025(ControlByte, HighAdd, LowAdd, rdptr, length);
 #endif
 }
+
+
+static inline __attribute__((always_inline)) unsigned int HDSequentialReadI2C_eds(unsigned char ControlByte,
+        unsigned char HighAdd, unsigned char LowAdd,__eds__ unsigned char *rdptr, unsigned int length) {
+    #if RAM_TYPE == MEM_24XX16
+        return sequentialRead_24XX16(ControlByte, HighAdd, LowAdd, rdptr, length);
+#elif RAM_TYPE == MEM_24XX1025
+        return sequentialRead_24XX1025_eds(ControlByte, HighAdd, LowAdd, rdptr, length);
+#endif
+}
+
+
+static inline __attribute__((always_inline)) unsigned int AbsSequentialReadI2C(unsigned char ControlByte,
+        unsigned int address, unsigned char *rdptr, unsigned int length) {
+    #if RAM_TYPE == MEM_24XX16
+        return sequentialRead_24XX16(ControlByte, address/256, address%256, rdptr, length);
+#elif RAM_TYPE == MEM_24XX1025
+        return sequentialRead_24XX1025(ControlByte, address/256, address%256, rdptr, length);
+#endif
+}
+
+static inline __attribute__((always_inline)) unsigned int AbsSequentialReadI2C_eds(unsigned char ControlByte,
+        unsigned int address,__eds__ unsigned char *rdptr, unsigned int length) {
+    #if RAM_TYPE == MEM_24XX16
+        return sequentialRead_24XX16(ControlByte, address/256, address%256, rdptr, length);
+#elif RAM_TYPE == MEM_24XX1025
+        return sequentialRead_24XX1025_eds(ControlByte, address/256, address%256, rdptr, length);
+#endif
+}
+
 
 
 #endif	/* MYI2C2_H */

@@ -4,6 +4,14 @@
 #include "EEPROM/24XX1025.h"
 #include "EEPROM/24XX16.h"
 
+void write_protect_enable() {
+    WRITE_PROTECT = 1;
+}
+
+void write_protect_disable() {
+    WRITE_PROTECT = 0;
+}
+
 
 void Init_I2C()
 {
@@ -20,6 +28,7 @@ void Init_I2C()
             I2C2_STOP_DIS & I2C2_RESTART_DIS & I2C2_START_DIS, (unsigned int) I2C_BRG);
     
     IdleI2C2();
+    write_protect_enable();
 }
 
 void I2CWriteReg(unsigned char reg, unsigned char data, unsigned char addr) {

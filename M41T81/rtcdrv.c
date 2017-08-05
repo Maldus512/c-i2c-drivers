@@ -12,24 +12,17 @@
 /*                                                                            */
 /*  Data  : 20/01/2003      REV  : 00.0                                       */
 /*                                                                            */
-/*  U.mod.: 21/05/2016      REV  : 01.0                                       */
+/*  U.mod.: 03/06/2017      REV  : 01.0                                       */
 /*                                                                            */
 /******************************************************************************/
 
-#include   <string.h>
+#include <string.h>
 
 #include "HardwareProfile.h"
-
-//#include    "I2C_Drv.h"
-#include "MyI2C2.h"
 #include "RtcDrv.h"
 
-#include "display.h"
-#include "sgtypes.h"
-#include "gdispcfg.h"
-#include "gdisphw.h"
-#include "GDISP.h"
-#include "gi_fonts.h"
+#include "MyI2C2.h"
+
 
 
 #define     TRUE  1
@@ -69,9 +62,9 @@ RTC_TIME ProgTime; /* orologio di sitema programmato */
 
 
 /*----------------------------------------------------------------------------*/
-/* RTC_Init                                                                   */
+/* Init_RTC                                                                   */
 /*----------------------------------------------------------------------------*/
-int RTC_Init (void)
+int Init_RTC (void)
 {
     unsigned char cData;
     RTC_TIME tCurrTime;
@@ -593,45 +586,4 @@ void Get_Str_From_Time (RTC_TIME time, unsigned char *str_raw, unsigned char *st
     str_time[6] = str_raw [10];
     str_time[7] = str_raw [11];
     str_time[8] = 0;
-}
-
-
-
-/*----------------------------------------------------------------------------*/
-/* BCD_to_ASCII.                                                              */
-/*----------------------------------------------------------------------------*/
-void BCD_to_ASCII (char BCD, char*string)
-{
-    *string = (((unsigned int)BCD & 0xf0)>>4) | 0x30;
-    
-    if (*string<'0' || *string>'9')
-    {
-        *string = '0';
-    }
-    string++;
-    
-    *string = ((BCD & 0x0f)) | 0x30;
-    
-    if (*string<'0' || *string>'9')
-    {
-        *string = '0';
-    }
-}
-/*----------------------------------------------------------------------------*/
-/* ASCII_to_BCD                                                               */
-/*----------------------------------------------------------------------------*/
-void ASCII_to_BCD (char *string, char BCD)
-{
-    BCD = 0;
-    
-    if (*string>'0' || *string<'9')
-    {
-        BCD = ((*string - 0x30) << 4);
-    }
-    string++;
-    
-    if (*string>'0' || *string<'9')
-    {
-        BCD |= (*string - 0x30);
-    }
 }

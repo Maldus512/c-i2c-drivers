@@ -20,7 +20,7 @@
 
 
 
-#if I2C_MODE == I2C_MODULE
+#if I2C_MODE == I2C_MODULE && RAM_TYPE == MEM_24XX16
 
 #include "MyI2C2.h"
 
@@ -38,6 +38,7 @@ unsigned char byteWrite_24XX16(unsigned char ControlByte, unsigned char HighAdd,
     }
     
     disableInt();
+    write_protect_disable();
     MyIdleI2C2(); //Ensure Module is Idle  
     
     MyIdleI2C2(); //Ensure Module is Idle
@@ -77,6 +78,7 @@ unsigned char byteWrite_24XX16(unsigned char ControlByte, unsigned char HighAdd,
     EEAckPolling(ControlByte); //perform Ack Polling
     
     enableInt();
+    write_protect_enable();
     
     return (0);
 }
@@ -144,6 +146,7 @@ void pageWrite_24XX16(unsigned char ControlByte, unsigned char HighAdd, unsigned
     ControlByte &= 0xF1;
     ControlByte |= HighAdd << 1;
     disableInt();
+    write_protect_disable();
     MyIdleI2C2(); //wait for bus Idle
     MyStartI2C2(); //Generate Start condition
     MasterWriteI2C2(ControlByte); //send controlbyte for a write
@@ -178,6 +181,7 @@ void pageWrite_24XX16(unsigned char ControlByte, unsigned char HighAdd, unsigned
     EEAckPolling(ControlByte); //perform Ack Polling
     
     enableInt();
+    write_protect_enable();
 }
 
 
@@ -338,7 +342,7 @@ unsigned char sequentialRead_24XX16(unsigned char ControlByte, unsigned char Hig
 
 
 
-#elif I2C_MODE == I2C_BITBANG
+#elif I2C_MODE == I2C_BITBANG && RAM_TYPE == MEM_24XX16
 
 #include "i2c_drv.h"
 

@@ -11,12 +11,9 @@
 /*                                                                            */
 /*  Data  : 20/01/2003      REV  : 00.0                                       */
 /*                                                                            */
-/*  U.mod.: 21/05/2016      REV  : 01.0                                       */
+/*  U.mod.: 03/06/2017      REV  : 01.0                                       */
 /*                                                                            */
 /******************************************************************************/
-
-#define BCD2BIN(x) ((((x) >> 4) & 0xF) * 10 + ((x) & 0xF))
-#define BIN2BCD(x) ((((x) / 10) << 4) | ((x) % 10))
 
 #define M41T11_ADDR     '\xD0'
 #define SEG_TIME        '\x01'
@@ -37,7 +34,7 @@ typedef struct _RTC_TIME
     unsigned char cCtrl;
 }RTC_TIME;
 
-int RTC_Init (void);
+int Init_RTC (void);
 void InitRTCport (void);
 
 int SetTime (const RTC_TIME *pTime);
@@ -70,8 +67,3 @@ void Get_Str_Curr_Time (void);
 void Get_Str_Prog_Time (void);
 void Get_Str_From_Time (RTC_TIME time, unsigned char *str_raw, unsigned char *str_time, unsigned char *str_date);
 void Get_Str_Prog_From_Time (RTC_TIME time, unsigned char *str_prog);
-
-
-
-void BCD_to_ASCII (char BCD, char *string);
-void ASCII_to_BCD (char *string, char BCD);
