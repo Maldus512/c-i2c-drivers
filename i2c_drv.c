@@ -15,7 +15,7 @@
 /*                                                                            */
 /******************************************************************************/
 
-#include <p24FJ128GA306.h>
+#include "HardwareProfile.h"
 
 #include <string.h>
 #include <libpic30.h>
