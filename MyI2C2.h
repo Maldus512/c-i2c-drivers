@@ -20,13 +20,17 @@ void write_protect_disable();
 void write_protect_enable();
 
 static inline __attribute__((always_inline)) void disableInt() {
+#ifndef FREE_INT
         IEC0bits.T1IE = 0;
         IEC0bits.T2IE = 0;
+#endif
 }
 
 static inline __attribute__((always_inline)) void enableInt() {
+#ifndef FREE_INT
         IEC0bits.T1IE = 1;
         IEC0bits.T2IE = 1;
+#endif
 }
 
 
