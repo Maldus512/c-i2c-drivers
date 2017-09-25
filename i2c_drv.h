@@ -19,7 +19,6 @@
 
 #define CLK_I2C_B       CLK_I2C
 #define DATA_I2C_B      D_I2C
-#define DATA_I2C_I_B    D_I2C_I
 #define WP_I2C_B        WP_I2C
 
 #define DD_CLK_I2C_B    CLK_I2C_TRIS
@@ -70,6 +69,7 @@ static inline __attribute__((always_inline)) void I2CByteWrite(unsigned char byt
     {
         CK_I2C(0);
         DATA_I2C_B = (byte >> (7 - x)) & 0x01;
+        delay_us(1);
         CK_I2C(1);
     }
 }
@@ -97,6 +97,7 @@ static inline __attribute__((always_inline)) unsigned char readAck() {
     CK_I2C(1);
     x = DATA_I2C_INPUT;//DATA_I2C_B;
     CK_I2C(0);
+    delay_us(1);
     return x;
 }
 
