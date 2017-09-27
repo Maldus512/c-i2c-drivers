@@ -527,9 +527,13 @@ void Set_ora_legale_auto_adjust (unsigned char ora_legale_flag)
 /*----------------------------------------------------------------------------*/
 void Get_Str_Curr_Time (void)
 {
+#ifndef FREE_INT
     INTCON2bits.GIE = 0;
+#endif
     Get_Str_From_Time(CurrTime, str_curr_time, str_time_display, str_date_display);
+#ifndef FREE_INT
     INTCON2bits.GIE = 1;
+#endif
 }
 
 

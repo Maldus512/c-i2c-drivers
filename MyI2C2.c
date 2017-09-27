@@ -74,6 +74,40 @@ void I2CWriteReg(unsigned char reg, unsigned char data, unsigned char addr) {
     enableInt();
 }
 
+void I2CScanner() {
+    unsigned char i = 0x00, addr;
+    int counter;
+    for (i = 0; i < 128; i++) {
+        counter = 0;
+        addr = i << 1;
+        MyStartI2C2();
+        MasterWriteI2C2(addr);
+        MyIdleI2C2();
+        do {
+            counter++;
+            if (I2C2STATbits.ACKSTAT)
+            {
+                MyRestartI2C2();
+                MasterWriteI2C2(addr);
+                MyIdleI2C2();
+                if (I2C2STATbits.ACKSTAT)
+                {
+                    continue;
+                }
+            }
+        } while (I2C2STATbits.ACKSTAT && counter <= 10);
+        
+        if (counter <= 10) {
+            Nop();
+            Nop();
+            Nop();
+            Nop();
+        }
+        
+        MyStopI2C2();
+    }
+}
+
 unsigned char I2CReadReg(unsigned char reg, unsigned char addr) {
     unsigned char valore;
     int counter = 0;
@@ -103,7 +137,7 @@ unsigned char I2CReadReg(unsigned char reg, unsigned char addr) {
     while (I2C2STATbits.ACKSTAT && counter <= 10);
 
     if (counter > 10)
-        return -1;
+        return -2;
     
     MyRestartI2C2();
     MasterWriteI2C2(addr | 1);

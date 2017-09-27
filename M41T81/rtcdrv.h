@@ -34,6 +34,8 @@ typedef struct _RTC_TIME
     unsigned char cCtrl;
 }RTC_TIME;
 
+extern RTC_TIME CurrTime;
+
 int Init_RTC (void);
 void InitRTCport (void);
 
