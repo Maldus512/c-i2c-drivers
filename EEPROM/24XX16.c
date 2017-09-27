@@ -423,10 +423,11 @@ unsigned char sequentialWrite_24XX16(unsigned char ControlByte, unsigned char Hi
         page_size = PAGE_SIZE - (LowAdd % PAGE_SIZE);
         page_size = (Length < page_size) ? Length : page_size;
         
-        do
-        {
-            res = I2C_Write_b(ControlByte, LowAdd, wrptr, page_size);
-        } while(res != 0);
+        
+        res = I2C_Write_b(ControlByte, LowAdd, wrptr, page_size);
+        if (res != 0) {
+            return res;
+        }
         
         Length -= page_size;
         wrptr += page_size;
