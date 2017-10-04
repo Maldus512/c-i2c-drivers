@@ -19,12 +19,12 @@
 
 #define CLK_I2C_B       CLK_I2C
 #define DATA_I2C_B      D_I2C
-#define DATA_I2C_I_B    D_I2C_I
-#define WP_I2C_B        WP_I2C
+//#define WP_I2C_B        WP_I2C
 
 #define DD_CLK_I2C_B    CLK_I2C_TRIS
 #define DD_DATA_I2C_B   D_I2C_TRIS
-#define DD_WP_I2C_B     D_WP_I2C_TRIS
+//#define DD_WP_I2C_B     D_WP_I2C_TRIS
+#define DATA_I2C_I      DATA_I2C_INPUT
 
 #define EEPROM_0_ADDR     '\xD0'
 #define EEPROM_1_ADDR     '\xD0'
@@ -36,19 +36,16 @@
 #define LOW                 0
 
 
-#ifndef DATA_I2C_INPUT
-#define DATA_I2C_INPUT  0 //STUB
-#endif
-
 
 static inline __attribute__((always_inline)) void CK_I2C (unsigned char ck)
 {
     CLK_I2C_B = ck;
-    //delay_us(3);
+    delay_us(10);
 }
 
 static inline __attribute__((always_inline)) void startCondition() {
     DD_DATA_I2C_B = OUTPUT_PIN;
+    DATA_I2C_B = HIGH;
     CLK_I2C_B = HIGH;
     DATA_I2C_B = LOW;
 }
@@ -69,6 +66,7 @@ static inline __attribute__((always_inline)) void I2CByteWrite(unsigned char byt
     {
         CK_I2C(0);
         DATA_I2C_B = (byte >> (7 - x)) & 0x01;
+        delay_us(1);
         CK_I2C(1);
     }
 }
@@ -79,7 +77,7 @@ static inline __attribute__((always_inline)) void I2CByteRead(unsigned char* byt
     for (x = 0; x < 8; x++)
     {
         CK_I2C(1);
-        *byte = (*byte << 1) | DATA_I2C_INPUT;//DATA_I2C_B; /* dato in input */
+        *byte = (*byte << 1) | DATA_I2C_I;//DATA_I2C_B; /* dato in input */
         CK_I2C(0);
     }
     DD_DATA_I2C_B = OUTPUT_PIN;//1;  /* dati in uscita dal micro             */
@@ -94,8 +92,9 @@ static inline __attribute__((always_inline)) unsigned char readAck() {
     DATA_I2C_B = 1;         //Set Nack
     DD_DATA_I2C_B = INPUT_PIN;
     CK_I2C(1);
-    x = DATA_I2C_INPUT;//DATA_I2C_B;
+    x = DATA_I2C_I;//DATA_I2C_B;
     CK_I2C(0);
+    delay_us(1);
     return x;
 }
 

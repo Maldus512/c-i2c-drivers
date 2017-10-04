@@ -5,11 +5,15 @@
 #include "EEPROM/24XX16.h"
 
 void write_protect_enable() {
+#ifdef WRITE_PROTECT
     WRITE_PROTECT = 1;
+#endif
 }
 
 void write_protect_disable() {
+#ifdef WRITE_PROTECT
     WRITE_PROTECT = 0;
+#endif
 }
 
 
@@ -28,6 +32,9 @@ void Init_I2C()
             I2C2_STOP_DIS & I2C2_RESTART_DIS & I2C2_START_DIS, (unsigned int) I2C_BRG);
     
     IdleI2C2();
+#ifdef D_WP_I2C_TRIS
+    D_WP_I2C_TRIS = OUTPUT_PIN;
+#endif
     write_protect_enable();
 }
 
@@ -69,6 +76,7 @@ void I2CWriteReg(unsigned char reg, unsigned char data, unsigned char addr) {
 
 unsigned char I2CReadReg(unsigned char reg, unsigned char addr) {
     unsigned char valore;
+    int counter = 0;
     disableInt();
     MyStartI2C2();
 
@@ -77,6 +85,7 @@ unsigned char I2CReadReg(unsigned char reg, unsigned char addr) {
     
     do
     {
+        counter++;
         if (I2C2STATbits.ACKSTAT)
         {
             MyRestartI2C2();
@@ -91,8 +100,11 @@ unsigned char I2CReadReg(unsigned char reg, unsigned char addr) {
         MasterWriteI2C2(reg);
         MyIdleI2C2();
     }
-    while (I2C2STATbits.ACKSTAT);
+    while (I2C2STATbits.ACKSTAT && counter <= 10);
 
+    if (counter > 10)
+        return -1;
+    
     MyRestartI2C2();
     MasterWriteI2C2(addr | 1);
     MyIdleI2C2();

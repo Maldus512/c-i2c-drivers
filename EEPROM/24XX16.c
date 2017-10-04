@@ -31,6 +31,7 @@ unsigned char byteWrite_24XX16(unsigned char ControlByte, unsigned char HighAdd,
 {
     ControlByte &= 0xF1;
     ControlByte |= HighAdd << 1;
+    int counter = 0;
     
     if (HighAdd > HIGH_ADD_LIMIT)
     {
@@ -48,6 +49,7 @@ unsigned char byteWrite_24XX16(unsigned char ControlByte, unsigned char HighAdd,
     
     do
     {
+        counter++;
         if (I2C2STATbits.ACKSTAT)
         {
             MyRestartI2C2();
@@ -59,8 +61,8 @@ unsigned char byteWrite_24XX16(unsigned char ControlByte, unsigned char HighAdd,
             }
         }
         //TODO: r u sure this is ok? Should the HighAdd be sent?
-        MasterWriteI2C2(HighAdd);
-        MyIdleI2C2(); //Write High Address
+        //MasterWriteI2C2(HighAdd);
+        //MyIdleI2C2(); //Write High Address
         MasterWriteI2C2(LowAdd); //Write Low Address
         MyIdleI2C2();
         
@@ -71,8 +73,11 @@ unsigned char byteWrite_24XX16(unsigned char ControlByte, unsigned char HighAdd,
         MasterWriteI2C2(data); //Write Data
         MyIdleI2C2();
     }
-    while (I2C2STATbits.ACKSTAT);
+    while (I2C2STATbits.ACKSTAT && counter <= 10);
     //ErrorCode = !I2C2STATbits.ACKSTAT;		//Return ACK Status
+    
+    if (counter > 10)
+        return -1;
 
     MyStopI2C2(); //Initiate Stop Condition
     EEAckPolling(ControlByte); //perform Ack Polling
@@ -90,6 +95,7 @@ unsigned char byteWrite_24XX16(unsigned char ControlByte, unsigned char HighAdd,
 /*----------------------------------------------------------------------------*/
 unsigned char byteRead_24XX16(unsigned char ControlByte, unsigned char HighAdd, unsigned char LowAdd, unsigned char *Data)
 { 
+    int counter = 0;
     if (HighAdd > HIGH_ADD_LIMIT)
     {
         return 1;
@@ -105,6 +111,7 @@ unsigned char byteRead_24XX16(unsigned char ControlByte, unsigned char HighAdd, 
     
     do
     {
+        counter++;
         if (I2C2STATbits.ACKSTAT)
         {
             MyRestartI2C2();
@@ -122,7 +129,10 @@ unsigned char byteRead_24XX16(unsigned char ControlByte, unsigned char HighAdd, 
             continue;
         }
     }
-    while (I2C2STATbits.ACKSTAT);
+    while (I2C2STATbits.ACKSTAT && counter <= 10);
+    
+    if (counter > 10)
+        return -1;
 
     MyRestartI2C2(); //Generate Restart
     MasterWriteI2C2(ControlByte | 0x01); //send control byte for Read
@@ -413,10 +423,11 @@ unsigned char sequentialWrite_24XX16(unsigned char ControlByte, unsigned char Hi
         page_size = PAGE_SIZE - (LowAdd % PAGE_SIZE);
         page_size = (Length < page_size) ? Length : page_size;
         
-        do
-        {
-            res = I2C_Write_b(ControlByte, LowAdd, wrptr, page_size);
-        } while(res != 0);
+        
+        res = I2C_Write_b(ControlByte, LowAdd, wrptr, page_size);
+        if (res != 0) {
+            return res;
+        }
         
         Length -= page_size;
         wrptr += page_size;
