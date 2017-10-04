@@ -21,6 +21,7 @@
 #include "variabili_parametri_sistema.h"
 
 #include "I2C_drv.h"
+#include "system.h"
 
 #define TRUE    1
 #define FALSE   0
