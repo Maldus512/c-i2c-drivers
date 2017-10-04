@@ -16,6 +16,7 @@
 /******************************************************************************/
 
 #include "HardwareProfile.h"
+#include "system.h"
 
 #define CLK_I2C_B       CLK_I2C
 #define DATA_I2C_B      D_I2C
