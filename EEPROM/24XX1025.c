@@ -24,7 +24,7 @@ unsigned int byteWrite_24XX1025(unsigned char ControlByte, unsigned char HighAdd
     disableInt();
     write_protect_disable();
     MyIdleI2C2(); //Ensure Module is Idle  
-    
+    int counter = 0;
     MyIdleI2C2(); //Ensure Module is Idle
     MyStartI2C2(); //Generate Start COndition
     MasterWriteI2C2(ControlByte); //Write Control byte
@@ -32,6 +32,7 @@ unsigned int byteWrite_24XX1025(unsigned char ControlByte, unsigned char HighAdd
     
     do
     {
+        counter++;
         if (I2C2STATbits.ACKSTAT)
         {
             MyRestartI2C2();
@@ -54,9 +55,13 @@ unsigned int byteWrite_24XX1025(unsigned char ControlByte, unsigned char HighAdd
         MasterWriteI2C2(data); //Write Data
         MyIdleI2C2();
     }
-    while (I2C2STATbits.ACKSTAT);
+    while (I2C2STATbits.ACKSTAT && counter <= 10);
     //ErrorCode = !I2C2STATbits.ACKSTAT;		//Return ACK Status
 
+    if (counter > 10) {
+        return -1;
+    }
+    
     MyStopI2C2(); //Initiate Stop Condition
     EEAckPolling(ControlByte); //perform Ack Polling
     
@@ -71,11 +76,13 @@ unsigned int byteRead_24XX1025(unsigned char ControlByte, unsigned char HighAdd,
     disableInt();
     MyIdleI2C2(); //Wait for bus Idle
     MyStartI2C2(); //Generate Start condition
+    int counter = 0;
     MasterWriteI2C2(ControlByte); //send control byte for write
     MyIdleI2C2(); //Wait for bus Idle
     
     do
     {
+        counter++;
         if (I2C2STATbits.ACKSTAT)
         {
             MyRestartI2C2();
@@ -95,8 +102,12 @@ unsigned int byteRead_24XX1025(unsigned char ControlByte, unsigned char HighAdd,
             continue;
         }
     }
-    while (I2C2STATbits.ACKSTAT);
+    while (I2C2STATbits.ACKSTAT && counter <= 10);
 
+    if (counter > 10) {
+        return -1;
+    }
+    
     MyRestartI2C2(); //Generate Restart
     MasterWriteI2C2(ControlByte | 0x01); //send control byte for Read
     MyIdleI2C2(); //Wait for bus Idle
@@ -113,6 +124,7 @@ unsigned int byteRead_24XX1025(unsigned char ControlByte, unsigned char HighAdd,
 void pageWrite_24XX1025(unsigned char ControlByte, unsigned char HighAdd, unsigned char LowAdd, unsigned char *wrptr, int Length) {
     disableInt();
     write_protect_disable();
+    int counter = 0;
     MyIdleI2C2(); //wait for bus Idle
     MyStartI2C2(); //Generate Start condition
     MasterWriteI2C2(ControlByte); //send controlbyte for a write
@@ -120,6 +132,7 @@ void pageWrite_24XX1025(unsigned char ControlByte, unsigned char HighAdd, unsign
     
     do
     {
+        counter++;
         if (I2C2STATbits.ACKSTAT)
         {
             MyRestartI2C2();
@@ -136,7 +149,11 @@ void pageWrite_24XX1025(unsigned char ControlByte, unsigned char HighAdd, unsign
         MasterWriteI2C2(LowAdd); //send Low Address
         MyIdleI2C2(); //wait for bus Idle
     }
-    while (I2C2STATbits.ACKSTAT);
+    while (I2C2STATbits.ACKSTAT && counter <= 10);
+    
+    if (counter > 10) {
+        return;
+    }
 
     while ( Length-- > 0)
     {
@@ -156,6 +173,7 @@ void pageWrite_24XX1025(unsigned char ControlByte, unsigned char HighAdd, unsign
 void pageWrite_24XX1025_eds(unsigned char ControlByte, unsigned char HighAdd,
         unsigned char LowAdd, __eds__ unsigned char *wrptr, int Length) {
     disableInt();
+    int counter =0 ;
     write_protect_disable();
     unsigned char x;
     MyIdleI2C2(); //wait for bus Idle
@@ -165,6 +183,7 @@ void pageWrite_24XX1025_eds(unsigned char ControlByte, unsigned char HighAdd,
     
     do
     {
+        counter++;
         if (I2C2STATbits.ACKSTAT)
         {
             MyRestartI2C2();
@@ -181,8 +200,12 @@ void pageWrite_24XX1025_eds(unsigned char ControlByte, unsigned char HighAdd,
         MasterWriteI2C2(LowAdd); //send Low Address
         MyIdleI2C2(); //wait for bus Idle
     }
-    while (I2C2STATbits.ACKSTAT);
+    while (I2C2STATbits.ACKSTAT && counter <= 10);
 
+    if (counter > 10) {
+        return;
+    }
+    
     while ( Length-- > 0)
     {
         x = *wrptr;
@@ -305,6 +328,7 @@ unsigned int sequentialWrite_24XX1025_eds(unsigned char ControlByte, unsigned ch
 void blockRead_24XX1025(unsigned char ControlByte, unsigned char HighAdd,
         unsigned char LowAdd, unsigned char *rdptr, unsigned int length) {
     disableInt();
+    int counter = 0;
     MyIdleI2C2(); //Ensure Module is Idle
     MyStartI2C2(); //Initiate start condition
     MasterWriteI2C2(ControlByte); //write 1 byte
@@ -312,6 +336,7 @@ void blockRead_24XX1025(unsigned char ControlByte, unsigned char HighAdd,
     
     do
     {
+        counter++;
         if (I2C2STATbits.ACKSTAT)
         {
             MyRestartI2C2();
@@ -328,7 +353,11 @@ void blockRead_24XX1025(unsigned char ControlByte, unsigned char HighAdd,
         MasterWriteI2C2(LowAdd); //Write Low word address
         MyIdleI2C2(); //Ensure module is idle
     }
-    while (I2C2STATbits.ACKSTAT);
+    while (I2C2STATbits.ACKSTAT && counter <= 10);
+    
+    if (counter > 10) {
+        return;
+    }
     
     MyRestartI2C2(); //Generate I2C Restart Condition
     MasterWriteI2C2(ControlByte | 0x01); //Write 1 byte - R/W bit should be 1 for read
