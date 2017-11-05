@@ -130,7 +130,35 @@ int Init_RTC (void)
 }
 
 
+int rtccmp(RTC_TIME t1, RTC_TIME t2) {
 
+    if (t1.cSec != t2.cSec) {
+        return 1;
+    }
+    if (t1.cMin != t2.cMin) {
+        return 1;
+    }
+    if (t1.cHour != t2.cHour) {
+        return 1;
+    }
+    if (t1.cDay != t2.cDay) {
+        return 1;
+    }
+    if (t1.cDate != t2.cDate) {
+        return 1;
+    }
+    if (t1.cMonth != t2.cMonth) {
+        return 1;
+    }
+    if (t1.cYear != t2.cYear) {
+        return 1;
+    }
+    if (t1.cCtrl != t2.cCtrl) {
+        return 1;
+    }
+
+    return 0;
+}
 
 
 /*----------------------------------------------------------------------------*/
@@ -527,9 +555,7 @@ void Set_ora_legale_auto_adjust (unsigned char ora_legale_flag)
 /*----------------------------------------------------------------------------*/
 void Get_Str_Curr_Time (void)
 {
-    INTCON2bits.GIE = 0;
     Get_Str_From_Time(CurrTime, str_curr_time, str_time_display, str_date_display);
-    INTCON2bits.GIE = 1;
 }
 
 
@@ -567,23 +593,27 @@ void Get_Str_From_Time (RTC_TIME time, unsigned char *str_raw, unsigned char *st
     BCD_to_ASCII (time.cSec, (char *)&str_raw[10]);
     str_raw[12] = 0;
     
-    str_date[0] = str_raw [4];
-    str_date[1] = str_raw [5];
-    str_date[2] = '/';
-    str_date[3] = str_raw [2];
-    str_date[4] = str_raw [3];
-    str_date[5] = '/';
-    str_date[6] = str_raw [0];
-    str_date[7] = str_raw [1];
-    str_date[8] = 0;
+    if (str_date != NULL) {
+        str_date[0] = str_raw [4];
+        str_date[1] = str_raw [5];
+        str_date[2] = '/';
+        str_date[3] = str_raw [2];
+        str_date[4] = str_raw [3];
+        str_date[5] = '/';
+        str_date[6] = str_raw [0];
+        str_date[7] = str_raw [1];
+        str_date[8] = 0;
+    }
     
-    str_time[0] = str_raw [6];
-    str_time[1] = str_raw [7];
-    str_time[2] = ':';
-    str_time[3] = str_raw [8];
-    str_time[4] = str_raw [9];
-    str_time[5] = ':';
-    str_time[6] = str_raw [10];
-    str_time[7] = str_raw [11];
-    str_time[8] = 0;
+    if (str_time != NULL) {
+        str_time[0] = str_raw [6];
+        str_time[1] = str_raw [7];
+        str_time[2] = ':';
+        str_time[3] = str_raw [8];
+        str_time[4] = str_raw [9];
+        str_time[5] = ':';
+        str_time[6] = str_raw [10];
+        str_time[7] = str_raw [11];
+        str_time[8] = 0;
+    }
 }

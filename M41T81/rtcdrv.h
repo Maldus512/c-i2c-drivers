@@ -55,7 +55,7 @@ void Set_ora_legale_auto_adjust (unsigned char ora_legale_flag);
 
 
 
-
+int timecmp(RTC_TIME t1, RTC_TIME t2);
 
 // void Display_temperatura (void);
 
