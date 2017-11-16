@@ -73,7 +73,7 @@ int Init_RTC (void)
     
     // controlla stop bit (oscillator stopped)
 //     if (!I2C_Read (M41T11_ADDR, SEG_TIME, &cData, 1))
-    if (!I2CReadRegN (M41T11_ADDR, SEG_TIME, &cData, 1))
+    if (I2CReadRegN (M41T11_ADDR, SEG_TIME, &cData, 1))
     {
         return FALSE;
     }
@@ -101,7 +101,7 @@ int Init_RTC (void)
     
     // azzera halt update bit
 //     if (!I2C_Read (M41T11_ADDR, SEG_TIME + 11, &cData, 1))
-    if (!I2CReadRegN (M41T11_ADDR, SEG_TIME + 11, &cData, 1))
+    if (I2CReadRegN (M41T11_ADDR, SEG_TIME + 11, &cData, 1))
     {
         return FALSE;
     }
@@ -109,13 +109,13 @@ int Init_RTC (void)
     cData &= ~'\x40';
     
 //     if (!I2C_Write (M41T11_ADDR, SEG_TIME + 11, &cData, 1))
-    if (!I2CWriteRegN (M41T11_ADDR, SEG_TIME + 11, &cData, 1))
+    if (I2CWriteRegN (M41T11_ADDR, SEG_TIME + 11, &cData, 1))
     {
         return FALSE;
     }
     
 //     if (!I2C_Read (M41T11_ADDR, SEG_TIME + 11, &cData, 1))
-    if (!I2CReadRegN (M41T11_ADDR, SEG_TIME + 11, &cData, 1))
+    if (I2CReadRegN (M41T11_ADDR, SEG_TIME + 11, &cData, 1))
     {
         return FALSE;
     }
@@ -186,13 +186,19 @@ int SetTime (const RTC_TIME *pTime)
 /*----------------------------------------------------------------------------*/
 int GetTime (RTC_TIME *pTime)
 {
+    int res;
     if (pTime == NULL)
     {
         return FALSE;
     }
     
-//     return I2C_Read (M41T11_ADDR, SEG_TIME, (unsigned char*) pTime, sizeof (RTC_TIME));
-    return I2CReadRegN (M41T11_ADDR, SEG_TIME, (unsigned char*) pTime, sizeof (RTC_TIME));
+    res = I2CReadRegN (M41T11_ADDR, SEG_TIME, (unsigned char*) pTime, sizeof (RTC_TIME));
+    
+//    if (res < 0) {
+//        memset(pTime, 0, sizeof(RTC_TIME));
+//    }
+    
+    return res;
 }
 
 

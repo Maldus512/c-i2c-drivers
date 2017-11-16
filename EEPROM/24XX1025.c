@@ -59,6 +59,7 @@ unsigned int byteWrite_24XX1025(unsigned char ControlByte, unsigned char HighAdd
     //ErrorCode = !I2C2STATbits.ACKSTAT;		//Return ACK Status
 
     if (counter > 10) {
+        enableInt();
         return -1;
     }
     
@@ -105,6 +106,7 @@ unsigned int byteRead_24XX1025(unsigned char ControlByte, unsigned char HighAdd,
     while (I2C2STATbits.ACKSTAT && counter <= 10);
 
     if (counter > 10) {
+        enableInt();
         return -1;
     }
     
@@ -152,6 +154,7 @@ void pageWrite_24XX1025(unsigned char ControlByte, unsigned char HighAdd, unsign
     while (I2C2STATbits.ACKSTAT && counter <= 10);
     
     if (counter > 10) {
+        enableInt();
         return;
     }
 
@@ -203,6 +206,7 @@ void pageWrite_24XX1025_eds(unsigned char ControlByte, unsigned char HighAdd,
     while (I2C2STATbits.ACKSTAT && counter <= 10);
 
     if (counter > 10) {
+        enableInt();
         return;
     }
     
@@ -356,6 +360,7 @@ void blockRead_24XX1025(unsigned char ControlByte, unsigned char HighAdd,
     while (I2C2STATbits.ACKSTAT && counter <= 10);
     
     if (counter > 10) {
+        enableInt();
         return;
     }
     

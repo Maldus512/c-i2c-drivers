@@ -76,8 +76,10 @@ unsigned char byteWrite_24XX16(unsigned char ControlByte, unsigned char HighAdd,
     while (I2C2STATbits.ACKSTAT && counter <= 10);
     //ErrorCode = !I2C2STATbits.ACKSTAT;		//Return ACK Status
     
-    if (counter > 10)
+    if (counter > 10) {
+        enableInt();
         return -1;
+    }
 
     MyStopI2C2(); //Initiate Stop Condition
     EEAckPolling(ControlByte); //perform Ack Polling
@@ -131,8 +133,10 @@ unsigned char byteRead_24XX16(unsigned char ControlByte, unsigned char HighAdd, 
     }
     while (I2C2STATbits.ACKSTAT && counter <= 10);
     
-    if (counter > 10)
+    if (counter > 10) {
+        enableInt();
         return -1;
+    }
 
     MyRestartI2C2(); //Generate Restart
     MasterWriteI2C2(ControlByte | 0x01); //send control byte for Read
