@@ -73,7 +73,7 @@ int Init_RTC (void)
     
     // controlla stop bit (oscillator stopped)
 //     if (!I2C_Read (M41T11_ADDR, SEG_TIME, &cData, 1))
-    if (!I2CReadRegN (M41T11_ADDR, SEG_TIME, &cData, 1))
+    if (I2CReadRegN (M41T11_ADDR, SEG_TIME, &cData, 1))
     {
         return FALSE;
     }
@@ -101,7 +101,7 @@ int Init_RTC (void)
     
     // azzera halt update bit
 //     if (!I2C_Read (M41T11_ADDR, SEG_TIME + 11, &cData, 1))
-    if (!I2CReadRegN (M41T11_ADDR, SEG_TIME + 11, &cData, 1))
+    if (I2CReadRegN (M41T11_ADDR, SEG_TIME + 11, &cData, 1))
     {
         return FALSE;
     }
@@ -109,13 +109,13 @@ int Init_RTC (void)
     cData &= ~'\x40';
     
 //     if (!I2C_Write (M41T11_ADDR, SEG_TIME + 11, &cData, 1))
-    if (!I2CWriteRegN (M41T11_ADDR, SEG_TIME + 11, &cData, 1))
+    if (I2CWriteRegN (M41T11_ADDR, SEG_TIME + 11, &cData, 1))
     {
         return FALSE;
     }
     
 //     if (!I2C_Read (M41T11_ADDR, SEG_TIME + 11, &cData, 1))
-    if (!I2CReadRegN (M41T11_ADDR, SEG_TIME + 11, &cData, 1))
+    if (I2CReadRegN (M41T11_ADDR, SEG_TIME + 11, &cData, 1))
     {
         return FALSE;
     }
@@ -130,7 +130,35 @@ int Init_RTC (void)
 }
 
 
+int rtccmp(RTC_TIME t1, RTC_TIME t2) {
 
+    if (t1.cSec != t2.cSec) {
+        return 1;
+    }
+    if (t1.cMin != t2.cMin) {
+        return 1;
+    }
+    if (t1.cHour != t2.cHour) {
+        return 1;
+    }
+    if (t1.cDay != t2.cDay) {
+        return 1;
+    }
+    if (t1.cDate != t2.cDate) {
+        return 1;
+    }
+    if (t1.cMonth != t2.cMonth) {
+        return 1;
+    }
+    if (t1.cYear != t2.cYear) {
+        return 1;
+    }
+    if (t1.cCtrl != t2.cCtrl) {
+        return 1;
+    }
+
+    return 0;
+}
 
 
 /*----------------------------------------------------------------------------*/
@@ -158,13 +186,19 @@ int SetTime (const RTC_TIME *pTime)
 /*----------------------------------------------------------------------------*/
 int GetTime (RTC_TIME *pTime)
 {
+    int res;
     if (pTime == NULL)
     {
         return FALSE;
     }
     
-//     return I2C_Read (M41T11_ADDR, SEG_TIME, (unsigned char*) pTime, sizeof (RTC_TIME));
-    return I2CReadRegN (M41T11_ADDR, SEG_TIME, (unsigned char*) pTime, sizeof (RTC_TIME));
+    res = I2CReadRegN (M41T11_ADDR, SEG_TIME, (unsigned char*) pTime, sizeof (RTC_TIME));
+    
+//    if (res < 0) {
+//        memset(pTime, 0, sizeof(RTC_TIME));
+//    }
+    
+    return res;
 }
 
 
@@ -534,6 +568,7 @@ void Get_Str_Curr_Time (void)
 #ifndef FREE_INT
     INTCON2bits.GIE = 1;
 #endif
+
 }
 
 
@@ -571,23 +606,27 @@ void Get_Str_From_Time (RTC_TIME time, unsigned char *str_raw, unsigned char *st
     BCD_to_ASCII (time.cSec, (char *)&str_raw[10]);
     str_raw[12] = 0;
     
-    str_date[0] = str_raw [4];
-    str_date[1] = str_raw [5];
-    str_date[2] = '/';
-    str_date[3] = str_raw [2];
-    str_date[4] = str_raw [3];
-    str_date[5] = '/';
-    str_date[6] = str_raw [0];
-    str_date[7] = str_raw [1];
-    str_date[8] = 0;
+    if (str_date != NULL) {
+        str_date[0] = str_raw [4];
+        str_date[1] = str_raw [5];
+        str_date[2] = '/';
+        str_date[3] = str_raw [2];
+        str_date[4] = str_raw [3];
+        str_date[5] = '/';
+        str_date[6] = str_raw [0];
+        str_date[7] = str_raw [1];
+        str_date[8] = 0;
+    }
     
-    str_time[0] = str_raw [6];
-    str_time[1] = str_raw [7];
-    str_time[2] = ':';
-    str_time[3] = str_raw [8];
-    str_time[4] = str_raw [9];
-    str_time[5] = ':';
-    str_time[6] = str_raw [10];
-    str_time[7] = str_raw [11];
-    str_time[8] = 0;
+    if (str_time != NULL) {
+        str_time[0] = str_raw [6];
+        str_time[1] = str_raw [7];
+        str_time[2] = ':';
+        str_time[3] = str_raw [8];
+        str_time[4] = str_raw [9];
+        str_time[5] = ':';
+        str_time[6] = str_raw [10];
+        str_time[7] = str_raw [11];
+        str_time[8] = 0;
+    }
 }

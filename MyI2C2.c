@@ -40,6 +40,7 @@ void Init_I2C()
 
 void I2CWriteReg(unsigned char reg, unsigned char data, unsigned char addr) {
     disableInt();
+    int counter = 0;
     MyStartI2C2();
 
     MasterWriteI2C2(addr);
@@ -47,6 +48,7 @@ void I2CWriteReg(unsigned char reg, unsigned char data, unsigned char addr) {
     
     do
     {
+        counter++;
         if (I2C2STATbits.ACKSTAT)
         {
             MyRestartI2C2();
@@ -68,44 +70,10 @@ void I2CWriteReg(unsigned char reg, unsigned char data, unsigned char addr) {
         MasterWriteI2C2(data);
         MyIdleI2C2();
         
-    } while(I2C2STATbits.ACKSTAT);
+    } while(I2C2STATbits.ACKSTAT && counter <= 10);
     
     MyStopI2C2();
     enableInt();
-}
-
-void I2CScanner() {
-    unsigned char i = 0x00, addr;
-    int counter;
-    for (i = 0; i < 128; i++) {
-        counter = 0;
-        addr = i << 1;
-        MyStartI2C2();
-        MasterWriteI2C2(addr);
-        MyIdleI2C2();
-        do {
-            counter++;
-            if (I2C2STATbits.ACKSTAT)
-            {
-                MyRestartI2C2();
-                MasterWriteI2C2(addr);
-                MyIdleI2C2();
-                if (I2C2STATbits.ACKSTAT)
-                {
-                    continue;
-                }
-            }
-        } while (I2C2STATbits.ACKSTAT && counter <= 10);
-        
-        if (counter <= 10) {
-            Nop();
-            Nop();
-            Nop();
-            Nop();
-        }
-        
-        MyStopI2C2();
-    }
 }
 
 unsigned char I2CReadReg(unsigned char reg, unsigned char addr) {
@@ -136,8 +104,10 @@ unsigned char I2CReadReg(unsigned char reg, unsigned char addr) {
     }
     while (I2C2STATbits.ACKSTAT && counter <= 10);
 
-    if (counter > 10)
-        return -2;
+    if (counter > 10) {
+        enableInt();
+        return -1;
+    }
     
     MyRestartI2C2();
     MasterWriteI2C2(addr | 1);
@@ -155,6 +125,7 @@ I2CWriteRegN(unsigned char addr, unsigned char reg, unsigned char *Data, unsigne
 {
     unsigned char *ptr;
     unsigned char len;
+    int counter  = 0;
     disableInt();
     MyStartI2C2();
     MasterWriteI2C2(addr);
@@ -162,6 +133,7 @@ I2CWriteRegN(unsigned char addr, unsigned char reg, unsigned char *Data, unsigne
     
     do
     {
+        counter++;
         ptr = Data;
         len = N;
         if (I2C2STATbits.ACKSTAT)
@@ -186,17 +158,23 @@ I2CWriteRegN(unsigned char addr, unsigned char reg, unsigned char *Data, unsigne
             }
         }
     }
-    while (I2C2STATbits.ACKSTAT);
+    while (I2C2STATbits.ACKSTAT && counter <= 10);
+    
+    if (counter > 10) {
+        enableInt();
+        return -1;
+    }
 
     MyStopI2C2();
     MyIdleI2C2();
     enableInt();
-    return 1;
+    return 0;
 }
 
 unsigned char I2CReadRegN(unsigned char addr, unsigned char reg, unsigned char *Data, unsigned char N)
 {
     unsigned char *ptr;
+    int counter = 0;
     
     ptr = Data;
     disableInt();
@@ -206,6 +184,7 @@ unsigned char I2CReadRegN(unsigned char addr, unsigned char reg, unsigned char *
     
     do
     {
+        counter++;
         if (I2C2STATbits.ACKSTAT)
         {
             MyRestartI2C2();
@@ -227,12 +206,17 @@ unsigned char I2CReadRegN(unsigned char addr, unsigned char reg, unsigned char *
         MasterWriteI2C2(addr | 1);//repeat the device address with R/W = 1 (read operation)
         MyIdleI2C2();
     }
-    while (I2C2STATbits.ACKSTAT);
+    while (I2C2STATbits.ACKSTAT && counter <= 10);
+    
+    if (counter > 10) {
+        enableInt();
+        return -1;
+    }
     
     MastergetsI2C2(N, ptr, 50000);
     MyStopI2C2(); //Send the Stop condition
     enableInt();
-    return 1;
+    return 0;
 }
 
 

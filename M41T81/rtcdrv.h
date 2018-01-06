@@ -15,6 +15,10 @@
 /*                                                                            */
 /******************************************************************************/
 
+#ifndef __RTCDRV_H__
+#define __RTCDRV_H__
+
+
 #define M41T11_ADDR     '\xD0'
 #define SEG_TIME        '\x01'
 
@@ -57,7 +61,7 @@ void Set_ora_legale_auto_adjust (unsigned char ora_legale_flag);
 
 
 
-
+int rtccmp(RTC_TIME t1, RTC_TIME t2);
 
 // void Display_temperatura (void);
 
@@ -69,3 +73,5 @@ void Get_Str_Curr_Time (void);
 void Get_Str_Prog_Time (void);
 void Get_Str_From_Time (RTC_TIME time, unsigned char *str_raw, unsigned char *str_time, unsigned char *str_date);
 void Get_Str_Prog_From_Time (RTC_TIME time, unsigned char *str_prog);
+
+#endif

@@ -16,20 +16,23 @@
 /******************************************************************************/
 
 #include "HardwareProfile.h"
+#include "system.h"
 
-#define CLK_I2C_B       CLK_I2C
-#define DATA_I2C_B      D_I2C
-#define WP_I2C_B        WP_I2C
+#define CLK_I2C_B       I2C_CLK
+#define DATA_I2C_B      I2C_DATA_OUT
+#define WP_I2C_B        WRITE_PROTECT
 
-#define DD_CLK_I2C_B    CLK_I2C_TRIS
-#define DD_DATA_I2C_B   D_I2C_TRIS
-#define DD_WP_I2C_B     D_WP_I2C_TRIS
-#define DATA_I2C_I      DATA_I2C_INPUT
+#define DD_CLK_I2C_B    I2C_CLK_TRIS
+#define DD_DATA_I2C_B   I2C_DATA_TRIS
+#define DD_WP_I2C_B     WRITE_PROTECT_TRIS
+#define DATA_I2C_I      I2C_DATA_IN
 
 #define EEPROM_0_ADDR     '\xD0'
 #define EEPROM_1_ADDR     '\xD0'
 #define EEPROM_2_ADDR     '\xD0'
 
+#define WRITE_CB(x)     x & 0xFE
+#define READ_CB(x)      x | 0x01
 
 
 #define HIGH                1
