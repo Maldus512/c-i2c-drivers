@@ -220,6 +220,18 @@ unsigned char I2CReadRegN(unsigned char addr, unsigned char reg, unsigned char *
 }
 
 
+int check_if_present(unsigned char control) {
+    char ack;
+    disableInt();
+    MyIdleI2C2(); //wait for bus Idle
+    MyStartI2C2(); //Generate Start condition
+
+    MasterWriteI2C2(control);
+    ack = I2C2STATbits.ACKSTAT;
+    MyStopI2C2();
+    enableInt();
+    return ack == 0;
+}
 
 
 
@@ -239,6 +251,8 @@ unsigned int EEAckPolling(unsigned char control)
     MyIdleI2C2(); //wait for bus Idle
     MyStartI2C2(); //Generate Start condition
     
+    unsigned long counter  = 0;
+     
     if (I2C1STATbits.BCL)
     {
         return (-1); //Bus collision, return
@@ -277,6 +291,10 @@ unsigned int EEAckPolling(unsigned char control)
             }
             
             MyIdleI2C2();
+            
+            if (counter++ > 100000UL) {
+                return -1;
+            }
         }
     }
     MyStopI2C2(); //send stop condition
@@ -287,3 +305,6 @@ unsigned int EEAckPolling(unsigned char control)
     }
     return (0);
 }
+
+
+

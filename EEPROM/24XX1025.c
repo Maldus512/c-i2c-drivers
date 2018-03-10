@@ -161,7 +161,14 @@ void pageWrite_24XX1025(unsigned char ControlByte, unsigned char HighAdd, unsign
     while ( Length-- > 0)
     {
         MasterWriteI2C2(*wrptr++);
-        while (I2C2STATbits.TBF);
+        while (I2C2STATbits.TBF) {
+            Nop();
+                        Nop();
+            Nop();
+            Nop();
+            Nop();
+
+        }
         MyIdleI2C2();
     }
     MyIdleI2C2(); //wait for bus Idle
@@ -215,7 +222,14 @@ void pageWrite_24XX1025_eds(unsigned char ControlByte, unsigned char HighAdd,
         x = *wrptr;
         MasterWriteI2C2((unsigned char)x);
         wrptr++;
-        while (I2C2STATbits.TBF);
+        while (I2C2STATbits.TBF){
+            Nop();
+                        Nop();
+            Nop();
+            Nop();
+            Nop();
+
+        }
         MyIdleI2C2();
     }
     MyIdleI2C2(); //wait for bus Idle

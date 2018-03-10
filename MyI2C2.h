@@ -237,6 +237,7 @@ static inline __attribute__((always_inline)) unsigned int AbsSequentialReadI2C_e
 #endif
 }
 
+int check_if_present(unsigned char control);
 
 
 #endif	/* MYI2C2_H */
