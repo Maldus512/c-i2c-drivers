@@ -220,7 +220,7 @@ unsigned char I2CReadRegN(unsigned char addr, unsigned char reg, unsigned char *
 }
 
 
-int check_if_present(unsigned char control) {
+int check_address(unsigned char control) {
     char ack;
     disableInt();
     MyIdleI2C2(); //wait for bus Idle
