@@ -11,7 +11,7 @@
 /*                                                                            */
 /*  Data  : 20/01/2003      REV  : 00.0                                       */
 /*                                                                            */
-/*  U.mod.: 03/06/2017      REV  : 01.0                                       */
+/*  U.mod.: 12/04/2018      REV  : 01.3                                       */
 /*                                                                            */
 /******************************************************************************/
 
@@ -38,7 +38,10 @@ typedef struct _RTC_TIME
     unsigned char cCtrl;
 }RTC_TIME;
 
-extern RTC_TIME CurrTime;
+extern RTC_TIME CurrTime; /* orologio di sitema */
+extern RTC_TIME ProgTime; /* orologio di sitema programmato */
+
+
 
 int Init_RTC (void);
 void InitRTCport (void);
