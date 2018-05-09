@@ -76,6 +76,34 @@ void I2CWriteReg(unsigned char reg, unsigned char data, unsigned char addr) {
     enableInt();
 }
 
+
+int findAddress() {
+    int found_counter = 0;
+    int i = 0;
+    unsigned char addr = 0;
+    disableInt();
+    
+    for (i = 0; i <= 0xFF; i += 2) {
+        MyStartI2C2();
+        
+        addr = (unsigned char) i;
+
+        MasterWriteI2C2(addr);
+        MyIdleI2C2();
+
+        if (!I2C2STATbits.ACKSTAT) {
+            found_counter++;
+            Nop();
+            Nop();
+            Nop();
+        }
+        MyStopI2C2();
+    }
+    
+    enableInt();
+    return found_counter;
+}
+
 unsigned char I2CReadReg(unsigned char reg, unsigned char addr) {
     unsigned char valore;
     int counter = 0;

@@ -29,7 +29,7 @@
 
 char temperature = 0;
 
-unsigned char readableTemp[MAX_TEMP_LEN];
+char readableTemp[MAX_TEMP_LEN];
 
 // </editor-fold>
 

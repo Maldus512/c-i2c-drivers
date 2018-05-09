@@ -22,9 +22,13 @@
 extern "C" {
 #endif
 
+#define MAX_TEMP_LEN        5
+    
 char readTemperature();
 
 extern char temperature;
+
+extern char readableTemp[MAX_TEMP_LEN];
 
 
 

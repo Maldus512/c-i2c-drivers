@@ -75,6 +75,7 @@ unsigned char I2CWriteRegN(unsigned char addr,unsigned char reg, unsigned char *
 unsigned char I2CReadRegN(unsigned char addr,unsigned char reg, unsigned char *Data, unsigned char N );
 
 unsigned int EEAckPolling(unsigned char control);
+int findAddress();
 
 
 /*********************************************************************
