@@ -87,6 +87,38 @@ unsigned int EEAckPolling_b(unsigned char control)
 
 
 
+int findAddress_b() {
+    int found_counter = 0;
+    unsigned int i = 0;
+    unsigned char i2caddr = 0;
+//    disableInt();
+    Nop();
+    Nop();
+    Nop();
+    
+    for (i = 0; i <= 0xFC; i += 2) {
+        startCondition();
+        
+        i2caddr = (unsigned char) i;
+
+        I2CByteWrite(i);
+
+        if (readAck() == 0) {
+            found_counter++;
+            Nop();
+            Nop();
+            Nop();
+        }
+        stopCondition();
+    }
+    
+//    enableInt();
+    return found_counter;
+}
+
+
+
+
 /*----------------------------------------------------------------------------*/
 /*  I2C_Write_b                                                               */
 /*----------------------------------------------------------------------------*/

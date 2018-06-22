@@ -20,53 +20,6 @@
 void write_protect_disable();
 void write_protect_enable();
 
-static inline __attribute__((always_inline)) void disableInt() {
-#ifndef FREE_INT
-        IEC0bits.T1IE = 0;
-        IEC0bits.T2IE = 0;
-#endif
-}
-
-static inline __attribute__((always_inline)) void enableInt() {
-#ifndef FREE_INT
-        IEC0bits.T1IE = 1;
-        IEC0bits.T2IE = 1;
-#endif
-}
-
-
-static inline __attribute__((always_inline)) void MyStartI2C2()
-{
-    I2C2CONbits.SEN = 1; //StartI2C2();
-    while (I2C2CONbits.SEN);
-    delay_us(2);
-}
-
-static inline __attribute__((always_inline)) void MyStopI2C2()
-{
-    I2C2CONbits.PEN = 1; //StopI2C2();
-    while (I2C2CONbits.PEN);
-}
-
-static inline __attribute__((always_inline)) void MyRestartI2C2()
-{
-    I2C2CONbits.RSEN = 1; //RestartI2C2();
-    while (I2C2CONbits.RSEN);
-    //delay_us(2);
-}
-
-static inline __attribute__((always_inline)) void MyIdleI2C2()
-{
-    while (I2C2CONbits.SEN || I2C2CONbits.RSEN || I2C2CONbits.PEN || I2C2CONbits.RCEN || I2C2CONbits.ACKEN || I2C2STATbits.TRSTAT);
-}
-
-static inline __attribute__((always_inline)) void MyAckI2C2()
-{
-    I2C2CONbits.ACKDT = 0; //Set for ACk
-    I2C2CONbits.ACKEN = 1;
-    while (I2C2CONbits.ACKEN); //wait for ACK to complete
-}
-
 void Init_I2C();
 
 void I2CWriteReg(unsigned char reg, unsigned char data, unsigned char addr);

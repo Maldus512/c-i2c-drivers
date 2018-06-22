@@ -104,25 +104,15 @@ static inline __attribute__((always_inline)) unsigned char readAck() {
 void Init_I2C (void);
 void Init_I2C_b (void);
 
-//int I2C_Write (unsigned char, unsigned char, const unsigned char*, int);
 int I2C_Write_b(unsigned char, unsigned char, const unsigned char*, int);
-//int I2C_Write_512 (unsigned char cDevAddr, unsigned char cRegAddr_h, unsigned char cRegAddr_l, const unsigned char* pData, unsigned int nLen);
 int I2C_Write_1024_b (unsigned char cDevAddr, unsigned char cRegAddr_h, unsigned char cRegAddr_l, const unsigned char* pData, unsigned int nLen);
-//int I2C_Write_512_b2 (unsigned char cDevAddr, unsigned char cRegAddr_h, unsigned char cRegAddr_l, const unsigned char* pData, unsigned int nLen);
-void I2C_Write_1024_b2(unsigned char cDevAddr, unsigned char cRegAddr_h, unsigned char cRegAddr_l, const unsigned char* pData, unsigned int nLen);
 
-//int I2C_Read (unsigned char, unsigned char, unsigned char*, int);
 int I2C_Read_b (unsigned char, unsigned char, unsigned char*, int);
-//int I2C_Read_512 (unsigned char cDevAddr, unsigned char cRegAddr_h, unsigned char cRegAddr_l, unsigned char* buffer, unsigned int nLen);
 int I2C_Read_1024_b (unsigned char cDevAddr, unsigned char cRegAddr_h, unsigned char cRegAddr_l, unsigned char* buffer, unsigned int nLen);
-//int I2C_Read_512_b2 (unsigned char cDevAddr, unsigned char cRegAddr_h, unsigned char cRegAddr_l, unsigned char* buffer, unsigned int nLen);
-void I2C_Read_1024_b2(unsigned char cDevAddr, unsigned char cRegAddr_h, unsigned char cRegAddr_l, unsigned char* buffer, unsigned int nLen);
 
-//void CK_I2C (unsigned char ck);
+int I2C_CurrentRead_b (unsigned char cDevAddr, unsigned char* buffer, int nLen);
+
 void CK_I2C (unsigned char ck);
 
-//void Set_I2C_Add (unsigned char add, unsigned char slave_add);
-void Set_I2C_Add_b (unsigned char add, unsigned char slave_add);
-//void Set_I2C_Add_512 (unsigned char add_h, unsigned char add_l, unsigned char slave_add);
-void Set_I2C_Add_512_b (unsigned char add_h, unsigned char add_l, unsigned char slave_add);
 
+int findAddress_b();
