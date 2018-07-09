@@ -20,7 +20,7 @@
 void write_protect_disable();
 void write_protect_enable();
 
-void Init_I2C();
+void Init_I2C(unsigned int brg);
 
 void I2CWriteReg(unsigned char reg, unsigned char data, unsigned char addr);
 unsigned char I2CReadReg(unsigned char reg, unsigned char addr);

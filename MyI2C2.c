@@ -20,7 +20,7 @@ void write_protect_disable() {
 
 
 
-void Init_I2C()
+void Init_I2C(unsigned int brg)
 {
     I2C2STAT = 0x0000;
     I2C2RCV = 0x0000;
@@ -32,7 +32,7 @@ void Init_I2C()
             I2C2_IPMI_DIS & I2C2_7BIT_ADD & I2C2_SLW_EN &
             I2C2_SM_DIS & I2C2_GCALL_DIS & I2C2_STR_DIS &
             I2C2_NACK & I2C2_ACK_DIS & I2C2_RCV_DIS &
-            I2C2_STOP_DIS & I2C2_RESTART_DIS & I2C2_START_DIS, (unsigned int) I2C_BRG);
+            I2C2_STOP_DIS & I2C2_RESTART_DIS & I2C2_START_DIS, brg);
     
     IdleI2C2();
 #ifdef D_WP_I2C_TRIS
