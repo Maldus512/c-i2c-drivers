@@ -1,40 +1,52 @@
-
 /******************************************************************************/
 /*                                                                            */
 /*  HSW snc - Casalecchio di Reno (BO) ITALY                                  */
 /*  ----------------------------------------                                  */
 /*                                                                            */
-/*  modulo: RtcDrv.c                                                          */
+/*  modulo: I2C_drv.c                                                         */
 /*                                                                            */
-/*      gestione RTC M41T81                                                   */
+/*      gestione I2C                                                          */
 /*                                                                            */
 /*  Autore: Massimo Zanna                                                     */
 /*                                                                            */
-/*  Data  : 20/01/2003      REV  : 00.0                                       */
+/*  Data  : 03/09/2007      REV  : 00.0                                       */
 /*                                                                            */
-/*  U.mod.: 12/04/2018      REV  : 01.3                                       */
+/*  U.mod.: 23/05/2016      REV  : 01.0                                       */
 /*                                                                            */
 /******************************************************************************/
 
-#include <xc.h>
 #include "HardwareProfile.h"
-#include "MCP4018/rheostat.h"
+
 #include <string.h>
+#include <libpic30.h>
+
 #include "i2c_bitbang.h"
+#include "system.h"
+#include "i2c_module2.h"
 
 
-#define     RHEOSTAT_ADDRESS        0x5E
-
-
-
-int setRheostatValue(char val) {
-    if (val > 127) 
-        return -1;
-    
-    return I2C_Write_b(RHEOSTAT_ADDRESS, val, NULL, 0);
+/*----------------------------------------------------------------------------*/
+/*  Init_I2C_b                                                                */
+/*----------------------------------------------------------------------------*/
+void Init_I2C (void)
+{
+#if I2C_MODE == I2C_BITBANG
+    Init_I2C_bitbang();
+#elif I2C_MODE == I2C_MODULE
+    Init_I2C_module();
+#endif
 }
 
 
-int getRheostatValue(char *val) {
-    return I2C_CurrentRead_b(RHEOSTAT_ADDRESS,(unsigned char*) val, 1);
+
+void write_protect_enable() {
+#ifdef WRITE_PROTECT
+    WRITE_PROTECT = 1;
+#endif
+}
+
+void write_protect_disable() {
+#ifdef WRITE_PROTECT
+    WRITE_PROTECT = 0;
+#endif
 }

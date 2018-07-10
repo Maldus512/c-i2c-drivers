@@ -20,7 +20,7 @@
 void write_protect_disable();
 void write_protect_enable();
 
-void Init_I2C(unsigned int brg);
+void Init_I2C_module(unsigned int brg);
 
 void I2CWriteReg(unsigned char reg, unsigned char data, unsigned char addr);
 unsigned char I2CReadReg(unsigned char reg, unsigned char addr);
@@ -46,36 +46,41 @@ static inline __attribute__((always_inline)) void enableInt() {
 }
 
 #if I2C_MODE == I2C_MODULE
-static inline __attribute__((always_inline)) void MyStartI2C2()
+static inline __attribute__((always_inline)) void startCondition_m2()
 {
     I2C2CONbits.SEN = 1; //StartI2C2();
     while (I2C2CONbits.SEN);
     delay_us(2);
 }
 
-static inline __attribute__((always_inline)) void MyStopI2C2()
+static inline __attribute__((always_inline)) void stopCondition_m2()
 {
     I2C2CONbits.PEN = 1; //StopI2C2();
     while (I2C2CONbits.PEN);
 }
 
-static inline __attribute__((always_inline)) void MyRestartI2C2()
+static inline __attribute__((always_inline)) void restartCondition_m2()
 {
     I2C2CONbits.RSEN = 1; //RestartI2C2();
     while (I2C2CONbits.RSEN);
     //delay_us(2);
 }
 
-static inline __attribute__((always_inline)) void MyIdleI2C2()
+static inline __attribute__((always_inline)) void idle_m2()
 {
     while (I2C2CONbits.SEN || I2C2CONbits.RSEN || I2C2CONbits.PEN || I2C2CONbits.RCEN || I2C2CONbits.ACKEN || I2C2STATbits.TRSTAT);
 }
 
-static inline __attribute__((always_inline)) void MyAckI2C2()
+static inline __attribute__((always_inline)) void writeAck_m2()
 {
     I2C2CONbits.ACKDT = 0; //Set for ACk
     I2C2CONbits.ACKEN = 1;
     while (I2C2CONbits.ACKEN); //wait for ACK to complete
+}
+
+
+static inline __attribute__((always_inline)) unsigned char readAck_m2() {
+    return I2C2STATbits.ACKSTAT;
 }
 #endif
 

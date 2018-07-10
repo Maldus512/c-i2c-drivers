@@ -1,26 +1,16 @@
 #include "HardwareProfile.h"
 
-#include "MyI2C2.h"
+#include "i2c_module2.h"
 #include "EEPROM/24XX1025.h"
 #include "EEPROM/24XX16.h"
 
-void write_protect_enable() {
-#ifdef WRITE_PROTECT
-    WRITE_PROTECT = 1;
-#endif
-}
-
-void write_protect_disable() {
-#ifdef WRITE_PROTECT
-    WRITE_PROTECT = 0;
-#endif
-}
 
 
 
 
 
-void Init_I2C(unsigned int brg)
+
+void Init_I2C_module(unsigned int brg)
 {
     I2C2STAT = 0x0000;
     I2C2RCV = 0x0000;

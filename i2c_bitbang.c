@@ -20,7 +20,7 @@
 #include <string.h>
 #include <libpic30.h>
 
-#include "I2C_drv.h"
+#include "i2c_bitbang.h"
 #include "system.h"
 
 #define TRUE    1
@@ -35,7 +35,7 @@
 /*----------------------------------------------------------------------------*/
 /*  Init_I2C_b                                                                */
 /*----------------------------------------------------------------------------*/
-void Init_I2C_b (void)
+void Init_I2C_bitbang (void)
 {
     CLK_I2C_B       = 1;    /* CLK I2C  */
     DATA_I2C_B      = 1;    /* DATI I2C */
@@ -68,19 +68,19 @@ void Init_I2C_b (void)
 unsigned int EEAckPolling_b(unsigned char control)
 {
     unsigned char ack;
-    startCondition();
+    startCondition_bitbang();
 
-    I2CByteWrite(WRITE_CB(control));
-    ack = readAck();
+    masterWrite_bitbang(WRITE_CB(control));
+    ack = readAck_bitbang();
     
     while (ack)
     {
-        stopCondition();
-        startCondition(); //generate restart
-        I2CByteWrite(control);
-        ack = readAck();
+        stopCondition_bitbang();
+        startCondition_bitbang(); //generate restart
+        masterWrite_bitbang(control);
+        ack = readAck_bitbang();
     }
-    stopCondition(); //send stop condition
+    stopCondition_bitbang(); //send stop condition
     
     return (0);
 }
@@ -97,19 +97,19 @@ int findAddress_b() {
     Nop();
     
     for (i = 0; i <= 0xFC; i += 2) {
-        startCondition();
+        startCondition_bitbang();
         
         i2caddr = (unsigned char) i;
 
-        I2CByteWrite(i);
+        masterWrite_bitbang(i);
 
-        if (readAck() == 0) {
+        if (readAck_bitbang() == 0) {
             found_counter++;
             Nop();
             Nop();
             Nop();
         }
-        stopCondition();
+        stopCondition_bitbang();
     }
     
 //    enableInt();
@@ -129,23 +129,23 @@ int I2C_Write_b (unsigned char cDevAddr, unsigned char cRegAddr, const unsigned 
     WP_I2C_B = 0;
 #endif
     counter = 0;
-    startCondition();
-    I2CByteWrite(cDevAddr);
+    startCondition_bitbang();
+    masterWrite_bitbang(cDevAddr);
     
     do
     {
         counter++;
-        if (readAck() != 0)
+        if (readAck_bitbang() != 0)
         {
-            startCondition();
-            I2CByteWrite(cDevAddr);
+            startCondition_bitbang();
+            masterWrite_bitbang(cDevAddr);
             
-            if (readAck() != 0)
+            if (readAck_bitbang() != 0)
                 continue;
         }
-        I2CByteWrite(cRegAddr);
+        masterWrite_bitbang(cRegAddr);
     }
-    while(readAck() != 0 && counter <= 10);
+    while(readAck_bitbang() != 0 && counter <= 10);
     
     if (counter > 10) {
         return -1;
@@ -153,9 +153,9 @@ int I2C_Write_b (unsigned char cDevAddr, unsigned char cRegAddr, const unsigned 
     
     for (y = 0; y < nLen; y++)
     {
-        I2CByteWrite(*pData);
+        masterWrite_bitbang(*pData);
         
-        if (readAck() != 0)
+        if (readAck_bitbang() != 0)
         {
 #ifdef WRITE_PROTECT
             WP_I2C_B = 1;
@@ -165,7 +165,7 @@ int I2C_Write_b (unsigned char cDevAddr, unsigned char cRegAddr, const unsigned 
         pData ++;
     }
     
-    stopCondition();
+    stopCondition_bitbang();
     EEAckPolling_b(cDevAddr);
     
 #ifdef WRITE_PROTECT
@@ -182,33 +182,33 @@ int I2C_Write_b (unsigned char cDevAddr, unsigned char cRegAddr, const unsigned 
 int I2C_Read_b (unsigned char cDevAddr, unsigned char cRegAddr, unsigned char* buffer, int nLen)
 {
     unsigned int counter, y;   
-    startCondition();
+    startCondition_bitbang();
     cDevAddr = WRITE_CB(cDevAddr);
-    I2CByteWrite(cDevAddr);
+    masterWrite_bitbang(cDevAddr);
     
     counter = 0;
     
     do {
         counter++;
-        if (readAck() != 0) {
-            startCondition();
-            I2CByteWrite(cDevAddr);
-            if (readAck() != 0)
+        if (readAck_bitbang() != 0) {
+            startCondition_bitbang();
+            masterWrite_bitbang(cDevAddr);
+            if (readAck_bitbang() != 0)
                 continue;
         }
   
-        I2CByteWrite(cRegAddr);
-    } while(readAck() != 0 && counter <= 10);
+        masterWrite_bitbang(cRegAddr);
+    } while(readAck_bitbang() != 0 && counter <= 10);
     
     if (counter > 10) {
         return -1;
     }
     
-    startCondition();
+    startCondition_bitbang();
     cDevAddr = READ_CB(cDevAddr);
     
-    I2CByteWrite(cDevAddr);
-    if (readAck() != 0)
+    masterWrite_bitbang(cDevAddr);
+    if (readAck_bitbang() != 0)
         return -1;
         
     /*--------------------------------------------------------------*/
@@ -218,13 +218,13 @@ int I2C_Read_b (unsigned char cDevAddr, unsigned char cRegAddr, unsigned char* b
     for(y = 0; y < nLen; y++)
     {
         if (y == nLen - 1)
-            I2CByteRead(buffer, 1); 
+            masterRead_bitbang(buffer, 1); 
         else 
-            I2CByteRead(buffer, 0); 
+            masterRead_bitbang(buffer, 0); 
         buffer++;
     }
     
-    stopCondition();
+    stopCondition_bitbang();
     return (0);
 }
 
@@ -232,19 +232,19 @@ int I2C_Read_b (unsigned char cDevAddr, unsigned char cRegAddr, unsigned char* b
 int I2C_CurrentRead_b (unsigned char cDevAddr, unsigned char* buffer, int nLen)
 {
     unsigned int y;   
-    startCondition();
+    startCondition_bitbang();
     cDevAddr = READ_CB(cDevAddr);
-    I2CByteWrite(cDevAddr);
+    masterWrite_bitbang(cDevAddr);
         
     do {
-        if (readAck() != 0) {
-            startCondition();
-            I2CByteWrite(cDevAddr);
-            if (readAck() != 0)
+        if (readAck_bitbang() != 0) {
+            startCondition_bitbang();
+            masterWrite_bitbang(cDevAddr);
+            if (readAck_bitbang() != 0)
                 continue;
         }
   
-    } while(readAck() != 0);
+    } while(readAck_bitbang() != 0);
     /*--------------------------------------------------------------*/
     /* Legge la ram del dispositivo                                 */
     /*--------------------------------------------------------------*/
@@ -252,12 +252,12 @@ int I2C_CurrentRead_b (unsigned char cDevAddr, unsigned char* buffer, int nLen)
     for(y = 0; y < nLen; y++)
     {
         if (y == nLen - 1)
-            I2CByteRead(buffer, 1); 
+            masterRead_bitbang(buffer, 1); 
         else 
-            I2CByteRead(buffer, 0); 
+            masterRead_bitbang(buffer, 0); 
         buffer++;
     }
     
-    stopCondition();
+    stopCondition_bitbang();
     return (0);
 }

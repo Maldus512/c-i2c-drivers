@@ -46,14 +46,21 @@ static inline __attribute__((always_inline)) void CK_I2C (unsigned char ck)
     delay_us(10);
 }
 
-static inline __attribute__((always_inline)) void startCondition() {
+static inline __attribute__((always_inline)) void startCondition_bitbang() {
     DD_DATA_I2C_B = OUTPUT_PIN;
     DATA_I2C_B = HIGH;
     CLK_I2C_B = HIGH;
     DATA_I2C_B = LOW;
 }
 
-static inline __attribute((always_inline)) void stopCondition() {
+static inline __attribute__((always_inline)) void restartCondition_bitbang() {
+    DD_DATA_I2C_B = OUTPUT_PIN;
+    DATA_I2C_B = HIGH;
+    CLK_I2C_B = HIGH;
+    DATA_I2C_B = LOW;
+}
+
+static inline __attribute__((always_inline)) void stopCondition_bitbang() {
     DD_DATA_I2C_B = OUTPUT_PIN;//1;      /* dati in uscita dal micro             */
     DATA_I2C_B = 0;         /* stop condition                       */
     CK_I2C(1);
@@ -62,7 +69,12 @@ static inline __attribute((always_inline)) void stopCondition() {
     CK_I2C(1);
 }
 
-static inline __attribute__((always_inline)) void I2CByteWrite(unsigned char byte) {
+static inline __attribute__((always_inline)) void idle_bitbang() {
+    Nop();
+}
+
+
+static inline __attribute__((always_inline)) void masterWrite_bitbang(unsigned char byte) {
     int x = 0;
     DD_DATA_I2C_B = OUTPUT_PIN;
     for ( x = 0; x < 8; x++)
@@ -74,7 +86,7 @@ static inline __attribute__((always_inline)) void I2CByteWrite(unsigned char byt
     }
 }
 
-static inline __attribute__((always_inline)) void I2CByteRead(unsigned char* byte, unsigned char ack) {
+static inline __attribute__((always_inline)) void masterRead_bitbang(unsigned char* byte, unsigned char ack) {
     DD_DATA_I2C_B = INPUT_PIN;//0;  /* dati in ingesso                      */
     unsigned char x = 0;
     for (x = 0; x < 8; x++)
@@ -89,7 +101,7 @@ static inline __attribute__((always_inline)) void I2CByteRead(unsigned char* byt
     CK_I2C(0);
 }
 
-static inline __attribute__((always_inline)) unsigned char readAck() {
+static inline __attribute__((always_inline)) char readAck_bitbang() {
     unsigned char x;
     CK_I2C(0);
     DATA_I2C_B = 1;         //Set Nack
@@ -102,7 +114,7 @@ static inline __attribute__((always_inline)) unsigned char readAck() {
 }
 
 void Init_I2C (void);
-void Init_I2C_b (void);
+void Init_I2C_bitbang (void);
 
 int I2C_Write_b(unsigned char, unsigned char, const unsigned char*, int);
 int I2C_Write_1024_b (unsigned char cDevAddr, unsigned char cRegAddr_h, unsigned char cRegAddr_l, const unsigned char* pData, unsigned int nLen);

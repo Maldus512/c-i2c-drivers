@@ -17,12 +17,8 @@
 
 #include "HardwareProfile.h"
 #include "24XX16.h"
+#include "i2c_driver.h"
 
-
-
-#if I2C_MODE == I2C_MODULE && RAM_TYPE == MEM_24XX16
-
-#include "MyI2C2.h"
 
 /*----------------------------------------------------------------------------*/
 /*  byteWrite_24XX16                                                          */
@@ -40,22 +36,22 @@ unsigned char byteWrite_24XX16(unsigned char ControlByte, unsigned char HighAdd,
     
     disableInt();
     write_protect_disable();
-    MyIdleI2C2(); //Ensure Module is Idle  
+    idle(); //Ensure Module is Idle  
     
-    MyIdleI2C2(); //Ensure Module is Idle
-    MyStartI2C2(); //Generate Start COndition
-    MasterWriteI2C2(ControlByte); //Write Control byte
-    MyIdleI2C2();
+    idle(); //Ensure Module is Idle
+    startCondition(); //Generate Start COndition
+    masterWrite(ControlByte); //Write Control byte
+    idle();
     
     do
     {
         counter++;
-        if (I2C2STATbits.ACKSTAT)
+        if (readAck())
         {
-            MyRestartI2C2();
-            MasterWriteI2C2(ControlByte); //Write Control byte
-            MyIdleI2C2();
-            if (I2C2STATbits.ACKSTAT)
+            restartCondition();
+            masterWrite(ControlByte); //Write Control byte
+            idle();
+            if (readAck())
             {
                 continue;
             }
@@ -63,17 +59,17 @@ unsigned char byteWrite_24XX16(unsigned char ControlByte, unsigned char HighAdd,
         //TODO: r u sure this is ok? Should the HighAdd be sent?
         //MasterWriteI2C2(HighAdd);
         //MyIdleI2C2(); //Write High Address
-        MasterWriteI2C2(LowAdd); //Write Low Address
-        MyIdleI2C2();
+        masterWrite_bitbang(LowAdd); //Write Low Address
+        idle();
         
-        if (I2C2STATbits.ACKSTAT)
+        if (readAck())
         {
             continue;
         }
-        MasterWriteI2C2(data); //Write Data
-        MyIdleI2C2();
+        masterWrite_bitbang(data); //Write Data
+        idle();
     }
-    while (I2C2STATbits.ACKSTAT && counter <= 10);
+    while (readAck() && counter <= 10);
     //ErrorCode = !I2C2STATbits.ACKSTAT;		//Return ACK Status
     
     if (counter > 10) {
@@ -81,7 +77,7 @@ unsigned char byteWrite_24XX16(unsigned char ControlByte, unsigned char HighAdd,
         return -1;
     }
 
-    MyStopI2C2(); //Initiate Stop Condition
+    stopCondition(); //Initiate Stop Condition
     EEAckPolling(ControlByte); //perform Ack Polling
     
     enableInt();
@@ -89,6 +85,13 @@ unsigned char byteWrite_24XX16(unsigned char ControlByte, unsigned char HighAdd,
     
     return (0);
 }
+
+
+#if I2C_MODE == I2C_MODULE && RAM_TYPE == MEM_24XX16
+
+#include "MyI2C2.h"
+
+
 
 
 
@@ -106,26 +109,26 @@ unsigned char byteRead_24XX16(unsigned char ControlByte, unsigned char HighAdd, 
     ControlByte |= HighAdd << 1;
     
     disableInt();
-    MyIdleI2C2(); //Wait for bus Idle
-    MyStartI2C2(); //Generate Start condition
+    idle_m2(); //Wait for bus Idle
+    startCondition_m2(); //Generate Start condition
     MasterWriteI2C2(ControlByte); //send control byte for write
-    MyIdleI2C2(); //Wait for bus Idle
+    idle_m2(); //Wait for bus Idle
     
     do
     {
         counter++;
         if (I2C2STATbits.ACKSTAT)
         {
-            MyRestartI2C2();
+            restartCondition_m2();
             MasterWriteI2C2(ControlByte);
-            MyIdleI2C2();
+            idle_m2();
             if (I2C2STATbits.ACKSTAT)
             {
                 continue;
             }
         }
         MasterWriteI2C2(LowAdd); //Send Low Address
-        MyIdleI2C2(); //Wait for bus Idle
+        idle_m2(); //Wait for bus Idle
         if (I2C2STATbits.ACKSTAT)
         {
             continue;
@@ -138,14 +141,14 @@ unsigned char byteRead_24XX16(unsigned char ControlByte, unsigned char HighAdd, 
         return -1;
     }
 
-    MyRestartI2C2(); //Generate Restart
+    restartCondition_m2(); //Generate Restart
     MasterWriteI2C2(ControlByte | 0x01); //send control byte for Read
-    MyIdleI2C2(); //Wait for bus Idle
+    idle_m2(); //Wait for bus Idle
 
     *Data = MasterReadI2C2();
 
     NotAckI2C2(); //send Not Ack
-    MyStopI2C2(); //Send Stop Condition
+    stopCondition_m2(); //Send Stop Condition
     enableInt();
     return (0);
 }
@@ -161,18 +164,18 @@ void pageWrite_24XX16(unsigned char ControlByte, unsigned char HighAdd, unsigned
     ControlByte |= HighAdd << 1;
     disableInt();
     write_protect_disable();
-    MyIdleI2C2(); //wait for bus Idle
-    MyStartI2C2(); //Generate Start condition
+    idle_m2(); //wait for bus Idle
+    startCondition_m2(); //Generate Start condition
     MasterWriteI2C2(ControlByte); //send controlbyte for a write
-    MyIdleI2C2(); //wait for bus Idle
+    idle_m2(); //wait for bus Idle
     
     do
     {
         if (I2C2STATbits.ACKSTAT)
         {
-            MyRestartI2C2();
+            restartCondition_m2();
             MasterWriteI2C2(ControlByte); //send controlbyte for a write
-            MyIdleI2C2();
+            idle_m2();
             
             if (I2C2STATbits.ACKSTAT)
             {
@@ -180,7 +183,7 @@ void pageWrite_24XX16(unsigned char ControlByte, unsigned char HighAdd, unsigned
             }
         }
         MasterWriteI2C2(LowAdd); //send Low Address
-        MyIdleI2C2(); //wait for bus Idle
+        idle_m2(); //wait for bus Idle
     }
     while (I2C2STATbits.ACKSTAT);
 
@@ -188,10 +191,10 @@ void pageWrite_24XX16(unsigned char ControlByte, unsigned char HighAdd, unsigned
     {
         MasterWriteI2C2(*wrptr++);
         while (I2C2STATbits.TBF);
-        MyIdleI2C2();
+        idle_m2();
     }
-    MyIdleI2C2(); //wait for bus Idle
-    MyStopI2C2(); //Generate a stop
+    idle_m2(); //wait for bus Idle
+    stopCondition_m2(); //Generate a stop
     EEAckPolling(ControlByte); //perform Ack Polling
     
     enableInt();
@@ -267,18 +270,18 @@ void blockRead_24XX16(unsigned char ControlByte, unsigned char HighAdd, unsigned
     ControlByte &= 0xF1;
     ControlByte |= HighAdd << 1;
     disableInt();
-    MyIdleI2C2(); //Ensure Module is Idle
-    MyStartI2C2(); //Initiate start condition
+    idle_m2(); //Ensure Module is Idle
+    startCondition_m2(); //Initiate start condition
     MasterWriteI2C2(ControlByte); //write 1 byte
-    MyIdleI2C2(); //Ensure module is Idle
+    idle_m2(); //Ensure module is Idle
     
     do
     {
         if (I2C2STATbits.ACKSTAT)
         {
-            MyRestartI2C2();
+            restartCondition_m2();
             MasterWriteI2C2(ControlByte); //write 1 byte
-            MyIdleI2C2();
+            idle_m2();
             
             if (I2C2STATbits.ACKSTAT)
             {
@@ -286,16 +289,16 @@ void blockRead_24XX16(unsigned char ControlByte, unsigned char HighAdd, unsigned
             }
         }
         MasterWriteI2C2(LowAdd); //Write Low word address
-        MyIdleI2C2(); //Ensure module is idle
+        idle_m2(); //Ensure module is idle
     }
     while (I2C2STATbits.ACKSTAT);
     
-    MyRestartI2C2(); //Generate I2C Restart Condition
+    restartCondition_m2(); //Generate I2C Restart Condition
     MasterWriteI2C2(ControlByte | 0x01); //Write 1 byte - R/W bit should be 1 for read
-    MyIdleI2C2(); //Ensure bus is idle
+    idle_m2(); //Ensure bus is idle
     MastergetsI2C2(length, rdptr, 50000);
     NotAckI2C2(); //Send Not Ack
-    MyStopI2C2(); //Send stop condition
+    stopCondition_m2(); //Send stop condition
     
     enableInt();
 }
@@ -358,26 +361,26 @@ unsigned char sequentialRead_24XX16(unsigned char ControlByte, unsigned char Hig
 
 #elif I2C_MODE == I2C_BITBANG && RAM_TYPE == MEM_24XX16
 
-#include "i2c_drv.h"
+
 
 /*----------------------------------------------------------------------------*/
 /*  byteWrite_24XX16                                                          */
 /*----------------------------------------------------------------------------*/
-unsigned char byteWrite_24XX16(unsigned char ControlByte, unsigned char HighAdd, unsigned char LowAdd, unsigned char data)
-{
-    unsigned char ret;
-    ControlByte &= 0xF1;
-    ControlByte |= HighAdd << 1;
-    
-    if (HighAdd > HIGH_ADD_LIMIT)
-    {
-        return 1;
-    }
-    
-    ret = I2C_Write_b(ControlByte, LowAdd, &data, 1);
-    
-    return ret;
-}
+//unsigned char byteWrite_24XX16(unsigned char ControlByte, unsigned char HighAdd, unsigned char LowAdd, unsigned char data)
+//{
+//    unsigned char ret;
+//    ControlByte &= 0xF1;
+//    ControlByte |= HighAdd << 1;
+//    
+//    if (HighAdd > HIGH_ADD_LIMIT)
+//    {
+//        return 1;
+//    }
+//    
+//    ret = I2C_Write_b(ControlByte, LowAdd, &data, 1);
+//    
+//    return ret;
+//}
 
 
 
