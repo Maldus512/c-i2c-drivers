@@ -19,9 +19,8 @@
 #include <xc.h>
 #include "HardwareProfile.h"
 #include "MCP4018/rheostat.h"
-
+#include <string.h>
 #include "i2c_drv.h"
-#include "SGTYPES.h"
 
 
 #define     RHEOSTAT_ADDRESS        0x5E

@@ -45,7 +45,7 @@ static inline __attribute__((always_inline)) void enableInt() {
 #endif
 }
 
-
+#if I2C_MODE == I2C_MODULE
 static inline __attribute__((always_inline)) void MyStartI2C2()
 {
     I2C2CONbits.SEN = 1; //StartI2C2();
@@ -77,7 +77,7 @@ static inline __attribute__((always_inline)) void MyAckI2C2()
     I2C2CONbits.ACKEN = 1;
     while (I2C2CONbits.ACKEN); //wait for ACK to complete
 }
-
+#endif
 
 
 /*********************************************************************
