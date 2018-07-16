@@ -31,8 +31,7 @@
 #define EEPROM_1_ADDR     '\xD0'
 #define EEPROM_2_ADDR     '\xD0'
 
-#define WRITE_CB(x)     x & 0xFE
-#define READ_CB(x)      x | 0x01
+
 
 
 #define HIGH                1
@@ -86,15 +85,22 @@ static inline __attribute__((always_inline)) void masterWrite_bitbang(unsigned c
     }
 }
 
-static inline __attribute__((always_inline)) void masterRead_bitbang(unsigned char* byte, unsigned char ack) {
+
+static inline __attribute__((always_inline)) char masterRead_bitbang() {
     DD_DATA_I2C_B = INPUT_PIN;//0;  /* dati in ingesso                      */
-    unsigned char x = 0;
-    for (x = 0; x < 8; x++)
+    int i = 0;
+    unsigned char byte = 0;
+    for (i = 0; i < 8; i++)
     {
         CK_I2C(1);
-        *byte = (*byte << 1) | DATA_I2C_I;//DATA_I2C_B; /* dato in input */
+        byte = (byte << 1) | DATA_I2C_I;//DATA_I2C_B; /* dato in input */
         CK_I2C(0);
     }
+    
+    return byte;
+}
+
+static inline __attribute__((always_inline)) void writeAck_bitbang(char ack) {
     DD_DATA_I2C_B = OUTPUT_PIN;//1;  /* dati in uscita dal micro             */
     DATA_I2C_B = ack;     /* invia ack                            */
     CK_I2C(1);
@@ -113,14 +119,11 @@ static inline __attribute__((always_inline)) char readAck_bitbang() {
     return x;
 }
 
-void Init_I2C (void);
 void Init_I2C_bitbang (void);
 
 int I2C_Write_b(unsigned char, unsigned char, const unsigned char*, int);
-int I2C_Write_1024_b (unsigned char cDevAddr, unsigned char cRegAddr_h, unsigned char cRegAddr_l, const unsigned char* pData, unsigned int nLen);
 
 int I2C_Read_b (unsigned char, unsigned char, unsigned char*, int);
-int I2C_Read_1024_b (unsigned char cDevAddr, unsigned char cRegAddr_h, unsigned char cRegAddr_l, unsigned char* buffer, unsigned int nLen);
 
 int I2C_CurrentRead_b (unsigned char cDevAddr, unsigned char* buffer, int nLen);
 

@@ -20,7 +20,7 @@
 #include <string.h>
 #include <libpic30.h>
 
-#include "i2c_bitbang.h"
+#include "i2c_driver.h"
 #include "system.h"
 
 #define TRUE    1
