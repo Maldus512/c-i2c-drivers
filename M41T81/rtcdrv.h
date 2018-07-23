@@ -22,7 +22,8 @@
 #define M41T11_ADDR     '\xD0'
 #define SEG_TIME        '\x01'
 
-
+#define BCD2BIN(x) ((((x) >> 4) & 0xF) * 10 + ((x) & 0xF))
+#define BIN2BCD(x) ((((x) / 10) << 4) | ((x) % 10))
 
 
 
