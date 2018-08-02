@@ -19,18 +19,28 @@
 #define __24XX1025_H__
 
 
-unsigned int byteWrite_24XX1025(unsigned char ControlByte, 
-        unsigned char HighAdd, unsigned char LowAdd, unsigned char data);
-unsigned int byteRead_24XX1025(unsigned char ControlByte, 
-        unsigned char HighAdd, unsigned char LowAdd, unsigned char *Data);
-void pageWrite_24XX1025(unsigned char ControlByte, unsigned char HighAdd, 
+/* Queste due funzioni devono essere fornite dall'applicazione 
+    Ne esistono delle versioni di default nella libreria */
+int pageWrite_24XX1025(unsigned char ControlByte, unsigned char HighAdd, 
         unsigned char LowAdd, unsigned char *wrptr, int Length);
+
+int pageWrite_24XX1025_eds(unsigned char ControlByte, unsigned char HighAdd, 
+        unsigned char LowAdd,__eds__ unsigned char *wrptr, int Length);
+
+int blockRead_24XX1025(unsigned char ControlByte, unsigned char HighAdd,
+        unsigned char LowAdd, unsigned char *rdptr, unsigned int length);
+
+//
+//unsigned int byteWrite_24XX1025(unsigned char ControlByte, 
+//        unsigned char HighAdd, unsigned char LowAdd, unsigned char data);
+//unsigned int byteRead_24XX1025(unsigned char ControlByte, 
+//        unsigned char HighAdd, unsigned char LowAdd, unsigned char *Data);
+
 unsigned int sequentialWrite_24XX1025(unsigned char ControlByte, 
         unsigned char HighAdd, unsigned char LowAdd, unsigned char *wrptr, unsigned int Length);
 unsigned int sequentialWrite_24XX1025_eds(unsigned char ControlByte, 
         unsigned char HighAdd, unsigned char LowAdd,__eds__ unsigned char *wrptr, unsigned int Length);
-void blockRead_24XX1025(unsigned char ControlByte, unsigned char HighAdd,
-        unsigned char LowAdd, unsigned char *rdptr, unsigned int length);
+
 unsigned int sequentialRead_24XX1025(unsigned char ControlByte, 
         unsigned char HighAdd, unsigned char LowAdd, unsigned char *rdptr, unsigned int length);
 unsigned int sequentialRead_24XX1025_eds(unsigned char ControlByte, 
