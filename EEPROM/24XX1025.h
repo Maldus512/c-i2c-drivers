@@ -30,11 +30,22 @@ int pageWrite_24XX1025_eds(unsigned char ControlByte, unsigned char HighAdd,
 int blockRead_24XX1025(unsigned char ControlByte, unsigned char HighAdd,
         unsigned char LowAdd, unsigned char *rdptr, unsigned int length);
 
-//
-//unsigned int byteWrite_24XX1025(unsigned char ControlByte, 
-//        unsigned char HighAdd, unsigned char LowAdd, unsigned char data);
-//unsigned int byteRead_24XX1025(unsigned char ControlByte, 
-//        unsigned char HighAdd, unsigned char LowAdd, unsigned char *Data);
+unsigned int AbsSequentialReadI2C(unsigned char ControlByte, unsigned int add, 
+         unsigned char *rdptr, unsigned int Length);
+unsigned int AbsSequentialWriteI2C(unsigned char ControlByte, unsigned int add, 
+         unsigned char *wrptr, unsigned int Length);
+
+unsigned int AbsSequentialWriteI2C_eds(unsigned char ControlByte, unsigned int add, 
+        __eds__ unsigned char *wrptr, unsigned int Length);
+
+unsigned int AbsSequentialReadI2C_eds(unsigned char ControlByte, unsigned int add, 
+        __eds__ unsigned char *rdptr, unsigned int Length);
+
+
+unsigned int byteWrite_24XX1025(unsigned char ControlByte, 
+        unsigned char HighAdd, unsigned char LowAdd, unsigned char data);
+unsigned int byteRead_24XX1025(unsigned char ControlByte, 
+        unsigned char HighAdd, unsigned char LowAdd, unsigned char *Data);
 
 unsigned int sequentialWrite_24XX1025(unsigned char ControlByte, 
         unsigned char HighAdd, unsigned char LowAdd, unsigned char *wrptr, unsigned int Length);

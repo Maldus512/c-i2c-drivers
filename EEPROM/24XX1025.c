@@ -21,6 +21,42 @@
 #include "utility.h"
 
 
+unsigned int AbsSequentialWriteI2C(unsigned char ControlByte, unsigned int add, 
+         unsigned char *wrptr, unsigned int Length)
+{
+    return sequentialWrite_24XX1025(ControlByte, (unsigned char) add>>8, (unsigned char) (add&0xFF), wrptr, Length);
+}
+
+unsigned int AbsSequentialReadI2C(unsigned char ControlByte, unsigned int add, 
+         unsigned char *rdptr, unsigned int Length)
+{
+    return sequentialRead_24XX1025(ControlByte, (unsigned char) add>>8, (unsigned char) (add&0xFF), rdptr, Length);
+}
+
+unsigned int AbsSequentialWriteI2C_eds(unsigned char ControlByte, unsigned int add, 
+        __eds__ unsigned char *wrptr, unsigned int Length)
+{
+    return sequentialWrite_24XX1025_eds(ControlByte, (unsigned char) add>>8, (unsigned char) (add&0xFF), wrptr, Length);
+}
+
+unsigned int AbsSequentialReadI2C_eds(unsigned char ControlByte, unsigned int add, 
+        __eds__ unsigned char *rdptr, unsigned int Length)
+{
+    return sequentialRead_24XX1025_eds(ControlByte, (unsigned char) add>>8, (unsigned char) (add&0xFF), rdptr, Length);
+}
+
+unsigned int byteWrite_24XX1025(unsigned char ControlByte, unsigned char HighAdd, 
+        unsigned char LowAdd, unsigned char byte)
+{
+    return sequentialWrite_24XX1025(ControlByte, HighAdd, LowAdd, &byte, 1);
+}
+
+
+unsigned int byteRead_24XX1025(unsigned char ControlByte, unsigned char HighAdd, 
+        unsigned char LowAdd, unsigned char *byte)
+{
+    return sequentialRead_24XX1025(ControlByte, HighAdd, LowAdd, byte, 1);
+}
 
 
 unsigned int sequentialWrite_24XX1025(unsigned char ControlByte, unsigned char HighAdd, 
@@ -77,9 +113,11 @@ unsigned int sequentialWrite_24XX1025(unsigned char ControlByte, unsigned char H
 unsigned int sequentialWrite_24XX1025_eds(unsigned char ControlByte, unsigned char HighAdd, 
         unsigned char LowAdd,__eds__ unsigned char *wrptr, unsigned int Length)
 {
+    unsigned int read = 0;
     unsigned char page_size = 0;
     unsigned char device = 0;
     unsigned char block = 0;
+    unsigned char buffer1[PAGE_SIZE];
     
     int fullAdd = (HighAdd << 8) | LowAdd;
     device = (ControlByte & 0x06) >> 1;
@@ -95,11 +133,13 @@ unsigned int sequentialWrite_24XX1025_eds(unsigned char ControlByte, unsigned ch
         page_size = PAGE_SIZE - (LowAdd % PAGE_SIZE);
         page_size = (Length < page_size) ? Length : page_size;
         
-        if (pageWrite_24XX1025_eds(ControlByte, HighAdd, LowAdd, wrptr, page_size) != 0)
+        memread_eds(buffer1, &wrptr[read], page_size);
+        if (pageWrite_24XX1025(ControlByte, HighAdd, LowAdd, buffer1, page_size) != 0)
             return 1;
         
+        /*Adjust addresses and pointers*/
+        read += page_size;        
         Length -= page_size;
-        wrptr += page_size;
         
         //Adjust addresses
         if (LowAdd + page_size  > 0xFF) {

@@ -18,7 +18,7 @@
 #include "HardwareProfile.h"
 
 #include <string.h>
-#include <libpic30.h>
+
 
 #include "i2c_driver.h"
 #include "system.h"
@@ -37,6 +37,7 @@
 /*----------------------------------------------------------------------------*/
 void Init_I2C_bitbang (void)
 {
+    ANSBbits.ANSB2 = 0;
     CLK_I2C_B       = 1;    /* CLK I2C  */
     DATA_I2C_B      = 1;    /* DATI I2C */
     
