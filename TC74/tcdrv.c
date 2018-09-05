@@ -27,7 +27,7 @@
 
 // <editor-fold defaultstate="collapsed" desc="variables">
 
-char temperature = 0;
+int temperature = 0;
 
 char readableTemp[MAX_TEMP_LEN];
 
@@ -36,11 +36,11 @@ char readableTemp[MAX_TEMP_LEN];
 
 // <editor-fold defaultstate="collapsed" desc="functions">
 
-char readTemperature()
+int readTemperature()
 {
     unsigned char negative = 0, tmp = 0, count = MAX_TEMP_DEC, div = 0, i = 1;
     
-    temperature = (char) I2CReadReg(TEMP_REG, TC_ADDRESS);
+    temperature = (int) I2CReadReg(TEMP_REG, TC_ADDRESS);
     negative = temperature & 0x80;
     tmp = temperature & 0x7F;
     

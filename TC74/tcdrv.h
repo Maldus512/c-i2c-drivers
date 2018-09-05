@@ -24,9 +24,9 @@ extern "C" {
 
 #define MAX_TEMP_LEN        5
     
-char readTemperature();
+int readTemperature();
 
-extern char temperature;
+extern int temperature;
 
 extern char readableTemp[MAX_TEMP_LEN];
 
