@@ -16,23 +16,6 @@
 /******************************************************************************/
 
 #include "HardwareProfile.h"
-#include "system.h"
-
-#define CLK_I2C_B       I2C_CLK
-#define DATA_I2C_B      I2C_DATA_OUT
-#define WP_I2C_B        WRITE_PROTECT
-
-#define DD_CLK_I2C_B    I2C_CLK_TRIS
-#define DD_DATA_I2C_B   I2C_DATA_TRIS
-#define DD_WP_I2C_B     WRITE_PROTECT_TRIS
-#define DATA_I2C_I      I2C_DATA_IN
-
-#define EEPROM_0_ADDR     '\xD0'
-#define EEPROM_1_ADDR     '\xD0'
-#define EEPROM_2_ADDR     '\xD0'
-
-
-
 
 #define HIGH                1
 #define LOW                 0
@@ -41,29 +24,29 @@
 
 static inline __attribute__((always_inline)) void CK_I2C (unsigned char ck)
 {
-    CLK_I2C_B = ck;
-    delay_us(10);
+    I2C_CLK = ck;
+    __delay_us(10);
 }
 
 static inline __attribute__((always_inline)) void startCondition_bitbang() {
-    DD_DATA_I2C_B = OUTPUT_PIN;
-    DATA_I2C_B = HIGH;
-    CLK_I2C_B = HIGH;
-    DATA_I2C_B = LOW;
+    I2C_DATA_TRIS = OUTPUT_PIN;
+    I2C_DATA_OUT = HIGH;
+    I2C_CLK = HIGH;
+    I2C_DATA_OUT = LOW;
 }
 
 static inline __attribute__((always_inline)) void restartCondition_bitbang() {
-    DD_DATA_I2C_B = OUTPUT_PIN;
-    DATA_I2C_B = HIGH;
-    CLK_I2C_B = HIGH;
-    DATA_I2C_B = LOW;
+    I2C_DATA_TRIS = OUTPUT_PIN;
+    I2C_DATA_OUT = HIGH;
+    I2C_CLK = HIGH;
+    I2C_DATA_OUT = LOW;
 }
 
 static inline __attribute__((always_inline)) void stopCondition_bitbang() {
-    DD_DATA_I2C_B = OUTPUT_PIN;//1;      /* dati in uscita dal micro             */
-    DATA_I2C_B = 0;         /* stop condition                       */
+    I2C_DATA_TRIS = OUTPUT_PIN;//1;      /* dati in uscita dal micro             */
+    I2C_DATA_OUT = 0;         /* stop condition                       */
     CK_I2C(1);
-    DATA_I2C_B = 1;         /* stop condition                       */
+    I2C_DATA_OUT = 1;         /* stop condition                       */
     CK_I2C(0);
     CK_I2C(1);
 }
@@ -75,25 +58,25 @@ static inline __attribute__((always_inline)) void idle_bitbang() {
 
 static inline __attribute__((always_inline)) void masterWrite_bitbang(unsigned char byte) {
     int x = 0;
-    DD_DATA_I2C_B = OUTPUT_PIN;
+    I2C_DATA_TRIS = OUTPUT_PIN;
     for ( x = 0; x < 8; x++)
     {
         CK_I2C(0);
-        DATA_I2C_B = (byte >> (7 - x)) & 0x01;
-        delay_us(1);
+        I2C_DATA_OUT = (byte >> (7 - x)) & 0x01;
+        __delay_us(1);
         CK_I2C(1);
     }
 }
 
 
 static inline __attribute__((always_inline)) char masterRead_bitbang() {
-    DD_DATA_I2C_B = INPUT_PIN;//0;  /* dati in ingesso                      */
+    I2C_DATA_TRIS = INPUT_PIN;//0;  /* dati in ingesso                      */
     int i = 0;
     unsigned char byte = 0;
     for (i = 0; i < 8; i++)
     {
         CK_I2C(1);
-        byte = (byte << 1) | DATA_I2C_I;//DATA_I2C_B; /* dato in input */
+        byte = (byte << 1) | I2C_DATA_IN;//I2C_DATA_OUT; /* dato in input */
         CK_I2C(0);
     }
     
@@ -101,8 +84,8 @@ static inline __attribute__((always_inline)) char masterRead_bitbang() {
 }
 
 static inline __attribute__((always_inline)) void writeAck_bitbang(char ack) {
-    DD_DATA_I2C_B = OUTPUT_PIN;//1;  /* dati in uscita dal micro             */
-    DATA_I2C_B = ack;     /* invia ack                            */
+    I2C_DATA_TRIS = OUTPUT_PIN;//1;  /* dati in uscita dal micro             */
+    I2C_DATA_OUT = ack;     /* invia ack                            */
     CK_I2C(1);
     CK_I2C(0);
 }
@@ -110,12 +93,12 @@ static inline __attribute__((always_inline)) void writeAck_bitbang(char ack) {
 static inline __attribute__((always_inline)) char readAck_bitbang() {
     unsigned char x;
     CK_I2C(0);
-    DATA_I2C_B = 1;         //Set Nack
-    DD_DATA_I2C_B = INPUT_PIN;
+    I2C_DATA_OUT = 1;         //Set Nack
+    I2C_DATA_TRIS = INPUT_PIN;
     CK_I2C(1);
-    x = DATA_I2C_I;//DATA_I2C_B;
+    x = I2C_DATA_IN;//I2C_DATA_OUT;
     CK_I2C(0);
-    delay_us(1);
+    __delay_us(1);
     return x;
 }
 

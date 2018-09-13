@@ -31,5 +31,8 @@ void write_protect_disable();
 void write_protect_enable();
 unsigned char masterRead();
 void writeAck(unsigned char ack);
+void idle();
 
+
+unsigned int EEAckPolling(unsigned char control);
 #endif

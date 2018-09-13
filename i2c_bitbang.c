@@ -21,7 +21,6 @@
 
 
 #include "i2c_driver.h"
-#include "system.h"
 
 #define TRUE    1
 #define FALSE   0
@@ -38,12 +37,12 @@
 void Init_I2C_bitbang (void)
 {
     ANSBbits.ANSB2 = 0;
-    CLK_I2C_B       = 1;    /* CLK I2C  */
-    DATA_I2C_B      = 1;    /* DATI I2C */
+    I2C_CLK       = 1;    /* CLK I2C  */
+    I2C_DATA_OUT      = 1;    /* DATI I2C */
     
     
-    DD_CLK_I2C_B    = OUTPUT_PIN;   /* abilita la porta come uscita CK        */
-    DD_DATA_I2C_B   = OUTPUT_PIN;   /* abilita la porta come uscita DATI      */
+    I2C_CLK_TRIS    = OUTPUT_PIN;   /* abilita la porta come uscita CK        */
+    I2C_DATA_TRIS   = OUTPUT_PIN;   /* abilita la porta come uscita DATI      */
                                     /* il pin deve essere riprogrammato per   */
                                     /* leggere i dati in ingresso e ACK       */
                                     /* dall' I2C                              */
