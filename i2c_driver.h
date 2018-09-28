@@ -1,40 +1,49 @@
-
 /******************************************************************************/
 /*                                                                            */
 /*  HSW snc - Casalecchio di Reno (BO) ITALY                                  */
 /*  ----------------------------------------                                  */
 /*                                                                            */
-/*  modulo: RtcDrv.c                                                          */
+/*  modulo: I2C_drv.h                                                         */
 /*                                                                            */
-/*      gestione RTC M41T81                                                   */
+/*      gestione I2C                                                          */
 /*                                                                            */
 /*  Autore: Massimo Zanna                                                     */
 /*                                                                            */
-/*  Data  : 20/01/2003      REV  : 00.0                                       */
+/*  Data  : 03/09/2007      REV  : 00.0                                       */
 /*                                                                            */
-/*  U.mod.: 12/04/2018      REV  : 01.3                                       */
+/*  U.mod.: 23/05/2016      REV  : 01.0                                       */
 /*                                                                            */
 /******************************************************************************/
 
-#include <xc.h>
 #include "HardwareProfile.h"
-#include "MCP4018/rheostat.h"
-#include <string.h>
+#if I2C_MODE == I2C_BITBANG
 #include "i2c_bitbang.h"
+#elif I2C_MODE == I2C_MODULE
+#include "i2c_module2.h"
+#endif
 
 
-#define     RHEOSTAT_ADDRESS        0x5E
+#define WRITE_CB(x)     x & 0xFE
+#define READ_CB(x)      x | 0x01
+
+static inline __attribute__((always_inline)) void disableInt() {
+#ifndef FREE_INT
+        IEC0bits.T1IE = 0;
+        IEC0bits.T2IE = 0;
+#endif
+}
+
+static inline __attribute__((always_inline)) void enableInt() {
+#ifndef FREE_INT
+        IEC0bits.T1IE = 1;
+        IEC0bits.T2IE = 1;
+#endif
+}
 
 
+void write_protect_enable();
+void write_protect_disable();
 
-int setRheostatValue(char val) {
-    if (val > 127) 
-        return -1;
     
-    return I2C_Write_b(RHEOSTAT_ADDRESS, val, NULL, 0);
-}
-
-
-int getRheostatValue(char *val) {
-    return I2C_CurrentRead_b(RHEOSTAT_ADDRESS,(unsigned char*) val, 1);
-}
+    
+void Init_I2C();
