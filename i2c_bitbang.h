@@ -42,7 +42,7 @@
 static inline __attribute__((always_inline)) void CK_I2C (unsigned char ck)
 {
     CLK_I2C_B = ck;
-    delay_us(10);
+    delay_us(3);
 }
 
 static inline __attribute__((always_inline)) void startCondition_bitbang() {

@@ -172,6 +172,7 @@ unsigned int sequentialRead_24XX1025(unsigned char ControlByte, unsigned char Hi
 {
     unsigned int block_size;
     unsigned char block, device;
+    //blockRead_24XX1025(ControlByte, 0x00,0x00,temp,1);
     
     if (HighAdd > HIGH_ADD_LIMIT) {
         return 1;

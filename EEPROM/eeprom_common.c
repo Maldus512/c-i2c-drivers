@@ -16,26 +16,33 @@
  *
  * Note:			None
  ********************************************************************/
-unsigned int EEAckPolling(unsigned char control)
+unsigned int EEAckPolling(unsigned char Control)
 {
     startCondition(); //Generate Start condition
+    
     unsigned long counter  = 0;
-     
-    
-    masterWrite(control);
 
-    while (readAck())
-    {
-        restartCondition(); //generate restart
-        masterWrite(control);
-        __delay_us(100);
-        if (counter++ > 100UL) {
-            return -1;
+        masterWrite(Control);
+                
+        while (readAck())
+        {
+            restartCondition(); //generate restart
+            
+            if (masterWrite(Control)) {
+                Nop();
+                Nop();
+                Nop();
+                //return (-3);
+            }
+
+            __delay_us(100);
+            
+            if (counter++ > 1000UL) {
+                return -1;
+            }
         }
-    }
-    
     stopCondition(); //send stop condition
-    return (0);
+    return 0;
 }
 
 /*----------------------------------------------------------------------------*/
@@ -70,6 +77,7 @@ char pageWrite_24XX16(unsigned char ControlByte, unsigned char LowAdd, unsigned 
     while (readAck() && counter <= 10);
 
     if (counter > 10) {
+        stopCondition();
         enableInt();
         write_protect_enable();
         return -1;
@@ -81,6 +89,7 @@ char pageWrite_24XX16(unsigned char ControlByte, unsigned char LowAdd, unsigned 
         
         if (readAck() != 0)
         {
+            stopCondition();
             return -1;
         }
         wrptr ++;
@@ -126,6 +135,7 @@ int blockRead_24XX16 (unsigned char ControlByte, unsigned char cRegAddr, unsigne
     while (counter <= 10 && readAck());
     
     if (counter > 10) {
+        stopCondition();
         enableInt();
         return -1;
     }
@@ -136,6 +146,7 @@ int blockRead_24XX16 (unsigned char ControlByte, unsigned char cRegAddr, unsigne
     masterWrite(ControlByte);
     
     if (readAck()) {
+        stopCondition();
         enableInt();
         return -1;
     }
@@ -263,6 +274,7 @@ int blockRead_24XX1025 (unsigned char ControlByte, unsigned char HighAdd, unsign
     while (counter <= 10 && readAck());
     
     if (counter > 10) {
+        stopCondition();
         enableInt();
         return -1;
     }
@@ -273,6 +285,7 @@ int blockRead_24XX1025 (unsigned char ControlByte, unsigned char HighAdd, unsign
     masterWrite(ControlByte);
     
     if (readAck()) {
+        stopCondition();
         enableInt();
         return -1;
     }
