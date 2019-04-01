@@ -17,6 +17,7 @@
 
 
 #include "HardwareProfile.h"
+#include "i2c_driver.h"
 #include "24XX1025.h"
 #include "utility.h"
 

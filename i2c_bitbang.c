@@ -22,19 +22,14 @@
 
 #include "i2c_driver.h"
 
-#define TRUE    1
-#define FALSE   0
-
-
-
-
-
+#define HIGH    1
+#define LOW   0
 
 
 /*----------------------------------------------------------------------------*/
 /*  Init_I2C_b                                                                */
 /*----------------------------------------------------------------------------*/
-void Init_I2C_bitbang (void)
+void Init_I2C (void)
 {
     ANSBbits.ANSB2 = 0;
     I2C_CLK       = 1;    /* CLK I2C  */
@@ -53,211 +48,97 @@ void Init_I2C_bitbang (void)
 }
 
 
-
-/*********************************************************************
- * Function:        EEAckPolling()
- *
- * Input:		Control byte.
- *
- * Output:		error state.
- *
- * Overview:		polls the bus for an Acknowledge from device
- *
- * Note:			None
- ********************************************************************/
-unsigned int EEAckPolling_b(unsigned char control)
-{
-    unsigned char ack;
-    startCondition_bitbang();
-
-    masterWrite_bitbang(WRITE_CB(control));
-    ack = readAck_bitbang();
-    
-    while (ack)
-    {
-        stopCondition_bitbang();
-        startCondition_bitbang(); //generate restart
-        masterWrite_bitbang(control);
-        ack = readAck_bitbang();
-    }
-    stopCondition_bitbang(); //send stop condition
-    
-    return (0);
-}
-
-
-
-int findAddress_b() {
-    int found_counter = 0;
-    unsigned int i = 0;
-    unsigned char i2caddr = 0;
-//    disableInt();
-    Nop();
-    Nop();
-    Nop();
-    
-    for (i = 0; i <= 0xFC; i += 2) {
-        startCondition_bitbang();
-        
-        i2caddr = (unsigned char) i;
-
-        masterWrite_bitbang(i);
-
-        if (readAck_bitbang() == 0) {
-            found_counter++;
-            Nop();
-            Nop();
-            Nop();
-        }
-        stopCondition_bitbang();
-    }
-    
-//    enableInt();
-    return found_counter;
-}
-
-
-
-
-/*----------------------------------------------------------------------------*/
-/*  I2C_Write_b                                                               */
-/*----------------------------------------------------------------------------*/
-int I2C_Write_b (unsigned char cDevAddr, unsigned char cRegAddr, const unsigned char* pData, int nLen)
-{
-    unsigned int counter, y;
-#ifdef WRITE_PROTECT
-    WP_I2C_B = 0;
-#endif
-    counter = 0;
-    startCondition_bitbang();
-    masterWrite_bitbang(cDevAddr);
-    
-    do
-    {
-        counter++;
-        if (readAck_bitbang() != 0)
-        {
-            startCondition_bitbang();
-            masterWrite_bitbang(cDevAddr);
-            
-            if (readAck_bitbang() != 0)
-                continue;
-        }
-        masterWrite_bitbang(cRegAddr);
-    }
-    while(readAck_bitbang() != 0 && counter <= 10);
-    
-    if (counter > 10) {
-        return -1;
-    }
-    
-    for (y = 0; y < nLen; y++)
-    {
-        masterWrite_bitbang(*pData);
-        
-        if (readAck_bitbang() != 0)
-        {
-#ifdef WRITE_PROTECT
-            WP_I2C_B = 1;
-#endif
-            return -1;
-        }
-        pData ++;
-    }
-    
-    stopCondition_bitbang();
-    EEAckPolling_b(cDevAddr);
-    
-#ifdef WRITE_PROTECT
-    WP_I2C_B = 1;
-#endif
-    return (0);
-}
-
-
-
-/*----------------------------------------------------------------------------*/
-/* I2C_Read_b                                                                 */
-/*----------------------------------------------------------------------------*/
-int I2C_Read_b (unsigned char cDevAddr, unsigned char cRegAddr, unsigned char* buffer, int nLen)
-{
-    unsigned int counter, y;   
-    startCondition_bitbang();
-    cDevAddr = WRITE_CB(cDevAddr);
-    masterWrite_bitbang(cDevAddr);
-    
-    counter = 0;
-    
-    do {
-        counter++;
-        if (readAck_bitbang() != 0) {
-            startCondition_bitbang();
-            masterWrite_bitbang(cDevAddr);
-            if (readAck_bitbang() != 0)
-                continue;
-        }
+void write_protect_enable() {
+ #ifdef WRITE_PROTECT
+      WRITE_PROTECT = 1;
+ #endif
+ }
   
-        masterWrite_bitbang(cRegAddr);
-    } while(readAck_bitbang() != 0 && counter <= 10);
-    
-    if (counter > 10) {
-        return -1;
-    }
-    
-    startCondition_bitbang();
-    cDevAddr = READ_CB(cDevAddr);
-    
-    masterWrite_bitbang(cDevAddr);
-    if (readAck_bitbang() != 0)
-        return -1;
-        
-    /*--------------------------------------------------------------*/
-    /* Legge la ram del dispositivo                                 */
-    /*--------------------------------------------------------------*/
-    
-    for(y = 0; y < nLen; y++)
-    {
-        if (y == nLen - 1)
-            masterRead_bitbang(buffer, 1); 
-        else 
-            masterRead_bitbang(buffer, 0); 
-        buffer++;
-    }
-    
-    stopCondition_bitbang();
-    return (0);
+ void write_protect_disable() {
+ #ifdef WRITE_PROTECT
+     WRITE_PROTECT = 0;
+ #endif
+ }
+
+
+
+void CK_I2C (unsigned char ck)
+{
+    I2C_CLK = ck;
+    __delay_us(10);
+}
+
+void startCondition() {
+    I2C_DATA_TRIS = OUTPUT_PIN;
+    I2C_DATA_OUT = HIGH;
+    I2C_CLK = HIGH;
+    I2C_DATA_OUT = LOW;
+}
+
+void restartCondition() {
+    I2C_DATA_TRIS = OUTPUT_PIN;
+    I2C_DATA_OUT = HIGH;
+    I2C_CLK = HIGH;
+    I2C_DATA_OUT = LOW;
+}
+
+void stopCondition() {
+    I2C_DATA_TRIS = OUTPUT_PIN;//1;      /* dati in uscita dal micro             */
+    I2C_DATA_OUT = 0;         /* stop condition                       */
+    CK_I2C(1);
+    I2C_DATA_OUT = 1;         /* stop condition                       */
+    CK_I2C(0);
+    CK_I2C(1);
+}
+
+void idle() {
+    Nop();
 }
 
 
-int I2C_CurrentRead_b (unsigned char cDevAddr, unsigned char* buffer, int nLen)
-{
-    unsigned int y;   
-    startCondition_bitbang();
-    cDevAddr = READ_CB(cDevAddr);
-    masterWrite_bitbang(cDevAddr);
-        
-    do {
-        if (readAck_bitbang() != 0) {
-            startCondition_bitbang();
-            masterWrite_bitbang(cDevAddr);
-            if (readAck_bitbang() != 0)
-                continue;
-        }
-  
-    } while(readAck_bitbang() != 0);
-    /*--------------------------------------------------------------*/
-    /* Legge la ram del dispositivo                                 */
-    /*--------------------------------------------------------------*/
-    
-    for(y = 0; y < nLen; y++)
+char masterWrite(unsigned char byte) {
+    int x = 0;
+    I2C_DATA_TRIS = OUTPUT_PIN;
+    for ( x = 0; x < 8; x++)
     {
-        if (y == nLen - 1)
-            masterRead_bitbang(buffer, 1); 
-        else 
-            masterRead_bitbang(buffer, 0); 
-        buffer++;
+        CK_I2C(0);
+        I2C_DATA_OUT = (byte >> (7 - x)) & 0x01;
+        __delay_us(1);
+        CK_I2C(1);
+    }
+    return 0;
+}
+
+
+unsigned char masterRead() {
+    I2C_DATA_TRIS = INPUT_PIN;//0;  /* dati in ingesso                      */
+    int i = 0;
+    unsigned char byte = 0;
+    for (i = 0; i < 8; i++)
+    {
+        CK_I2C(1);
+        byte = (byte << 1) | I2C_DATA_IN;//I2C_DATA_OUT; /* dato in input */
+        CK_I2C(0);
     }
     
-    stopCondition_bitbang();
-    return (0);
+    return byte;
+}
+
+void writeAck(char ack) {
+    I2C_DATA_TRIS = OUTPUT_PIN;//1;  /* dati in uscita dal micro             */
+    I2C_DATA_OUT = ack;     /* invia ack                            */
+    CK_I2C(1);
+    CK_I2C(0);
+}
+
+char readAck() {
+    unsigned char x;
+    CK_I2C(0);
+    I2C_DATA_OUT = 1;         //Set Nack
+    I2C_DATA_TRIS = INPUT_PIN;
+    CK_I2C(1);
+    x = I2C_DATA_IN;//I2C_DATA_OUT;
+    CK_I2C(0);
+    __delay_us(1);
+    return x;
 }

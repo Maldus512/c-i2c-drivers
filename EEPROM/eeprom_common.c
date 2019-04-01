@@ -1,3 +1,4 @@
+#include "i2c_driver.h"
 #include "eeprom_common.h"
 #include "HardwareProfile.h"
 

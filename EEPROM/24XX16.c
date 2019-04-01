@@ -199,7 +199,7 @@ char pageWrite_24XX16(unsigned char ControlByte, unsigned char LowAdd, unsigned 
     {
         masterWrite(*wrptr);
         
-        if (readAck_bitbang() != 0)
+        if (readAck() != 0)
         {
 #ifdef WRITE_PROTECT
             WP_I2C_B = 1;
