@@ -28,7 +28,7 @@ unsigned int EEAckPolling(unsigned char control)
     {
         restartCondition(); //generate restart
         masterWrite(control);
-        __delay_us(100);
+        delay_us(100);
         if (counter++ > 100UL) {
             return -1;
         }

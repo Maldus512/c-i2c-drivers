@@ -18,6 +18,8 @@
 #ifndef __24XX1025_H__
 #define __24XX1025_H__
 
+#include "i2c_driver.h"
+#include "eeprom_common.h"
 
 /* Queste due funzioni devono essere fornite dall'applicazione 
     Ne esistono delle versioni di default nella libreria */
@@ -28,7 +30,7 @@ int pageWrite_24XX1025_eds(unsigned char ControlByte, unsigned char HighAdd,
         unsigned char LowAdd,__eds__ unsigned char *wrptr, int Length);
 
 int blockRead_24XX1025(unsigned char ControlByte, unsigned char HighAdd,
-        unsigned char LowAdd, unsigned char *rdptr, unsigned int length);
+        unsigned char LowAdd, unsigned char *rdptr, int length);
 
 unsigned int AbsSequentialReadI2C(unsigned char ControlByte, unsigned int add, 
          unsigned char *rdptr, unsigned int Length);

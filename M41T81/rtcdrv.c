@@ -21,7 +21,7 @@
 #include "HardwareProfile.h"
 #include "RtcDrv.h"
 
-#include "MyI2C2.h"
+#include "i2c_module2.h"
 
 
 

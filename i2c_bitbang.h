@@ -25,7 +25,7 @@
 static inline __attribute__((always_inline)) void CK_I2C (unsigned char ck)
 {
     I2C_CLK = ck;
-    __delay_us(10);
+    delay_us(10);
 }
 
 static inline __attribute__((always_inline)) void startCondition_bitbang() {
@@ -63,7 +63,7 @@ static inline __attribute__((always_inline)) void masterWrite_bitbang(unsigned c
     {
         CK_I2C(0);
         I2C_DATA_OUT = (byte >> (7 - x)) & 0x01;
-        __delay_us(1);
+        delay_us(1);
         CK_I2C(1);
     }
 }
@@ -98,7 +98,7 @@ static inline __attribute__((always_inline)) char readAck_bitbang() {
     CK_I2C(1);
     x = I2C_DATA_IN;//I2C_DATA_OUT;
     CK_I2C(0);
-    __delay_us(1);
+    delay_us(1);
     return x;
 }
 

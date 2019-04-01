@@ -36,7 +36,6 @@
 /*----------------------------------------------------------------------------*/
 void Init_I2C_bitbang (void)
 {
-    ANSBbits.ANSB2 = 0;
     I2C_CLK       = 1;    /* CLK I2C  */
     I2C_DATA_OUT      = 1;    /* DATI I2C */
     
@@ -47,8 +46,8 @@ void Init_I2C_bitbang (void)
                                     /* leggere i dati in ingresso e ACK       */
                                     /* dall' I2C                              */
 #ifdef WRITE_PROTECT
-    WP_I2C_B        = 1;    /* WRITE PROTECT BIT */
-    DD_WP_I2C_B     = OUTPUT_PIN;   /* se H sono in WRITE PROTECT, se L -> WR */
+    WRITE_PROTECT        = 1;    /* WRITE PROTECT BIT */
+    WRITE_PROTECT_TRIS     = OUTPUT_PIN;   /* se H sono in WRITE PROTECT, se L -> WR */
 #endif
 }
 
@@ -126,7 +125,7 @@ int I2C_Write_b (unsigned char cDevAddr, unsigned char cRegAddr, const unsigned 
 {
     unsigned int counter, y;
 #ifdef WRITE_PROTECT
-    WP_I2C_B = 0;
+    WRITE_PROTECT = 0;
 #endif
     counter = 0;
     startCondition_bitbang();
@@ -158,7 +157,7 @@ int I2C_Write_b (unsigned char cDevAddr, unsigned char cRegAddr, const unsigned 
         if (readAck_bitbang() != 0)
         {
 #ifdef WRITE_PROTECT
-            WP_I2C_B = 1;
+            WRITE_PROTECT = 1;
 #endif
             return -1;
         }
@@ -169,7 +168,7 @@ int I2C_Write_b (unsigned char cDevAddr, unsigned char cRegAddr, const unsigned 
     EEAckPolling_b(cDevAddr);
     
 #ifdef WRITE_PROTECT
-    WP_I2C_B = 1;
+    WRITE_PROTECT = 1;
 #endif
     return (0);
 }

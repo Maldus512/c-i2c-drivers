@@ -294,7 +294,7 @@ unsigned int sequentialRead_24XX1025_eds(unsigned char ControlByte, unsigned cha
 /*----------------------------------------------------------------------------*/
 /*  pageWrite_24XX16                                                          */
 /*----------------------------------------------------------------------------*/
-char pageWrite_24XX1025(unsigned char ControlByte, unsigned char HighAdd, unsigned char LowAdd, unsigned char *wrptr, int Length)
+int pageWrite_24XX1025(unsigned char ControlByte, unsigned char HighAdd, unsigned char LowAdd, unsigned char *wrptr, int Length)
 {
     int i = 0;
     ControlByte = WRITE_CB(ControlByte);
