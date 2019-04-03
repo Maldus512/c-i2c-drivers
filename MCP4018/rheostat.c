@@ -4,7 +4,7 @@
 /*  HSW snc - Casalecchio di Reno (BO) ITALY                                  */
 /*  ----------------------------------------                                  */
 /*                                                                            */
-/*  modulo: RtcDrv.c                                                          */
+/*  modulo: rtcdrv.h.c                                                          */
 /*                                                                            */
 /*      gestione RTC M41T81                                                   */
 /*                                                                            */

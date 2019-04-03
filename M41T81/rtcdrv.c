@@ -4,7 +4,7 @@
 /*  HSW snc - Casalecchio di Reno (BO) ITALY                                  */
 /*  ----------------------------------------                                  */
 /*                                                                            */
-/*  modulo: RtcDrv.c                                                          */
+/*  modulo: rtcdrv.h.c                                                          */
 /*                                                                            */
 /*      gestione RTC M41T81                                                   */
 /*                                                                            */
@@ -19,7 +19,7 @@
 #include <string.h>
 
 #include "HardwareProfile.h"
-#include "RtcDrv.h"
+#include "rtcdrv.h"
 
 #include "i2c_module2.h"
 
@@ -73,12 +73,12 @@ int Init_RTC (void)
     
     // controlla stop bit (oscillator stopped)
 //     if (!I2C_Read (M41T11_ADDR, SEG_TIME, &cData, 1))
-    if (I2CReadRegN (M41T11_ADDR, SEG_TIME, &cData, 1))
+    if (I2C_Read_b (M41T11_ADDR, SEG_TIME, &cData, 1))
     {
         return FALSE;
     }
     
-    if (cData & '\x80')
+    if (cData & '\x80' || 1)
     {
         // inizializza default - Giovedi 01/01/2004 12:00:00, enable SQW @1sec // !!!!!!!!!!!!!!!!
         tCurrTime.cSec   = '\x10';
@@ -101,7 +101,7 @@ int Init_RTC (void)
     
     // azzera halt update bit
 //     if (!I2C_Read (M41T11_ADDR, SEG_TIME + 11, &cData, 1))
-    if (I2CReadRegN (M41T11_ADDR, SEG_TIME + 11, &cData, 1))
+    if (I2C_Read_b (M41T11_ADDR, SEG_TIME + 11, &cData, 1))
     {
         return FALSE;
     }
@@ -109,13 +109,13 @@ int Init_RTC (void)
     cData &= ~'\x40';
     
 //     if (!I2C_Write (M41T11_ADDR, SEG_TIME + 11, &cData, 1))
-    if (I2CWriteRegN (M41T11_ADDR, SEG_TIME + 11, &cData, 1))
+    if (I2C_Write_b (M41T11_ADDR, SEG_TIME + 11, &cData, 1))
     {
         return FALSE;
     }
     
 //     if (!I2C_Read (M41T11_ADDR, SEG_TIME + 11, &cData, 1))
-    if (I2CReadRegN (M41T11_ADDR, SEG_TIME + 11, &cData, 1))
+    if (I2C_Read_b (M41T11_ADDR, SEG_TIME + 11, &cData, 1))
     {
         return FALSE;
     }
@@ -173,7 +173,7 @@ int SetTime (const RTC_TIME *pTime)
     calc_day_of_week((RTC_TIME *)pTime);
     
 //     return I2C_Write (M41T11_ADDR, SEG_TIME, (const unsigned char*) pTime, sizeof (RTC_TIME));
-    I2CWriteRegN (M41T11_ADDR, SEG_TIME, (unsigned char*) pTime, sizeof (RTC_TIME));
+    I2C_Write_b (M41T11_ADDR, SEG_TIME, (unsigned char*) pTime, sizeof (RTC_TIME));
     return 1;
 }
 
@@ -192,7 +192,7 @@ int GetTime (RTC_TIME *pTime)
         return FALSE;
     }
     
-    res = I2CReadRegN (M41T11_ADDR, SEG_TIME, (unsigned char*) pTime, sizeof (RTC_TIME));
+    res = I2C_Read_b (M41T11_ADDR, SEG_TIME, (unsigned char*) pTime, sizeof (RTC_TIME));
     
 //    if (res < 0) {
 //        memset(pTime, 0, sizeof(RTC_TIME));
@@ -213,7 +213,7 @@ int IsSecIncr (RTC_TIME *pTime)
     unsigned char cSec;
     
 //     if (!I2C_Read (M41T11_ADDR, SEG_TIME, &cSec, 1))
-    if (!I2CReadRegN (M41T11_ADDR, SEG_TIME, &cSec, 1))
+    if (!I2C_Read_b (M41T11_ADDR, SEG_TIME, &cSec, 1))
     {
         return FALSE;
     }
@@ -228,7 +228,7 @@ int IsSecIncr (RTC_TIME *pTime)
     if (pTime != NULL)
     {
 //         return I2C_Read (M41T11_ADDR, SEG_TIME, (unsigned char*) pTime, sizeof (RTC_TIME));
-        return I2CReadRegN (M41T11_ADDR, SEG_TIME, (unsigned char*) pTime, sizeof (RTC_TIME));
+        return I2C_Read_b (M41T11_ADDR, SEG_TIME, (unsigned char*) pTime, sizeof (RTC_TIME));
     }
     return TRUE;
 }

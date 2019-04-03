@@ -165,7 +165,7 @@ int I2C_Write_b (unsigned char cDevAddr, unsigned char cRegAddr, const unsigned 
     }
     
     stopCondition_bitbang();
-    EEAckPolling_b(cDevAddr);
+//    EEAckPolling_b(cDevAddr);
     
 #ifdef WRITE_PROTECT
     WRITE_PROTECT = 1;
