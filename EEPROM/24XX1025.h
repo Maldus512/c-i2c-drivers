@@ -59,4 +59,6 @@ unsigned int sequentialRead_24XX1025(unsigned char ControlByte,
 unsigned int sequentialRead_24XX1025_eds(unsigned char ControlByte, 
         unsigned char HighAdd, unsigned char LowAdd,__eds__ unsigned char *rdptr, unsigned int length);
 
+
+#define BUFFER_SIZE 512
 #endif

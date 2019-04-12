@@ -10,7 +10,7 @@
 
 
 
-void Init_I2C_module(unsigned int brg)
+void Init_I2C(unsigned int brg)
 {
     I2C2STAT = 0x0000;
     I2C2RCV = 0x0000;
@@ -31,44 +31,42 @@ void Init_I2C_module(unsigned int brg)
     write_protect_enable();
 }
 
-void I2CWriteReg(unsigned char reg, unsigned char data, unsigned char addr) {
-    disableInt();
-    int counter = 0;
-    MyStartI2C2();
-
-    MasterWriteI2C2(addr);
-    MyIdleI2C2();
-    
-    do
-    {
-        counter++;
-        if (I2C2STATbits.ACKSTAT)
-        {
-            MyRestartI2C2();
-            MasterWriteI2C2(addr);
-            MyIdleI2C2();
-            
-            if (I2C2STATbits.ACKSTAT)
-            {
-                continue;
-            }
-        }
-        MasterWriteI2C2(reg);
-        MyIdleI2C2();
-        
-        if (I2C2STATbits.ACKSTAT)
-        {
-            continue;
-        }
-        MasterWriteI2C2(data);
-        MyIdleI2C2();
-        
-    } while(I2C2STATbits.ACKSTAT && counter <= 10);
-    
-    MyStopI2C2();
-    enableInt();
+void startCondition()
+{
+    I2C2CONbits.SEN = 1; //StartI2C2();
+    while (I2C2CONbits.SEN);
+    delay_us(2);
 }
 
+void stopCondition()
+{
+    I2C2CONbits.PEN = 1; //StopI2C2();
+    while (I2C2CONbits.PEN);
+}
+
+void restartCondition()
+{
+    I2C2CONbits.RSEN = 1; //RestartI2C2();
+    while (I2C2CONbits.RSEN);
+    //delay_us(2);
+}
+
+void idle()
+{
+    while (I2C2CONbits.SEN || I2C2CONbits.RSEN || I2C2CONbits.PEN || I2C2CONbits.RCEN || I2C2CONbits.ACKEN || I2C2STATbits.TRSTAT);
+}
+
+void writeAck()
+{
+    I2C2CONbits.ACKDT = 0; //Set for ACk
+    I2C2CONbits.ACKEN = 1;
+    while (I2C2CONbits.ACKEN); //wait for ACK to complete
+}
+
+
+unsigned char readAck() {
+    return I2C2STATbits.ACKSTAT;
+}
 
 int findAddress() {
     int found_counter = 0;
@@ -97,52 +95,8 @@ int findAddress() {
     return found_counter;
 }
 
-unsigned char I2CReadReg(unsigned char reg, unsigned char addr) {
-    unsigned char valore;
-    int counter = 0;
-    disableInt();
-    MyStartI2C2();
-
-    MasterWriteI2C2(addr);
-    MyIdleI2C2();
-    
-    do
-    {
-        counter++;
-        if (I2C2STATbits.ACKSTAT)
-        {
-            MyRestartI2C2();
-            MasterWriteI2C2(addr);
-            MyIdleI2C2();
-            if (I2C2STATbits.ACKSTAT)
-            {
-                continue;
-            }
-        }
-        
-        MasterWriteI2C2(reg);
-        MyIdleI2C2();
-    }
-    while (I2C2STATbits.ACKSTAT && counter <= 10);
-
-    if (counter > 10) {
-        enableInt();
-        return -1;
-    }
-    
-    MyRestartI2C2();
-    MasterWriteI2C2(addr | 1);
-    MyIdleI2C2();
-    valore = MasterReadI2C2();
-
-    MyStopI2C2();
-    enableInt();
-
-    return valore;
-}
-
 unsigned char
-I2CWriteRegN(unsigned char addr, unsigned char reg, unsigned char *Data, unsigned char N)
+I2C_write_register(unsigned char addr, unsigned char reg, unsigned char *Data, unsigned char N)
 {
     unsigned char *ptr;
     unsigned char len;
@@ -192,7 +146,7 @@ I2CWriteRegN(unsigned char addr, unsigned char reg, unsigned char *Data, unsigne
     return 0;
 }
 
-unsigned char I2CReadRegN(unsigned char addr, unsigned char reg, unsigned char *Data, unsigned char N)
+unsigned char I2C_read_register(unsigned char addr, unsigned char reg, unsigned char *Data, unsigned char N)
 {
     unsigned char *ptr;
     int counter = 0;

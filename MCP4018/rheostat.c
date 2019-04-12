@@ -20,7 +20,7 @@
 #include "HardwareProfile.h"
 #include "MCP4018/rheostat.h"
 #include <string.h>
-#include "i2c_bitbang.h"
+#include "i2c_driver.h"
 
 
 #define     RHEOSTAT_ADDRESS        0x5E
@@ -31,10 +31,10 @@ int setRheostatValue(char val) {
     if (val > 127) 
         return -1;
     
-    return I2C_Write_b(RHEOSTAT_ADDRESS, val, NULL, 0);
+    return I2C_write_register(RHEOSTAT_ADDRESS, val, NULL, 0);
 }
 
 
 int getRheostatValue(char *val) {
-    return I2C_CurrentRead_b(RHEOSTAT_ADDRESS,(unsigned char*) val, 1);
+    return I2C_read_current_register(RHEOSTAT_ADDRESS,(unsigned char*) val, 1);
 }

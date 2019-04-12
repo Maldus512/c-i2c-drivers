@@ -16,33 +16,54 @@
 /******************************************************************************/
 
 #include "HardwareProfile.h"
-#if I2C_MODE == I2C_BITBANG
-#include "i2c_bitbang.h"
-#elif I2C_MODE == I2C_MODULE
-#include "i2c_module2.h"
-#endif
 
 
 #define WRITE_CB(x)     x & 0xFE
 #define READ_CB(x)      x | 0x01
 
-static inline __attribute__((always_inline)) void disableInt() {
-#ifndef FREE_INT
-        IEC0bits.T1IE = 0;
-        IEC0bits.T2IE = 0;
-#endif
-}
-
-static inline __attribute__((always_inline)) void enableInt() {
-#ifndef FREE_INT
-        IEC0bits.T1IE = 1;
-        IEC0bits.T2IE = 1;
-#endif
-}
+void disableInt();
+void enableInt();
 
 
 void write_protect_enable();
 void write_protect_disable();
+
+int I2C_write_register(unsigned char, unsigned char, const unsigned char*, int);
+int I2C_read_register (unsigned char, unsigned char, unsigned char*, int);
+int I2C_read_current_register (unsigned char, unsigned char*, int);
+
+
+/* Funzioni che devono essere definite (come macro)
+ * Per utilizzare l'implementazione di default di pageWrite
+ * e blockRead
+ * 
+ * idle
+ * startCondition
+ * masterWrite
+ * readAck
+ * restartCondition
+ * stopCondition
+ * disableInt
+ * enableInt
+ * write_protect_disable
+ * write_protect_enable
+ * masterRead
+ * writeAck
+ * 
+ */
+
+void startCondition();
+void masterWrite(unsigned char byte);
+char readAck();
+void restartCondition();
+void stopCondition();
+void disableInt();
+void enableInt();
+void write_protect_disable();
+void write_protect_enable();
+char masterRead();
+void writeAck(char ack);
+void idle();
 
     
     

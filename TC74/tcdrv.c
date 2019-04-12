@@ -19,11 +19,13 @@
 
 #include "HardwareProfile.h"
 
-#include "i2c_module2.h"
+#include "i2c_driver.h"
 #include "TC74/tcdrv.h"
 
 
-
+#define TEMP_REG 0
+#define TC_ADDRESS 0
+#define MAX_TEMP_DEC 2
 
 // <editor-fold defaultstate="collapsed" desc="variables">
 
@@ -38,9 +40,10 @@ char readableTemp[MAX_TEMP_LEN];
 
 int readTemperature()
 {
-    unsigned char negative = 0, tmp = 0, count = MAX_TEMP_DEC, div = 0, i = 1;
+    unsigned char negative = 0, tmp = 0, count = MAX_TEMP_DEC, div = 0, i = 1, val;
     
-    temperature = (int) I2CReadReg(TEMP_REG, TC_ADDRESS);
+    I2C_read_register(TEMP_REG, TC_ADDRESS, &val, 1);
+    temperature = (int) val;
     negative = temperature & 0x80;
     tmp = temperature & 0x7F;
     
