@@ -258,7 +258,8 @@ int I2C_write_register (unsigned char cDevAddr, unsigned char cRegAddr, const un
 
 int I2C_read_register (unsigned char cDevAddr, unsigned char cRegAddr, unsigned char* buffer, int nLen)
 {
-    unsigned int counter, y;   
+    unsigned int counter, y = 0; 
+    char ack = 1;
     startCondition();
     cDevAddr = WRITE_CB(cDevAddr);
     masterWrite(cDevAddr);
@@ -267,15 +268,18 @@ int I2C_read_register (unsigned char cDevAddr, unsigned char cRegAddr, unsigned 
     
     do {
         counter++;
-        if (readAck() != 0) {
+        ack = readAck();
+        if (ack != 0) {
             startCondition();
             masterWrite(cDevAddr);
-            if (readAck() != 0)
+            ack = readAck();
+            if ( ack != 0)
                 continue;
         }
   
         masterWrite(cRegAddr);
-    } while(readAck() != 0 && counter <= 10);
+        ack = readAck();
+    } while(ack != 0 && counter <= 10);
     
     if (counter > 10) {
         return -1;
@@ -294,10 +298,14 @@ int I2C_read_register (unsigned char cDevAddr, unsigned char cRegAddr, unsigned 
     
     for(y = 0; y < nLen; y++)
     {
-        if (y == nLen - 1)
-            masterRead(buffer, 1); 
-        else 
-            masterRead(buffer, 0); 
+        if (y == nLen - 1) {
+            *buffer = masterRead();
+            writeAck(1);
+        }
+        else {
+            *buffer = masterRead(); 
+            writeAck(0);
+        }
         buffer++;
     }
     
@@ -328,10 +336,14 @@ int I2C_read_current_register (unsigned char cDevAddr, unsigned char* buffer, in
     
     for(y = 0; y < nLen; y++)
     {
-        if (y == nLen - 1)
-            masterRead(buffer, 1); 
-        else 
-            masterRead(buffer, 0); 
+        if (y == nLen - 1) {
+            *buffer = masterRead();
+            writeAck(1);
+        }
+        else {
+            *buffer = masterRead(); 
+            writeAck(0);
+        }
         buffer++;
     }
     
