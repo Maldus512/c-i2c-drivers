@@ -18,8 +18,31 @@
 
 #include "hardwareprofile.h"
 #include "24XX1025.h"
-#include "utility.h"
 
+
+/*----------------------------------------------------------------------------*/
+/*  Legge una stringa normale e la scrive in una locazione eds                */
+/*----------------------------------------------------------------------------*/
+void _memwrite_eds(__eds__ unsigned char *str, unsigned char *msg, int len)
+{
+    int i = 0;
+    for (i = 0; i < len; i++)
+    {
+        str[i] = msg[i];
+    }
+}
+
+/*----------------------------------------------------------------------------*/
+/*  Legge una locazione eds e la copia in una stringa normale                 */
+/*----------------------------------------------------------------------------*/
+void _memread_eds(unsigned char *str, __eds__ unsigned char *msg, int len)
+{
+    int i = 0;
+    for (i = 0; i < len; i++)
+    {
+        str[i] = msg[i];
+    }
+}
 
 unsigned int AbsSequentialWriteI2C(unsigned char ControlByte, unsigned int add, 
          unsigned char *wrptr, unsigned int Length)
@@ -133,7 +156,7 @@ unsigned int sequentialWrite_24XX1025_eds(unsigned char ControlByte, unsigned ch
         page_size = PAGE_SIZE - (LowAdd % PAGE_SIZE);
         page_size = (Length < page_size) ? Length : page_size;
         
-        memread_eds(buffer1, &wrptr[read], page_size);
+        _memread_eds(buffer1, &wrptr[read], page_size);
         if (pageWrite_24XX1025(ControlByte, HighAdd, LowAdd, buffer1, page_size) != 0)
             return 1;
         
@@ -256,7 +279,7 @@ unsigned int sequentialRead_24XX1025_eds(unsigned char ControlByte, unsigned cha
         /*Read the data*/
         if (blockRead_24XX1025(ControlByte, HighAdd, LowAdd, buffer1, block_size) != 0)
             return 1;
-        memwrite_eds(&rdptr[written], buffer1, block_size);
+        _memwrite_eds(&rdptr[written], buffer1, block_size);
         /*Adjust addresses and pointers*/
         written += block_size;
         length -= block_size;

@@ -17,7 +17,7 @@
 
 #include "hardwareprofile.h"
 #include "24XX16.h"
-#include "i2c_driver.h"
+#include "I2C/i2c_driver.h"
 #include "eeprom_common.h"
 
 
