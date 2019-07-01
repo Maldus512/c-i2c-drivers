@@ -17,7 +17,7 @@
 
 #include   <string.h>
 
-#include "HardwareProfile.h"
+#include "hardwareprofile.h"
 
 #include "i2c_driver.h"
 #include "TC74/tcdrv.h"

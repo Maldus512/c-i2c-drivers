@@ -18,8 +18,8 @@
 
 #include <string.h>
 
-#include "HardwareProfile.h"
-#include "RtcDrv.h"
+#include "hardwareprofile.h"
+#include "rtcdrv.h"
 
 #include "i2c_driver.h"
 

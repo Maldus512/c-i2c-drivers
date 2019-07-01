@@ -15,7 +15,7 @@
 /*                                                                            */
 /******************************************************************************/
 
-#include "HardwareProfile.h"
+#include "hardwareprofile.h"
 
 
 #define WRITE_CB(x)     x & 0xFE

@@ -16,7 +16,7 @@
 /******************************************************************************/
 
 
-#include "HardwareProfile.h"
+#include "hardwareprofile.h"
 #include "24XX1025.h"
 #include "utility.h"
 

@@ -15,7 +15,7 @@
 /*                                                                            */
 /******************************************************************************/
 
-#include "HardwareProfile.h"
+#include "hardwareprofile.h"
 
 #include <string.h>
 

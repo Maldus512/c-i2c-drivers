@@ -17,7 +17,7 @@
 /******************************************************************************/
 
 #include <xc.h>
-#include "HardwareProfile.h"
+#include "hardwareprofile.h"
 #include "MCP4018/rheostat.h"
 #include <string.h>
 #include "i2c_driver.h"

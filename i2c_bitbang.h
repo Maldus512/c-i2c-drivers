@@ -15,7 +15,7 @@
 /*                                                                            */
 /******************************************************************************/
 
-#include "HardwareProfile.h"
+#include "hardwareprofile.h"
 
 #define HIGH                1
 #define LOW                 0
