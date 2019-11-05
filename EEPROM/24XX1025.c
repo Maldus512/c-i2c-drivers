@@ -20,6 +20,14 @@
 #include "24XX1025.h"
 
 
+#define HIGH_ADDRESS        1
+#define HIGH_ADD_LIMIT      0xFF
+#define MEM_SIZE            0xFFFF  // 64K
+
+#define BLOCK_SIZE          0x10000 // 64 K Byte
+#define PAGE_SIZE           0x80    // 128 Byte
+#define BUFFER_SIZE         512
+
 /*----------------------------------------------------------------------------*/
 /*  Legge una stringa normale e la scrive in una locazione eds                */
 /*----------------------------------------------------------------------------*/

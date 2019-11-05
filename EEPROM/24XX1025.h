@@ -18,8 +18,10 @@
 #ifndef __24XX1025_H__
 #define __24XX1025_H__
 
-#include "I2C/i2c_driver.h"
+#include "i2c_driver.h"
 #include "eeprom_common.h"
+
+
 
 /* Queste due funzioni devono essere fornite dall'applicazione 
     Ne esistono delle versioni di default nella libreria */

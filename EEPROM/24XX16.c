@@ -17,9 +17,15 @@
 
 #include "hardwareprofile.h"
 #include "24XX16.h"
-#include "I2C/i2c_driver.h"
+#include "i2c_driver.h"
 #include "eeprom_common.h"
 
+#define HIGH_ADDRESS        0
+#define HIGH_ADD_LIMIT      0x7
+#define MEM_SIZE            0x800  // 64K
+
+#define BLOCK_SIZE          0x100
+#define PAGE_SIZE           0x10    // 2 KByte
 
 /*----------------------------------------------------------------------------*/
 /*  byteWrite_24XX16                                                          */

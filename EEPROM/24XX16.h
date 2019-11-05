@@ -19,7 +19,6 @@
 #define __24XX16_H__
 
 
-
 unsigned char byteWrite_24XX16(unsigned char ControlByte, unsigned char HighAdd, unsigned char LowAdd, unsigned char Data);
 unsigned char byteRead_24XX16(unsigned char ControlByte, unsigned char HighAdd, unsigned char LowAdd, unsigned char *Data);
 

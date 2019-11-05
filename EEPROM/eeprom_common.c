@@ -1,5 +1,5 @@
 #include "eeprom_common.h"
-#include "I2C/i2c_driver.h"
+#include "i2c_driver.h"
 #include "hardwareprofile.h"
 
 #define WRITE_CB(x)     x & 0xFE

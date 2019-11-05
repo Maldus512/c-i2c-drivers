@@ -6,8 +6,8 @@
  */
 
 
-#ifndef MYI2C2_H
-#define	MYI2C2_H
+#ifndef MYI2C1_H
+#define	MYI2C1_H
 
 #include "EEPROM/24XX1025.h"
 #include "EEPROM/24XX16.h"
