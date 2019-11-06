@@ -56,7 +56,7 @@ void idle()
 
 void writeAck(char ack)
 {
-    I2C1CONbits.ACKDT = 1-ack; //Set for Ack or not ack
+    I2C1CONbits.ACKDT = ack; //Set for Ack or not ack
     I2C1CONbits.ACKEN = 1;
     while (I2C1CONbits.ACKEN); //wait for ACK to complete
 }

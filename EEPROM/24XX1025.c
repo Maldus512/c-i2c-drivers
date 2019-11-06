@@ -52,41 +52,17 @@ void _memread_eds(unsigned char *str, __eds__ unsigned char *msg, int len)
     }
 }
 
-unsigned int AbsSequentialWriteI2C(unsigned char ControlByte, unsigned int add, 
-         unsigned char *wrptr, unsigned int Length)
-{
-    return sequentialWrite_24XX1025(ControlByte, (unsigned char) add>>8, (unsigned char) (add&0xFF), wrptr, Length);
-}
-
-unsigned int AbsSequentialReadI2C(unsigned char ControlByte, unsigned int add, 
-         unsigned char *rdptr, unsigned int Length)
-{
-    return sequentialRead_24XX1025(ControlByte, (unsigned char) add>>8, (unsigned char) (add&0xFF), rdptr, Length);
-}
-
-unsigned int AbsSequentialWriteI2C_eds(unsigned char ControlByte, unsigned int add, 
-        __eds__ unsigned char *wrptr, unsigned int Length)
-{
-    return sequentialWrite_24XX1025_eds(ControlByte, (unsigned char) add>>8, (unsigned char) (add&0xFF), wrptr, Length);
-}
-
-unsigned int AbsSequentialReadI2C_eds(unsigned char ControlByte, unsigned int add, 
-        __eds__ unsigned char *rdptr, unsigned int Length)
-{
-    return sequentialRead_24XX1025_eds(ControlByte, (unsigned char) add>>8, (unsigned char) (add&0xFF), rdptr, Length);
-}
-
 unsigned int byteWrite_24XX1025(unsigned char ControlByte, unsigned char HighAdd, 
         unsigned char LowAdd, unsigned char byte)
 {
-    return sequentialWrite_24XX1025(ControlByte, HighAdd, LowAdd, &byte, 1);
+    return pageWrite_24XX1025(ControlByte, HighAdd, LowAdd, &byte, 1);
 }
 
 
 unsigned int byteRead_24XX1025(unsigned char ControlByte, unsigned char HighAdd, 
         unsigned char LowAdd, unsigned char *byte)
 {
-    return sequentialRead_24XX1025(ControlByte, HighAdd, LowAdd, byte, 1);
+    return blockRead_24XX1025(ControlByte, HighAdd, LowAdd, byte, 1);
 }
 
 
@@ -435,10 +411,9 @@ int blockRead_24XX1025 (unsigned char ControlByte, unsigned char HighAdd, unsign
         return -1;
     }
         
-    /*--------------------------------------------------------------*/
+        /*--------------------------------------------------------------*/
     /* Legge la ram del dispositivo                                 */
     /*--------------------------------------------------------------*/
-    
     for(i = 0; i < nLen; i++)
     {
         if (i == nLen - 1) {
@@ -454,4 +429,34 @@ int blockRead_24XX1025 (unsigned char ControlByte, unsigned char HighAdd, unsign
     stopCondition();
     enableInt();
     return (0);
+}
+
+
+int test_24XX1025(unsigned char ControlByte, unsigned char HighAdd, unsigned char LowAdd) {
+    const int SIZE = 4096;
+    unsigned char testbuffer[4096];
+    int i;
+    
+    for (i = 0; i < SIZE; i++) {
+        testbuffer[i] = (i % 0xFF)+1;
+    }
+    
+    if (sequentialWrite_24XX1025(ControlByte, HighAdd, LowAdd, testbuffer, SIZE))
+        return -1;
+    
+    for (i = 0; i < SIZE; i++) {
+        testbuffer[i] = 0;
+    }
+    
+    if (sequentialRead_24XX1025(ControlByte, HighAdd, LowAdd, testbuffer, SIZE)) {
+        return -1;
+    }
+    
+    for (i = 0; i < SIZE; i++) {
+        if (testbuffer[i] != (i % 0xFF)+1) {
+            return -1;
+        }
+    }
+    
+    return 0;
 }

@@ -17,18 +17,18 @@
  *
  * Note:			None
  ********************************************************************/
-unsigned int EEAckPolling(unsigned char control)
+unsigned int EEAckPolling(unsigned char c)
 {
     startCondition(); //Generate Start condition
     unsigned long counter  = 0;
      
     
-    masterWrite(control);
+    masterWrite(c);
 
     while (readAck())
     {
         restartCondition(); //generate restart
-        masterWrite(control);
+        masterWrite(c);
         delay_us(100);
         if (counter++ > 100UL) {
             return -1;

@@ -27,7 +27,7 @@
 
 
 
-
+static int clock_delay = 10;
 
 
 
@@ -55,7 +55,7 @@ void Init_I2C (unsigned int brg)
 void CK_I2C (unsigned char ck)
 {
     I2C_CLK = ck;
-    delay_us(10);
+    delay_us(clock_delay);
 }
 
 void startCondition() {
