@@ -23,8 +23,8 @@ void Init_I2C(unsigned int brg)
             I2C2_STOP_DIS & I2C2_RESTART_DIS & I2C2_START_DIS, brg);
     
     IdleI2C2();
-#ifdef D_WP_I2C_TRIS
-    D_WP_I2C_TRIS = OUTPUT_PIN;
+#ifdef WRITE_PROTECT_TRIS
+    WRITE_PROTECT_TRIS = OUTPUT_PIN;
 #endif
     write_protect_enable();
 }
@@ -68,6 +68,10 @@ char readAck() {
 
 void masterWrite(unsigned char byte) {
     MasterWriteI2C2(byte);
+}
+
+char masterRead() {
+    return MasterReadI2C2();
 }
 
 int findAddress() {
