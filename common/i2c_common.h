@@ -9,6 +9,7 @@
 typedef struct {
     uint8_t device_address;
     int (*i2c_transfer)(uint8_t devaddr, uint8_t *writebuf, int writelen, uint8_t *readbuf, int readlen);
+    void (*ack_polling)(uint8_t devaddr);
 } i2c_driver_t;
 
 #endif

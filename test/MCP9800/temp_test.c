@@ -21,7 +21,7 @@ int write_i2c_reg(uint8_t devaddr, uint8_t *write, int writelen, uint8_t *data, 
 }
 
 void test_temp() {
-    i2c_driver_t driver = {0x98, write_i2c_reg};
+    i2c_driver_t driver = {0x98, write_i2c_reg, NULL};
 
     TEST_ASSERT(-10.5 == MCP9800_read_temperature(driver));
     TEST_ASSERT_EQUAL(1, test1);

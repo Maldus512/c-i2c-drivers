@@ -5,7 +5,7 @@ PROGRAM = "testsuite"
 LIBS = "../"
 UNITY = "Unity/src/"
 CFLAGS = ["-Wall", "-Wextra", "-g", "-O0"]
-MODULES = ["MCP9800"]
+MODULES = ["MCP9800", "EEPROM"]
 RBGEN = "ruby ./Unity/auto/generate_test_runner.rb"
 
 # Creates a Phony target
