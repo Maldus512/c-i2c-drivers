@@ -27,8 +27,7 @@
 
 
 
-static int clock_delay = 10;
-
+#define CLOCK_DELAY 3
 
 
 /*----------------------------------------------------------------------------*/
@@ -55,7 +54,7 @@ void Init_I2C (unsigned int brg)
 void CK_I2C (unsigned char ck)
 {
     I2C_CLK = ck;
-    delay_us(clock_delay);
+    delay_us(CLOCK_DELAY);
 }
 
 void startCondition() {
@@ -93,7 +92,6 @@ void masterWrite(unsigned char byte) {
     {
         CK_I2C(0);
         I2C_DATA_OUT = (byte >> (7 - x)) & 0x01;
-        delay_us(1);
         CK_I2C(1);
     }
 }
