@@ -24,7 +24,7 @@
 
 
 #define TEMP_REG 0
-#define TC_ADDRESS 0
+#define TC_ADDRESS 0x90
 #define MAX_TEMP_DEC 2
 
 // <editor-fold defaultstate="collapsed" desc="variables">
