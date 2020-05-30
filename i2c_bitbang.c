@@ -142,7 +142,7 @@ char readAck() {
  *
  * Note:			None
  ********************************************************************/
-unsigned int EEAckPolling_b(unsigned char control)
+unsigned int EEAckPolling(unsigned char control)
 {
     unsigned char ack;
     startCondition();
@@ -244,7 +244,7 @@ int I2C_write_register (unsigned char cDevAddr, unsigned char cRegAddr, const un
     }
     
     stopCondition();
-    EEAckPolling_b(cDevAddr);
+    EEAckPolling(cDevAddr);
     
 #ifdef WRITE_PROTECT
     WRITE_PROTECT = 1;
