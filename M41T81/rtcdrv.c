@@ -17,13 +17,9 @@
 /******************************************************************************/
 
 #include <string.h>
-
-#include "hardwareprofile.h"
 #include "rtcdrv.h"
 
-#include "i2c_driver.h"
-
-
+#if 0
 
 #define     TRUE  1
 #define     FALSE 0
@@ -645,3 +641,5 @@ void Get_Str_From_Time (RTC_TIME time, unsigned char *str_raw, unsigned char *st
         str_time[8] = 0;
     }
 }
+
+#endif
