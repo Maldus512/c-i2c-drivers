@@ -1,7 +1,7 @@
 #ifndef EE24LC16_H_INCLUDED
 #define EE24LC16_H_INCLUDED
 
-#include "common/i2c_common.h"
+#include "i2c_common/i2c_common.h"
 
 #define MAX_BLOCK  0x7
 #define MEM_SIZE   0x800     // 2 KiByte

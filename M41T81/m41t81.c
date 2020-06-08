@@ -17,128 +17,172 @@
 /******************************************************************************/
 
 #include <string.h>
-#include "rtcdrv.h"
 
-#if 0
+#include "i2c_common/i2c_common.h"
 
-#define     TRUE  1
-#define     FALSE 0
+#include "m41t81.h"
+
+#define BCD2BIN(x) ((((x) >> 4) & 0xF) * 10 + ((x)&0xF))
+#define BIN2BCD(x) ((((x) / 10) << 4) | ((x) % 10))
 
 static volatile unsigned char ora_legale_auto_adjust_flag;
 static volatile unsigned char cPrevSec;
-static volatile short nMsec;
-static volatile short nSec;
-static volatile short nMin;
-static volatile short nHour;
-static volatile short nDayOfWeek;
-static volatile short nDay;
-static volatile short nMonth;
-static volatile short nYear;
+static volatile short         nMsec;
+static volatile short         nSec;
+static volatile short         nMin;
+static volatile short         nHour;
+static volatile short         nDayOfWeek;
+static volatile short         nDay;
+static volatile short         nMonth;
+static volatile short         nYear;
 
-const int nMonthOfYear [] = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
-void calc_day_of_week(RTC_TIME *pTime);
-
-
-extern unsigned char    stringa[64];
+const int nMonthOfYear[] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
 
 
-unsigned char str_curr_time[13] = "0000000000000";
+extern unsigned char stringa[64];
+
+
+unsigned char str_curr_time[13]   = "0000000000000";
 unsigned char str_date_display[9] = "GG/MM/AA";
 unsigned char str_time_display[9] = "hh:mm:ss";
-unsigned char str_prog_time[13] = "0000000000000";
+unsigned char str_prog_time[13]   = "0000000000000";
 
-RTC_TIME CurrTime; /* orologio di sitema */ 
-RTC_TIME ProgTime; /* orologio di sitema programmato */ 
-
-
+RTC_TIME CurrTime; /* orologio di sitema */
+RTC_TIME ProgTime; /* orologio di sitema programmato */
 
 
-static void BCD_to_ASCII(char BCD, char *string)
-{
+
+
+static void BCD_to_ASCII(char BCD, char *string) {
     *string = (((unsigned int)BCD & 0xf0) >> 4) | 0x30;
 
-    if (*string < '0' || *string > '9')
-    {
+    if (*string < '0' || *string > '9') {
         *string = '0';
     }
     string++;
 
     *string = ((BCD & 0x0f)) | 0x30;
 
-    if (*string < '0' || *string > '9')
-    {
+    if (*string < '0' || *string > '9') {
         *string = '0';
     }
 }
+
+
+/*----------------------------------------------------------------------------*/
+/* calc_day_of_week                                                           */
+/*----------------------------------------------------------------------------*/
+static void calc_day_of_week(RTC_TIME *pTime) {
+    unsigned int calc_a, calc_y, calc_m, calc_d;
+
+    // Formula to calculate the day-of-week:
+    //
+    // a= (14-month)/12
+    // y= year - a
+    // m= (month+(12*a))-2
+    // d= (day+y+(y/4)-(y/100)+(y/400)+((31*m)/12)) mod 7
+    //
+    // Remember: "mod 7" simply means to take the remainder, as in %7 in C
+    //
+    // The following variables are assigned:
+    //
+    // nDayOfWeek       Current day of the week (1-7, 1=Monday)
+    // pTime->cDate      Current Day
+    // pTime->cMonth    Current month (1-12)
+    // pTime->cYear     Current year (00-99) Must add 2000
+
+    calc_a = (14 - BCD2BIN(pTime->month)) / 12;
+    calc_y = (BCD2BIN(pTime->month) + 2000) - calc_a;
+    calc_m = (BCD2BIN(pTime->month) + (12 * calc_a)) - 2;
+    calc_d =
+        (BCD2BIN(pTime->month) + calc_y + (calc_y / 4) - (calc_y / 100) + (calc_y / 400) + ((31 * calc_m) / 12)) % 7;
+
+    // The day of week now resides in the calc_d variable.
+    // Remember, the day-of-week calculated is in the range 0-6,
+    // with Sunday = 0. We want Sunday = 7.
+
+    if (calc_d) {
+        // Non-zero - store day-of-week 1-6
+        pTime->day = calc_d;
+    } else {
+        // Equal to zero - this is Sunday - reset to 7
+        pTime->day = 7;
+    }
+}
+
 
 
 
 /*----------------------------------------------------------------------------*/
 /* Init_RTC                                                                   */
 /*----------------------------------------------------------------------------*/
-int Init_RTC (void)
-{
+int M41T81_init(i2c_driver_t driver) {
     unsigned char cData;
-    RTC_TIME tCurrTime;
-    
+    RTC_TIME      tCurrTime;
+    int           res;
+
     cPrevSec = 0;
-    
+
     // controlla stop bit (oscillator stopped)
-    if (I2C_read_register (M41T11_ADDR, SEG_TIME, &cData, 1))
-    {
-        return FALSE;
-    }
-    
-    if (cData & '\x80')
-    {
+    if ((res = i2c_read_register(driver, SEG_TIME, &cData, 1)))
+        return res;
+
+    if (cData & 0x80 || 1) {
         // inizializza default - Giovedi 01/01/2004 12:00:00, enable SQW @1sec // !!!!!!!!!!!!!!!!
-        tCurrTime.cSec   = '\x10';
-        tCurrTime.cMin   = '\x59';
-        tCurrTime.cHour  = '\x23';
-        
-        tCurrTime.cDay   = '\x04';
-        
-        tCurrTime.cDate  = '\x31';
-        tCurrTime.cMonth = '\x12';
-        tCurrTime.cYear  = '\x15';
-        
-        tCurrTime.cCtrl  = '\x80';
-        
-        if (!SetTime (&tCurrTime))
-        {
-            return FALSE;
-        }
+        tCurrTime.sec  = 0; //TODO: usa il formato BCD
+        tCurrTime.min  = 59;
+        tCurrTime.hour = 23;
+
+        tCurrTime.day = 3;
+
+        tCurrTime.date  = 31;
+        tCurrTime.month = 12;
+        tCurrTime.year  = 15;
+
+        tCurrTime.ctrl = '\x80';
+
+        if ((res = m41t81_set_time(driver, &tCurrTime)))
+            return res;
     }
-    
+
     // azzera halt update bit
-//     if (!I2C_Read (M41T11_ADDR, SEG_TIME + 11, &cData, 1))
-    if (I2C_read_register (M41T11_ADDR, SEG_TIME + 11, &cData, 1))
-    {
-        return FALSE;
-    }
-    
+    if ((res = i2c_read_register(driver, SEG_TIME + 11, &cData, 1)))
+        return res;
+
     cData &= ~'\x40';
-    
-//     if (!I2C_Write (M41T11_ADDR, SEG_TIME + 11, &cData, 1))
-    if (I2C_write_register (M41T11_ADDR, SEG_TIME + 11, &cData, 1))
-    {
-        return FALSE;
-    }
-    
-//     if (!I2C_Read (M41T11_ADDR, SEG_TIME + 11, &cData, 1))
-    if (I2C_read_register (M41T11_ADDR, SEG_TIME + 11, &cData, 1))
-    {
-        return FALSE;
-    }
-    
+
+    if ((res = i2c_write_register(driver, SEG_TIME + 11, &cData, 1)))
+        return res;
+
+    if ((res = i2c_read_register(driver, SEG_TIME + 11, &cData, 1)))
+        return res;
+
     if (cData & '\x40')
-    {
-        return FALSE;
-    }
-    
-    //return StartClock ();
-    return TRUE;
+        return -1;
+
+    return 0;
 }
+
+
+int m41t81_set_time(i2c_driver_t driver, const RTC_TIME *pTime) {
+    if (pTime == NULL)
+        return -1;
+
+    calc_day_of_week((RTC_TIME *)pTime);
+
+    return i2c_write_register(driver, SEG_TIME, (unsigned char *)pTime, sizeof(RTC_TIME));
+}
+
+
+int m41t81_get_time(i2c_driver_t driver, RTC_TIME *pTime) {
+    if (pTime == NULL)
+        return -1;
+
+    return i2c_read_register(driver, SEG_TIME, (uint8_t *)pTime, sizeof(RTC_TIME));
+}
+
+#if 0
+
 
 
 int rtccmp(RTC_TIME t1, RTC_TIME t2) {
@@ -171,46 +215,6 @@ int rtccmp(RTC_TIME t1, RTC_TIME t2) {
     return 0;
 }
 
-
-/*----------------------------------------------------------------------------*/
-/* SetTime                                                                    */
-/*----------------------------------------------------------------------------*/
-int SetTime (const RTC_TIME *pTime)
-{
-    if (pTime == NULL)
-    {
-        return FALSE;
-    }
-    calc_day_of_week((RTC_TIME *)pTime);
-    
-//     return I2C_Write (M41T11_ADDR, SEG_TIME, (const unsigned char*) pTime, sizeof (RTC_TIME));
-    I2C_write_register (M41T11_ADDR, SEG_TIME, (unsigned char*) pTime, sizeof (RTC_TIME));
-    return 1;
-}
-
-
-
-
-
-/*----------------------------------------------------------------------------*/
-/* GetTime                                                                    */
-/*----------------------------------------------------------------------------*/
-int GetTime (RTC_TIME *pTime)
-{
-    int res;
-    if (pTime == NULL)
-    {
-        return FALSE;
-    }
-    
-    res = I2C_read_register (M41T11_ADDR, SEG_TIME, (unsigned char*) pTime, sizeof (RTC_TIME));
-    
-//    if (res < 0) {
-//        memset(pTime, 0, sizeof(RTC_TIME));
-//    }
-    
-    return res;
-}
 
 
 
@@ -344,57 +348,6 @@ unsigned char Check_TIME (RTC_TIME *pTime)
 
 
 
-
-
-/*----------------------------------------------------------------------------*/
-/* calc_day_of_week                                                           */
-/*----------------------------------------------------------------------------*/
-void calc_day_of_week (RTC_TIME *pTime)
-{
-    unsigned int calc_a,calc_y,calc_m,calc_d;
-    
-    // Formula to calculate the day-of-week:
-    //
-    // a= (14-month)/12
-    // y= year - a
-    // m= (month+(12*a))-2
-    // d= (day+y+(y/4)-(y/100)+(y/400)+((31*m)/12)) mod 7
-    //
-    // Remember: "mod 7" simply means to take the remainder, as in %7 in C
-    //
-    // The following variables are assigned:
-    //
-    // nDayOfWeek       Current day of the week (1-7, 1=Monday)
-    // pTime->cDate      Current Day
-    // pTime->cMonth    Current month (1-12)
-    // pTime->cYear     Current year (00-99) Must add 2000
-    
-    calc_a = (14-BCD2BIN(pTime->cMonth)) / 12;
-    calc_y = (BCD2BIN(pTime->cYear) + 2000) - calc_a;
-    calc_m = (BCD2BIN(pTime->cMonth)+(12 * calc_a)) - 2;
-    calc_d = (BCD2BIN(pTime->cDate)
-                +calc_y
-                    +(calc_y/4)
-                        -(calc_y/100)
-                            +(calc_y/400)
-                                +((31*calc_m)/12)
-                                    ) % 7;
-    
-    // The day of week now resides in the calc_d variable.
-    // Remember, the day-of-week calculated is in the range 0-6,
-    // with Sunday = 0. We want Sunday = 7.
-    
-    if(calc_d)
-    {
-        // Non-zero - store day-of-week 1-6
-        pTime->cDay = calc_d;
-    }
-    else
-    {
-        // Equal to zero - this is Sunday - reset to 7
-        pTime->cDay = 7;
-    }
-}
 
 
 

@@ -1,7 +1,7 @@
 #ifndef MCP9800_H_INCLUDED
 #define MCP9800_H_INCLUDED
 
-#include "common/i2c_common.h"
+#include "i2c_common/i2c_common.h"
 
 #define MCP9800_TEMPERATURE_REGISTER   0
 #define MCP9800_CONFIGURATION_REGISTER 1

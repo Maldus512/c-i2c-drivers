@@ -1,5 +1,5 @@
 #include <stddef.h>
-#include "common/i2c_common.h"
+#include "i2c_common/i2c_common.h"
 #include "MCP9800.h"
 
 #define RESOLUTION_BIT_SHIFT 5
