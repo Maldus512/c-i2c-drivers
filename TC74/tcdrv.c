@@ -25,7 +25,7 @@
 
 #define TEMP_REG 0
 #define TC_ADDRESS 0x90
-#define MAX_TEMP_DEC 2
+#define MAX_TEMP_DEC 100
 
 // <editor-fold defaultstate="collapsed" desc="variables">
 
@@ -42,7 +42,7 @@ int readTemperature()
 {
     unsigned char negative = 0, tmp = 0, count = MAX_TEMP_DEC, div = 0, i = 1, val;
     
-    I2C_read_register(TEMP_REG, TC_ADDRESS, &val, 1);
+    I2C_read_register(TC_ADDRESS, TEMP_REG, &val, 1);
     temperature = (int) val;
     negative = temperature & 0x80;
     tmp = temperature & 0x7F;

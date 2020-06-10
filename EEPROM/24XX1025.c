@@ -335,9 +335,14 @@ int pageWrite_24XX1025(unsigned char ControlByte, unsigned char HighAdd, unsigne
     }
     while (readAck() && counter <= 10);
 
-    if (counter > 10) {
+    if (counter > 10)
+    {
         enableInt();
         write_protect_enable();
+        Nop();
+        Nop();
+        Nop();
+        Nop();
         return -1;
     }
     
@@ -346,6 +351,10 @@ int pageWrite_24XX1025(unsigned char ControlByte, unsigned char HighAdd, unsigne
         masterWrite(*wrptr);
         if (readAck() != 0)
         {
+            Nop();
+            Nop();
+            Nop();
+            Nop();
             return -1;
         }
         wrptr ++;
@@ -396,8 +405,13 @@ int blockRead_24XX1025 (unsigned char ControlByte, unsigned char HighAdd, unsign
     }
     while (counter <= 10 && readAck());
     
-    if (counter > 10) {
+    if (counter > 10)
+    {
         enableInt();
+        Nop();
+        Nop();
+        Nop();
+        Nop();
         return -1;
     }
     
@@ -406,8 +420,13 @@ int blockRead_24XX1025 (unsigned char ControlByte, unsigned char HighAdd, unsign
     
     masterWrite(ControlByte);
     
-    if (readAck()) {
+    if (readAck())
+    {
         enableInt();
+        Nop();
+        Nop();
+        Nop();
+        Nop();
         return -1;
     }
         
