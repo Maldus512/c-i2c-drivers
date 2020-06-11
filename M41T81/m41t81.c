@@ -127,7 +127,7 @@ int M41T81_init(i2c_driver_t driver) {
     if ((res = i2c_read_register(driver, SEG_TIME, &cData, 1)))
         return res;
 
-    if (cData & 0x80 || 1) {
+    if (cData & 0x80) {
         // inizializza default - Giovedi 01/01/2004 12:00:00, enable SQW @1sec // !!!!!!!!!!!!!!!!
         tCurrTime.sec  = 0; //TODO: usa il formato BCD
         tCurrTime.min  = 59;
