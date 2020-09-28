@@ -6,8 +6,6 @@
 #define TEMPERATURE_DECIMAL_PLACE 1
 #define CHECKSUM                  4
 
-#include <stdio.h>
-
 
 int zs05_read(i2c_driver_t driver, double *temperature, double *humidity) {
     uint8_t buffer[5] = {0};

@@ -128,16 +128,16 @@ int M41T81_init(i2c_driver_t driver) {
         return res;
 
     if (cData & 0x80) {
-        // inizializza default - Giovedi 01/01/2004 12:00:00, enable SQW @1sec // !!!!!!!!!!!!!!!!
-        tCurrTime.sec  = 0; //TODO: usa il formato BCD
-        tCurrTime.min  = 59;
-        tCurrTime.hour = 23;
+        // inizializza default
+        tCurrTime.sec  = BIN2BCD(0);
+        tCurrTime.min  = BIN2BCD(20);
+        tCurrTime.hour = BIN2BCD(12);
 
-        tCurrTime.day = 3;
+        tCurrTime.day = BIN2BCD(4);
 
-        tCurrTime.date  = 31;
-        tCurrTime.month = 12;
-        tCurrTime.year  = 15;
+        tCurrTime.date  = BIN2BCD(4);
+        tCurrTime.month = BIN2BCD(9);
+        tCurrTime.year  = BIN2BCD(20);
 
         tCurrTime.ctrl = '\x80';
 
@@ -175,10 +175,22 @@ int m41t81_set_time(i2c_driver_t driver, const RTC_TIME *pTime) {
 
 
 int m41t81_get_time(i2c_driver_t driver, RTC_TIME *pTime) {
+    int err;
     if (pTime == NULL)
         return -1;
 
-    return i2c_read_register(driver, SEG_TIME, (uint8_t *)pTime, sizeof(RTC_TIME));
+    if ((err = i2c_read_register(driver, SEG_TIME, (uint8_t *)pTime, sizeof(RTC_TIME))))
+        return err;
+
+    pTime->date  = BCD2BIN(pTime->date);
+    pTime->day   = BCD2BIN(pTime->day);
+    pTime->month = BCD2BIN(pTime->month);
+    pTime->year  = BCD2BIN(pTime->year);
+    pTime->hour  = BCD2BIN(pTime->hour);
+    pTime->min   = BCD2BIN(pTime->min);
+    pTime->sec   = BCD2BIN(pTime->sec);
+
+    return 0;
 }
 
 #if 0

@@ -13,6 +13,7 @@ typedef struct {
     uint8_t device_address;
     int (*i2c_transfer)(uint8_t devaddr, uint8_t *writebuf, int writelen, uint8_t *readbuf, int readlen);
     void (*ack_polling)(uint8_t devaddr);
+    void (*delay_ms)(unsigned long ms);
 } i2c_driver_t;
 
 int i2c_write_register(i2c_driver_t driver, uint8_t reg, uint8_t *data, size_t len);
