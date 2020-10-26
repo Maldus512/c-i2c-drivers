@@ -20,8 +20,8 @@ typedef struct {
      *  devaddr: Device address
      *  writebuf: buffer of bytes to be written to the device. It can be NULL (in which case no data should be written)
      *  writelen: number of bytes to be written
-     *  readbuf: buffer to be filled with bytes read from the device. It can be NULL (in which case no data should be read)
-     *  readlen: number of bytes to be read
+     *  readbuf: buffer to be filled with bytes read from the device. It can be NULL (in which case no data should be
+     * read) readlen: number of bytes to be read
      *
      *  return: 0 if everything went well, something else otherwise (the error is propagated)
      */
@@ -40,6 +40,18 @@ typedef struct {
     void (*ack_polling)(uint8_t devaddr);
     void (*delay_ms)(unsigned long ms);
 } i2c_driver_t;
+
+
+typedef struct {
+    uint8_t sec;
+    uint8_t min;
+    uint8_t hour;
+    uint8_t day;
+    uint8_t wday;
+    uint8_t month;
+    uint8_t year;
+} rtc_time_t;
+
 
 /* Write a specific register
  * Many I2C devices work with internal addressable registers. This functions simply executes a transaction containing

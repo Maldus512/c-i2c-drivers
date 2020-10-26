@@ -1,0 +1,31 @@
+menu "I2C library"
+    menu "Temperature sensors"
+        config I2C_DEVICES_SHT3
+            bool "SHT3 temperature sensor"
+            help
+                Enable the SHT3 I2C driver
+    endmenu
+
+    menu "Eeproms"
+    endmenu
+
+    menu "Real time clocks"
+        config I2C_DEVICES_RTC_PCF85063A
+            bool "PCF85063A"
+            help
+                Enable the PCF85063A RTC driver
+    endmenu
+
+    config I2C_DEVICES_MCP4018
+        bool "MCP4018 digital potentiometer"
+        help
+            Enable the MCP4018 I2C driver
+
+    menu "Ports"
+        config I2C_DEVICES_PIC_BITBANG_PORT
+            bool "PIC24 bitbang driver"
+        config I2C_DEVICES_ESP_IDF_PORT
+            bool "ESP-IDF i2c driver"
+    endmenu
+
+endmenu

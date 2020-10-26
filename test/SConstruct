@@ -2,10 +2,10 @@ import os
 import multiprocessing
 
 PROGRAM = "testsuite"
-LIBS = "../"
+LIBS = "../i2c_devices/"
 UNITY = "Unity/src/"
 CFLAGS = ["-Wall", "-Wextra", "-g", "-O0"]
-MODULES = ["MCP9800", "EEPROM"]
+MODULES = ["temperature/MCP9800", "eeprom"]
 RBGEN = "ruby ./Unity/auto/generate_test_runner.rb"
 
 # Creates a Phony target
@@ -44,7 +44,7 @@ EXE = ""
 programs = []
 
 for mod in MODULES:
-    tests = Glob("./{}/*.c".format(mod), strings=True)
+    tests = Glob(f'./{mod}/*.c', strings=True)
     for t in [x for x in tests if not str.endswith(x, "_Runner.c")]:
         sources = unity+libs
         env.Command(t.replace(".c", "_Runner.c"), t, "{} {}".format(RBGEN, t))

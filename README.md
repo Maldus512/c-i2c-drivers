@@ -1,7 +1,11 @@
 # I2C Peripheral library
 
+A collection of I2C drivers for various integrated circuits.
+Immediately pluggable as ESP-IDF component.
+
 
 ## TODO
 
-    - Gather all peripherarals under an `i2c_devices` folder
     - Add tests for al peripherals
+    - Complete ESP-IDF integration
+    - Add `SConscript` integration
