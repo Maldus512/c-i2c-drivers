@@ -121,8 +121,6 @@ int M41T81_init(i2c_driver_t driver) {
         tCurrTime.month = BIN2BCD(9);
         tCurrTime.year  = BIN2BCD(20);
 
-        tCurrTime.ctrl = '\x80';
-
         if ((res = m41t81_set_time(driver, &tCurrTime)))
             return res;
     }
