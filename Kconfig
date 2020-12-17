@@ -7,6 +7,15 @@ menu "I2C library"
     endmenu
 
     menu "Eeproms"
+        config I2C_DEVICES_EEPROM_24LC16
+            bool "MCP24LC16"
+            help
+                Enable the MCP24LC16 RTC driver
+
+        config I2C_DEVICES_EEPROM_24LC1025
+            bool "MCP24LC1025"
+            help
+                Enable the MCP24LC1025 RTC driver
     endmenu
 
     menu "Real time clocks"
