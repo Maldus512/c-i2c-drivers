@@ -66,3 +66,9 @@ int esp_idf_i2c_port_transfer(uint8_t devaddr, uint8_t *writebuf, int writelen, 
 
     return ret;
 }
+
+
+void esp_idf_i2c_ack_polling(uint8_t devaddr) {
+    (void)devaddr;
+    vTaskDelay(pdMS_TO_TICKS(5));
+}
