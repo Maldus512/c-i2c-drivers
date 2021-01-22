@@ -15,7 +15,7 @@ typedef enum {
 } sht21_resolution_t;
 
 
-int  sht21_read(i2c_driver_t driver, double *temperature, double *humidity);
+int  sht21_read(i2c_driver_t driver, double *temperature, double *humidity, unsigned long msdelay);
 int sht21_soft_reset(i2c_driver_t driver);
 int sht21_read_user_register(i2c_driver_t driver, uint8_t *ureg);
 int sht21_write_user_register(i2c_driver_t driver, uint8_t ureg);
