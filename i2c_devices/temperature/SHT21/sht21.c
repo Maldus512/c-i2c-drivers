@@ -75,20 +75,21 @@ int sht21_set_resolution(i2c_driver_t driver, sht21_resolution_t resolution) {
 }
 
 
-int sht21_read(i2c_driver_t driver, double *temperature, double *humidity) {
+int sht21_read(i2c_driver_t driver, double *temperature, double *humidity, unsigned long msdelay) {
     int     res = 0, counter = 0;
     uint8_t buffer[4] = {0};
+    msdelay           = msdelay > 100 ? 100 : msdelay;     // no point in waiting more than 100ms
 
     if (temperature) {
         buffer[0] = TRIGGER_T_MEASUREMENT | NO_HOLD_MASTER_BIT;
         driver.i2c_transfer(driver.device_address, buffer, 1, NULL, 0);
 
         do {
-            driver.delay_ms(5);
+            driver.delay_ms(1);
             res = driver.i2c_transfer(driver.device_address, NULL, 0, buffer, 3);
-        } while (res && counter++ < 100);
+        } while (res && counter++ < msdelay);
 
-        if (sht21_crc(buffer, 2) != buffer[2]) {
+        if (res || sht21_crc(buffer, 2) != buffer[2]) {
             return -1;
         } else {
             uint16_t rawt = (((uint16_t)buffer[0] << 8) | (buffer[1] & (~0x3)));

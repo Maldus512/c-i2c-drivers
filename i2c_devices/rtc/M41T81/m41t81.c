@@ -100,7 +100,7 @@ static void calc_day_of_week(rtc_time_t *pTime) {
 /*----------------------------------------------------------------------------*/
 int M41T81_init(i2c_driver_t driver) {
     unsigned char cData;
-    rtc_time_t      tCurrTime;
+    rtc_time_t    tCurrTime;
     int           res;
 
     cPrevSec = 0;
@@ -115,9 +115,9 @@ int M41T81_init(i2c_driver_t driver) {
         tCurrTime.min  = BIN2BCD(20);
         tCurrTime.hour = BIN2BCD(12);
 
-        tCurrTime.day = BIN2BCD(4);
+        tCurrTime.wday = BIN2BCD(4);
 
-        tCurrTime.date  = BIN2BCD(4);
+        tCurrTime.day   = BIN2BCD(4);
         tCurrTime.month = BIN2BCD(9);
         tCurrTime.year  = BIN2BCD(20);
 
@@ -162,7 +162,7 @@ int m41t81_get_time(i2c_driver_t driver, rtc_time_t *pTime) {
     if ((err = i2c_read_register(driver, SEG_TIME, (uint8_t *)pTime, sizeof(rtc_time_t))))
         return err;
 
-    pTime->date  = BCD2BIN(pTime->date);
+    pTime->wday  = BCD2BIN(pTime->wday);
     pTime->day   = BCD2BIN(pTime->day);
     pTime->month = BCD2BIN(pTime->month);
     pTime->year  = BCD2BIN(pTime->year);
