@@ -17,5 +17,6 @@ typedef enum {
 
 int sht3_start_single_acquisition(i2c_driver_t driver, int clock_stretching, sht3_repeatability_t repeatibility);
 int sht3_read_acquisition(i2c_driver_t driver, double *temperature, double *humidity);
+int sht3_read_status_register(i2c_driver_t driver, uint16_t *status);
 
 #endif
