@@ -30,6 +30,12 @@ menu "I2C library"
         help
             Enable the MCP4018 I2C driver
 
+    config I2C_DEVICES_LTR559ALS
+        bool "LTR559ALS optical sensor"
+        help
+            Enable the LTR559ALS I2C driver
+    
+
     menu "Ports"
         config I2C_DEVICES_PIC_BITBANG_PORT
             bool "PIC24 bitbang driver"
