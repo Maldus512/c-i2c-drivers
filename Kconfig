@@ -1,5 +1,10 @@
 menu "I2C library"
     menu "Temperature sensors"
+        config I2C_DEVICES_SHT21
+            bool "SHT21 temperature sensor"
+            help
+                Enable the SHT21 I2C driver
+                
         config I2C_DEVICES_SHT3
             bool "SHT3 temperature sensor"
             help

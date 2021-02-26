@@ -1,5 +1,8 @@
 list(APPEND MODULES "i2c_common")
 
+if (CONFIG_I2C_DEVICES_SHT21)
+    list(APPEND MODULES "i2c_devices/temperature/SHT21")
+endif()
 if (CONFIG_I2C_DEVICES_SHT3)
     list(APPEND MODULES "i2c_devices/temperature/SHT3")
 endif()
