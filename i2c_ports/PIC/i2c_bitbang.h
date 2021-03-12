@@ -15,15 +15,11 @@
 /*                                                                            */
 /******************************************************************************/
 
-#include "hardwareprofile.h"
+#include <stdint.h>
 
-#define HIGH                1
-#define LOW                 0
+void Init_I2C (void);
 
-
-void Init_I2C (unsigned int brg);
-
-int I2C_write_register(unsigned char, unsigned char, const unsigned char*, int);
-int I2C_read_register (unsigned char, unsigned char, unsigned char*, int);
+unsigned int pic_i2c_bitbang_port_ack_polling(unsigned char control);
+int pic_i2c_bitbang_port_transfer(uint8_t devaddr, uint8_t *writebuf, int writelen, uint8_t *readbuf, int readlen);
 
 int findAddress_b();

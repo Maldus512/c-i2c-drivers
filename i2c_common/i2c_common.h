@@ -3,7 +3,6 @@
 
 #include <stdint.h>
 #include <string.h>
-#include <unistd.h>
 
 #define I2C_READ_ADDR(x)  (x | 0x01)
 #define I2C_WRITE_ADDR(x) (x & 0xFE)

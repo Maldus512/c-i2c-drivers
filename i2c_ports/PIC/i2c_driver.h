@@ -18,12 +18,11 @@
 #include "hardwareprofile.h"
 
 
-#define WRITE_CB(x)     x & 0xFE
-#define READ_CB(x)      x | 0x01
+#define WRITE_CB(x)     (x & 0xFE)
+#define READ_CB(x)      (x | 0x01)
 
 void disableInt();
 void enableInt();
-
 
 void write_protect_enable();
 void write_protect_disable();
