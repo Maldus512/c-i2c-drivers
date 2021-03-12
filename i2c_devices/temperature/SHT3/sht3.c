@@ -35,7 +35,7 @@ int sht3_read_status_register(i2c_driver_t driver, uint16_t *status) {
     uint8_t readbuf[2]  = {0};
 
     int res = driver.i2c_transfer(driver.device_address, writebuf, 2, readbuf, 2);
-    *status = (((uint16_t)readbuf[1]) << 8) | ((uint16_t)readbuf[0]);
+    *status = (((uint16_t)readbuf[0]) << 8) | ((uint16_t)readbuf[1]);
 
     return res;
 }
