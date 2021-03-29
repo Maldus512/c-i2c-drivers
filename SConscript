@@ -3,11 +3,12 @@ import os
 #TODO: Add components
 components = [
     'temperature/SHT3',
+    'temperature/SHT21',
+    'LTR559ALS',
 ]
 ports = [
     'dummy'
 ]
-sources = {}
 sources = {}
 
 Import('i2c_selected', 'i2c_env')
