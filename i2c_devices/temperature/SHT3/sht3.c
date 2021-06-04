@@ -13,6 +13,9 @@
 #define SINGLE_SHOT_NO_CLOCK_STRETCHING_LSB_LOW_REP  0x16
 
 
+#define CMD_READ_STATUS_REGISTER 0xF32D
+
+
 static uint8_t sht3_crc8(uint8_t *data, size_t len) {
     uint8_t polynomial = 0x31;
     uint8_t crc        = 0xFF;
@@ -24,6 +27,17 @@ static uint8_t sht3_crc8(uint8_t *data, size_t len) {
         }
     }
     return crc;
+}
+
+
+int sht3_read_status_register(i2c_driver_t driver, uint16_t *status) {
+    uint8_t writebuf[2] = {(CMD_READ_STATUS_REGISTER >> 8) & 0xFF, CMD_READ_STATUS_REGISTER & 0xFF};
+    uint8_t readbuf[2]  = {0};
+
+    int res = driver.i2c_transfer(driver.device_address, writebuf, 2, readbuf, 2);
+    *status = (((uint16_t)readbuf[0]) << 8) | ((uint16_t)readbuf[1]);
+
+    return res;
 }
 
 

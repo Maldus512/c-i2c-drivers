@@ -22,9 +22,16 @@
 #include "i2c_bitbang.h"
 #include "i2c_driver.h"
 
+#include "../../i2c_common/i2c_common.h"
+
+
+
+#define HIGH                1
+#define LOW                 0
 #define TRUE    1
 #define FALSE   0
-
+#define OUTPUT_PIN 0
+#define INPUT_PIN 1
 
 
 static int clock_delay = 10;
@@ -34,7 +41,7 @@ static int clock_delay = 10;
 /*----------------------------------------------------------------------------*/
 /*  Init_I2C_b                                                                */
 /*----------------------------------------------------------------------------*/
-void Init_I2C (unsigned int brg)
+void i2c_bitbang_init (void)
 {
     I2C_CLK       = 1;    /* CLK I2C  */
     I2C_DATA_OUT      = 1;    /* DATI I2C */
@@ -55,7 +62,7 @@ void Init_I2C (unsigned int brg)
 void CK_I2C (unsigned char ck)
 {
     I2C_CLK = ck;
-    delay_us(clock_delay);
+    __delay_us(clock_delay);
 }
 
 void startCondition() {
@@ -93,7 +100,7 @@ void masterWrite(unsigned char byte) {
     {
         CK_I2C(0);
         I2C_DATA_OUT = (byte >> (7 - x)) & 0x01;
-        delay_us(1);
+        __delay_us(1);
         CK_I2C(1);
     }
 }
@@ -128,7 +135,7 @@ char readAck() {
     CK_I2C(1);
     x = I2C_DATA_IN;//I2C_DATA_OUT;
     CK_I2C(0);
-    delay_us(1);
+    __delay_us(1);
     return x;
 }
 
@@ -144,24 +151,22 @@ char readAck() {
  *
  * Note:			None
  ********************************************************************/
-unsigned int EEAckPolling_b(unsigned char control)
+void pic_i2c_bitbang_port_ack_polling(uint8_t addr)
 {
     unsigned char ack;
     startCondition();
 
-    masterWrite(WRITE_CB(control));
+    masterWrite(WRITE_CB(addr));
     ack = readAck();
     
     while (ack)
     {
         stopCondition();
         startCondition(); //generate restart
-        masterWrite(control);
+        masterWrite(addr);
         ack = readAck();
     }
     stopCondition(); //send stop condition
-    
-    return (0);
 }
 
 
@@ -200,153 +205,90 @@ int findAddress_b() {
 }
 
 
-
-
-int I2C_write_register (unsigned char cDevAddr, unsigned char cRegAddr, const unsigned char* pData, int nLen)
-{
-    unsigned int counter, y;
-#ifdef WRITE_PROTECT
-    WRITE_PROTECT = 0;
-#endif
+int pic_i2c_bitbang_port_transfer(uint8_t devaddr, uint8_t *writebuf, int writelen, uint8_t *readbuf, int readlen) {
+    
+    unsigned int counter;
+    if (writebuf!=NULL && writelen>0) {
+         unsigned int y;
+         write_protect_disable();
     counter = 0;
-    startCondition();
-    masterWrite(cDevAddr);
+    
+    
     
     do
     {
         counter++;
+        startCondition();
+        masterWrite(WRITE_CB(devaddr));
         if (readAck() != 0)
         {
-            startCondition();
-            masterWrite(cDevAddr);
-            
-            if (readAck() != 0)
-                continue;
+            continue;
         }
-        masterWrite(cRegAddr);
+        
+        else break;
     }
-    while(readAck() != 0 && counter <= 10);
+    while(counter <= 10);
     
     if (counter > 10) {
         return -1;
     }
     
-    for (y = 0; y < nLen; y++)
+    for (y = 0; y < writelen; y++)
     {
-        masterWrite(*pData);
+        masterWrite(writebuf[y]);
         
         if (readAck() != 0)
         {
-#ifdef WRITE_PROTECT
-            WRITE_PROTECT = 1;
-#endif
+            write_protect_enable();
             return -1;
         }
-        pData ++;
+  
     }
     
     stopCondition();
-    EEAckPolling_b(cDevAddr);
+    //pic_i2c_bitbang_port_ack_polling(devaddr);
     
-#ifdef WRITE_PROTECT
-    WRITE_PROTECT = 1;
-#endif
-    return (0);
-}
-
-
-
-int I2C_read_register (unsigned char cDevAddr, unsigned char cRegAddr, unsigned char* buffer, int nLen)
-{
-    unsigned int counter, y = 0; 
-    char ack = 1;
-    startCondition();
-    cDevAddr = WRITE_CB(cDevAddr);
-    masterWrite(cDevAddr);
+    write_protect_enable();
+    }
     
-    counter = 0;
-    
+    if (readbuf!=NULL && readlen>0) {
+        
+         unsigned int y;  
+         counter=0;
+        
+        
     do {
         counter++;
-        ack = readAck();
-        if (ack != 0) {
-            startCondition();
-            masterWrite(cDevAddr);
-            ack = readAck();
-            if ( ack != 0)
-                continue;
-        }
-  
-        masterWrite(cRegAddr);
-        ack = readAck();
-    } while(ack != 0 && counter <= 10);
-    
-    if (counter > 10) {
-        return -1;
-    }
-    
-    startCondition();
-    cDevAddr = READ_CB(cDevAddr);
-    
-    masterWrite(cDevAddr);
-    if (readAck() != 0)
-        return -1;
-        
-    /*--------------------------------------------------------------*/
-    /* Legge la ram del dispositivo                                 */
-    /*--------------------------------------------------------------*/
-    
-    for(y = 0; y < nLen; y++)
-    {
-        if (y == nLen - 1) {
-            *buffer = masterRead();
-            writeAck(1);
-        }
-        else {
-            *buffer = masterRead(); 
-            writeAck(0);
-        }
-        buffer++;
-    }
-    
-    stopCondition();
-    return (0);
-}
-
-
-int I2C_read_current_register (unsigned char cDevAddr, unsigned char* buffer, int nLen)
-{
-    unsigned int y;   
-    startCondition();
-    cDevAddr = READ_CB(cDevAddr);
-    masterWrite(cDevAddr);
-        
-    do {
+        startCondition();
+        masterWrite(READ_CB(devaddr));
         if (readAck() != 0) {
-            startCondition();
-            masterWrite(cDevAddr);
-            if (readAck() != 0)
                 continue;
         }
-  
-    } while(readAck() != 0);
+        
+        else break;
+    } while(counter<=10);
+    
+    if (counter>10)
+        return -1;
+    
     /*--------------------------------------------------------------*/
     /* Legge la ram del dispositivo                                 */
     /*--------------------------------------------------------------*/
     
-    for(y = 0; y < nLen; y++)
+    for(y = 0; y < readlen; y++)
     {
-        if (y == nLen - 1) {
-            *buffer = masterRead();
+        if (y == readlen - 1) {
+            readbuf[y] = masterRead();
             writeAck(1);
         }
         else {
-            *buffer = masterRead(); 
+            readbuf[y] = masterRead(); 
             writeAck(0);
         }
-        buffer++;
     }
     
     stopCondition();
+       
+}
     return (0);
 }
