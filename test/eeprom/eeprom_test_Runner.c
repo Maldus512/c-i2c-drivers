@@ -69,7 +69,7 @@ static void run_test(UnityTestFunction func, const char* name, int line_num)
 int main(void)
 {
   UnityBegin("eeprom/eeprom_test.c");
-  run_test(test_temp, "test_temp", 39);
+  run_test(test_temp, "test_temp", 42);
 
   return UnityEnd();
 }

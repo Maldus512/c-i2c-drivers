@@ -35,9 +35,11 @@ void esp_idf_i2c_scanner(void) {
 }
 
 
-int esp_idf_i2c_port_transfer(uint8_t devaddr, uint8_t *writebuf, int writelen, uint8_t *readbuf, int readlen) {
+int esp_idf_i2c_port_transfer(uint8_t devaddr, uint8_t *writebuf, size_t writelen, uint8_t *readbuf, size_t readlen,
+                              void *arg) {
     esp_err_t        ret = ESP_OK;
     i2c_cmd_handle_t cmd;
+    (void)arg;
 
     if (writebuf != NULL && writelen > 0) {
         cmd = i2c_cmd_link_create();
@@ -68,7 +70,8 @@ int esp_idf_i2c_port_transfer(uint8_t devaddr, uint8_t *writebuf, int writelen, 
 }
 
 
-void esp_idf_i2c_ack_polling(uint8_t devaddr) {
+void esp_idf_i2c_ack_polling(uint8_t devaddr, void *arg) {
     (void)devaddr;
+    (void)arg;
     vTaskDelay(pdMS_TO_TICKS(5));
 }

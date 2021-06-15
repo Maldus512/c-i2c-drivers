@@ -34,7 +34,7 @@ int sht3_read_status_register(i2c_driver_t driver, uint16_t *status) {
     uint8_t writebuf[2] = {(CMD_READ_STATUS_REGISTER >> 8) & 0xFF, CMD_READ_STATUS_REGISTER & 0xFF};
     uint8_t readbuf[2]  = {0};
 
-    int res = driver.i2c_transfer(driver.device_address, writebuf, 2, readbuf, 2);
+    int res = driver.i2c_transfer(driver.device_address, writebuf, 2, readbuf, 2, driver.arg);
     *status = (((uint16_t)readbuf[0]) << 8) | ((uint16_t)readbuf[1]);
 
     return res;
@@ -56,7 +56,7 @@ int sht3_start_single_acquisition(i2c_driver_t driver, int clock_stretching, sht
     int     index    = clock_stretching ? 1 : 0;
     uint8_t buffer[] = {msbs[index], lsbs[index][repeatibility]};
 
-    return driver.i2c_transfer(driver.device_address, buffer, 2, NULL, 0);
+    return driver.i2c_transfer(driver.device_address, buffer, 2, NULL, 0, driver.arg);
 }
 
 
@@ -64,7 +64,7 @@ int sht3_read_acquisition(i2c_driver_t driver, double *temperature, double *humi
     uint8_t  buffer[6];
     uint16_t temp, hum;
 
-    int res = driver.i2c_transfer(driver.device_address, NULL, 0, buffer, 6);
+    int res = driver.i2c_transfer(driver.device_address, NULL, 0, buffer, 6, driver.arg);
 
     if (res)
         return res;

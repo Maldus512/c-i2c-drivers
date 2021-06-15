@@ -2,7 +2,9 @@
 #define I2C_COMMON_H_INCLUDED
 
 #include <stdint.h>
+#include <stdlib.h>
 #include <string.h>
+
 
 #define I2C_READ_ADDR(x)  (x | 0x01)
 #define I2C_WRITE_ADDR(x) (x & 0xFE)
@@ -21,10 +23,12 @@ typedef struct {
      *  writelen: number of bytes to be written
      *  readbuf: buffer to be filled with bytes read from the device. It can be NULL (in which case no data should be
      * read) readlen: number of bytes to be read
+     *  arg: extra user argument
      *
      *  return: 0 if everything went well, something else otherwise (the error is propagated)
      */
-    int (*i2c_transfer)(uint8_t devaddr, uint8_t *writebuf, int writelen, uint8_t *readbuf, int readlen);
+    int (*i2c_transfer)(uint8_t devaddr, uint8_t *writebuf, size_t writelen, uint8_t *readbuf, size_t readlen,
+                        void *arg);
 
     /* Callback for an address polling operation
      * Some devices (mainly I2C eeproms) support address polling: when queried for a write operation they
@@ -35,9 +39,21 @@ typedef struct {
      * It can easily be replaced by a suitably long time delay.
      *
      *  devaddr: Device address
+     *  arg: extra user argument
      */
-    void (*ack_polling)(uint8_t devaddr);
+    void (*ack_polling)(uint8_t devaddr, void *arg);
+
+    /**
+     * @brief Delay function. Useful for synchronous operations on some devices
+     *
+     */
     void (*delay_ms)(unsigned long ms);
+
+    /**
+     * @brief Extra user argument
+     *
+     */
+    void *arg;
 } i2c_driver_t;
 
 

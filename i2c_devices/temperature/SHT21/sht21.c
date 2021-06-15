@@ -33,7 +33,7 @@ static uint8_t sht21_crc(uint8_t *data, uint8_t len) {
 
 int sht21_soft_reset(i2c_driver_t driver) {
     uint8_t buffer = SOFT_RESET;
-    return driver.i2c_transfer(driver.device_address, &buffer, 1, NULL, 0);
+    return driver.i2c_transfer(driver.device_address, &buffer, 1, NULL, 0, driver.arg);
 }
 
 
@@ -41,7 +41,7 @@ int sht21_read_user_register(i2c_driver_t driver, uint8_t *ureg) {
     int     res      = 0;
     uint8_t wrbuf[1] = {READ_USER_REGISTER};
 
-    res = driver.i2c_transfer(driver.device_address, wrbuf, 1, ureg, 1);
+    res = driver.i2c_transfer(driver.device_address, wrbuf, 1, ureg, 1, driver.arg);
 
     return res;
 }
@@ -51,7 +51,7 @@ int sht21_write_user_register(i2c_driver_t driver, uint8_t ureg) {
     int     res      = 0;
     uint8_t wrbuf[2] = {WRITE_USER_REGISTER, ureg};
 
-    res = driver.i2c_transfer(driver.device_address, wrbuf, 2, NULL, 0);
+    res = driver.i2c_transfer(driver.device_address, wrbuf, 2, NULL, 0, driver.arg);
 
     return res;
 }
@@ -84,11 +84,11 @@ int sht21_read(i2c_driver_t driver, double *temperature, double *humidity, unsig
 
     if (temperature) {
         buffer[0] = TRIGGER_T_MEASUREMENT | NO_HOLD_MASTER_BIT;
-        driver.i2c_transfer(driver.device_address, buffer, 1, NULL, 0);
+        driver.i2c_transfer(driver.device_address, buffer, 1, NULL, 0, driver.arg);
 
         do {
             driver.delay_ms(1);
-            res = driver.i2c_transfer(driver.device_address, NULL, 0, buffer, 3);
+            res = driver.i2c_transfer(driver.device_address, NULL, 0, buffer, 3, driver.arg);
         } while (res && counter++ < msdelay);
 
         if (res || sht21_crc(buffer, 2) != buffer[2]) {
@@ -101,11 +101,11 @@ int sht21_read(i2c_driver_t driver, double *temperature, double *humidity, unsig
 
     if (humidity) {
         buffer[0] = TRIGGER_RH_MEASUREMENT | NO_HOLD_MASTER_BIT;
-        driver.i2c_transfer(driver.device_address, buffer, 1, NULL, 0);
+        driver.i2c_transfer(driver.device_address, buffer, 1, NULL, 0, driver.arg);
 
         do {
             driver.delay_ms(5);
-            res = driver.i2c_transfer(driver.device_address, NULL, 0, buffer, 3);
+            res = driver.i2c_transfer(driver.device_address, NULL, 0, buffer, 3, driver.arg);
         } while (res && counter++ < 200);
 
         if (sht21_crc(buffer, 2) != buffer[2]) {

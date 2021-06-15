@@ -69,7 +69,7 @@ static void run_test(UnityTestFunction func, const char* name, int line_num)
 int main(void)
 {
   UnityBegin("temperature/MCP9800/temp_test.c");
-  run_test(test_temp, "test_temp", 23);
+  run_test(test_temp, "test_temp", 24);
 
   return UnityEnd();
 }

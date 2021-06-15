@@ -7,13 +7,16 @@ void tearDown() {}
 static int test1 = 0;
 static int test2 = 0;
 
-void i2c_ack_polling(uint8_t devaddr) {
+void i2c_ack_polling(uint8_t devaddr, void *arg) {
+    (void)devaddr;
+    (void)arg;
     TEST_ASSERT_EQUAL(0xA0, devaddr);
     test2 = 1;
 }
 
-int write_i2c_reg(uint8_t devaddr, uint8_t *write, int writelen, uint8_t *data, int len) {
+int write_i2c_reg(uint8_t devaddr, uint8_t *write, size_t writelen, uint8_t *data, size_t len, void *arg) {
     (void)data;
+    (void)arg;
     (void)write;
     (void)writelen;
     (void)len;

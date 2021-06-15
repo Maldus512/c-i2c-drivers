@@ -17,12 +17,12 @@ int EE24LC16_sequential_write(i2c_driver_t driver, uint8_t block, uint8_t addres
         buffer[0]    = address;
         memcpy(&buffer[1], data, pagesize);
 
-        int res = driver.i2c_transfer(controlbyte, buffer, pagesize + 1, NULL, 0);
+        int res = driver.i2c_transfer(controlbyte, buffer, pagesize + 1, NULL, 0, driver.arg);
 
         if (res)
             return res;
         else if (driver.ack_polling)
-            driver.ack_polling(driver.device_address);
+            driver.ack_polling(driver.device_address, driver.arg);
 
         len -= pagesize;
         data += pagesize;
@@ -54,5 +54,5 @@ int EE24LC16_sequential_read(i2c_driver_t driver, uint8_t block, uint8_t address
     if (fulladdr + len >= MEM_SIZE)
         return -2;
 
-    return driver.i2c_transfer(controlbyte, &address, 1, data, len);
+    return driver.i2c_transfer(controlbyte, &address, 1, data, len, driver.arg);
 }
