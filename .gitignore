@@ -1,3 +1,5 @@
 .vscode
 .sconsign.dblite
 *.o
+*_Runner.*
+*_test

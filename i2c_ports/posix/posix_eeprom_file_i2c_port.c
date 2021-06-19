@@ -27,33 +27,44 @@ int posix_eeprom_file_i2c_u8addr_port_transfer(uint8_t devaddr, uint8_t *writebu
             current_address = ((devaddr & 0xE) << 8) | writebuf[start++];
         }
 
-        if (writelen <= start) {
-            // Just update the address
-            return 0;
-        }
+        if (writelen > start) {
+            int res = get_file_size(filename);
+            if (res < 0) {
+                return -1;
+            }
+            size_t size = (size_t)res;
 
+            if (size < current_address) {
+                if (pad_file(filename, current_address - size)) {
+                    return -1;
+                }
+            }
+
+            res = overwrite_file(filename, current_address, &writebuf[start], writelen - start);
+            if (res < 0) {
+                return -1;
+            } else {
+                // Update the current address
+                current_address += (size_t)res;
+            }
+        } else {
+            // Otherwise just update the address
+        }
+    }
+
+    if (readlen > 0 && readbuf != NULL) {
         int res = get_file_size(filename);
         if (res < 0) {
             return -1;
         }
         size_t size = (size_t)res;
 
-        if (size < current_address) {
-            if (pad_file(filename, current_address - size)) {
+        if (size < current_address + readlen) {
+            if (pad_file(filename, current_address + readlen - size)) {
                 return -1;
             }
         }
 
-        res = overwrite_file(filename, current_address, &writebuf[start], writelen - start);
-        if (res < 0) {
-            return -1;
-        } else {
-            // Update the current address
-            current_address += (size_t)res;
-        }
-    }
-
-    if (readlen > 0 && readbuf != NULL) {
         return read_file(filename, current_address, readbuf, readlen);
     }
 
@@ -175,6 +186,10 @@ static int read_file(char *filename, size_t start, uint8_t *buffer, size_t len) 
             printf("Read error: %s\n", strerror(errno));
             fclose(fp);
             return -1;
+        } else if (res == 0) {
+            printf("File was not long enough");
+            fclose(fp);
+            return len;
         } else {
             read += (size_t)res;
         }
