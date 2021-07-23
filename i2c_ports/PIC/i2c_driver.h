@@ -66,4 +66,4 @@ void idle();
 
     
     
-void Init_I2C();
+void i2c_bitbang_init();

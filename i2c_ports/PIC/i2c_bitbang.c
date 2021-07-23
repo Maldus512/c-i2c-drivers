@@ -41,7 +41,7 @@ static int clock_delay = 10;
 /*----------------------------------------------------------------------------*/
 /*  Init_I2C_b                                                                */
 /*----------------------------------------------------------------------------*/
-void Init_I2C (void)
+void i2c_bitbang_init (void)
 {
     I2C_CLK       = 1;    /* CLK I2C  */
     I2C_DATA_OUT      = 1;    /* DATI I2C */
@@ -151,24 +151,22 @@ char readAck() {
  *
  * Note:			None
  ********************************************************************/
-unsigned int pic_i2c_bitbang_port_ack_polling(unsigned char control)
+void pic_i2c_bitbang_port_ack_polling(uint8_t addr)
 {
     unsigned char ack;
     startCondition();
 
-    masterWrite(WRITE_CB(control));
+    masterWrite(WRITE_CB(addr));
     ack = readAck();
     
     while (ack)
     {
         stopCondition();
         startCondition(); //generate restart
-        masterWrite(control);
+        masterWrite(addr);
         ack = readAck();
     }
     stopCondition(); //send stop condition
-    
-    return (0);
 }
 
 
