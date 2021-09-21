@@ -66,8 +66,11 @@ void CK_I2C(unsigned char ck) {
 void startCondition() {
     I2C_DATA_TRIS = OUTPUT_PIN;
     I2C_DATA_OUT  = HIGH;
-    I2C_CLK       = HIGH;
-    I2C_DATA_OUT  = LOW;
+    __delay_us(clock_delay);
+    I2C_CLK = HIGH;
+    __delay_us(clock_delay);
+    I2C_DATA_OUT = LOW;
+    __delay_us(clock_delay);
 }
 
 void restartCondition() {
