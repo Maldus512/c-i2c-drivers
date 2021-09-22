@@ -19,7 +19,7 @@
 #include "../../i2c_common/i2c_common.h"
 
 
-void i2c_bitbang_init(void);
+void i2c_bitbang_init(unsigned int delay);
 
 void pic_i2c_bitbang_port_ack_polling(uint8_t addr, void *arg);
 int pic_i2c_bitbang_port_transfer(uint8_t devaddr, uint8_t *writebuf, size_t writelen, uint8_t *readbuf, size_t readlen,

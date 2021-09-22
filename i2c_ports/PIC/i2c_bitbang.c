@@ -34,14 +34,16 @@
 #define INPUT_PIN  1
 
 
-static int clock_delay = 10;
+static unsigned int clock_delay = 10;
 
 
 
 /*----------------------------------------------------------------------------*/
 /*  Init_I2C_b                                                                */
 /*----------------------------------------------------------------------------*/
-void i2c_bitbang_init(void) {
+void i2c_bitbang_init(unsigned int delay) {
+    clock_delay = delay;
+
     I2C_CLK      = 1; /* CLK I2C  */
     I2C_DATA_OUT = 1; /* DATI I2C */
 

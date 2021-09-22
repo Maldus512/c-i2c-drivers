@@ -66,4 +66,4 @@ void idle();
 
     
     
-void i2c_bitbang_init();
+void i2c_bitbang_init(unsigned int delay);
