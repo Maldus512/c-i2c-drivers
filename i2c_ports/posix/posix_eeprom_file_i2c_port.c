@@ -65,7 +65,7 @@ int posix_eeprom_file_i2c_u8addr_port_transfer(uint8_t devaddr, uint8_t *writebu
             }
         }
 
-        return read_file(filename, current_address, readbuf, readlen);
+        return (read_file(filename, current_address, readbuf, readlen) < 0);
     }
 
     return 0;
