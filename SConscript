@@ -5,6 +5,8 @@ components = [
     "eeprom/24LC16",
     "temperature/SHT3",
     "temperature/SHT21",
+    "rtc/PCF8523",
+    "rtc/PCF85063A",
     "LTR559ALS",
 ]
 ports = [
