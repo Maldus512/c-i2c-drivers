@@ -11,7 +11,7 @@
 /*                                                                            */
 /*  Data  : 03/09/2007      REV  : 00.0                                       */
 /*                                                                            */
-/*  U.mod.: 23/05/2016      REV  : 01.0                                       */
+/*  U.mod.: 21/09/2021      REV  : 17.6                                       */
 /*                                                                            */
 /******************************************************************************/
 
@@ -157,17 +157,25 @@ int I2C_Read_b (unsigned char cDevAddr, unsigned char cRegAddr, unsigned char* b
     
     do {
         counter++;
-        if (readAck() != 0) {
+        
+        if (readAck() != 0)
+        {
             startCondition();
             I2CByteWrite(cDevAddr);
+            
             if (readAck() != 0)
+            {
                 continue;
+            }
         }
   
         I2CByteWrite(cRegAddr);
-    } while(readAck() != 0 && counter <= 10);
+        
+    }
+    while(readAck() != 0 && counter <= 10);
     
-    if (counter > 10) {
+    if (counter > 10)
+    {
         return -1;
     }
     
@@ -175,9 +183,12 @@ int I2C_Read_b (unsigned char cDevAddr, unsigned char cRegAddr, unsigned char* b
     cDevAddr = READ_CB(cDevAddr);
     
     I2CByteWrite(cDevAddr);
+    
     if (readAck() != 0)
+    {
         return -1;
-        
+    }
+    
     /*--------------------------------------------------------------*/
     /* Legge la ram del dispositivo                                 */
     /*--------------------------------------------------------------*/

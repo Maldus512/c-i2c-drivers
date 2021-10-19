@@ -11,7 +11,7 @@
 /*                                                                            */
 /*  Data  : 03/09/2007      REV  : 00.0                                       */
 /*                                                                            */
-/*  U.mod.: 23/05/2016      REV  : 01.0                                       */
+/*  U.mod.: 21/09/2021      REV  : 17.6                                       */
 /*                                                                            */
 /******************************************************************************/
 
@@ -46,8 +46,11 @@ static inline __attribute__((always_inline)) void CK_I2C (unsigned char ck)
 static inline __attribute__((always_inline)) void startCondition() {
     DD_DATA_I2C_B = OUTPUT_PIN;
     DATA_I2C_B = HIGH;
+    delay_us(10);
     CLK_I2C_B = HIGH;
+    delay_us(10);
     DATA_I2C_B = LOW;
+    delay_us(10);
 }
 
 static inline __attribute((always_inline)) void stopCondition() {
@@ -82,14 +85,17 @@ static inline __attribute__((always_inline)) void I2CByteRead(unsigned char* byt
     }
     DD_DATA_I2C_B = OUTPUT_PIN;//1;  /* dati in uscita dal micro             */
     DATA_I2C_B = ack;     /* invia ack                            */
+    delay_us(10);
     CK_I2C(1);
     CK_I2C(0);
 }
 
 static inline __attribute__((always_inline)) unsigned char readAck() {
     unsigned char x;
+    delay_us(10);
     CK_I2C(0);
     DATA_I2C_B = 1;         //Set Nack
+    delay_us(10);
     DD_DATA_I2C_B = INPUT_PIN;
     CK_I2C(1);
     x = DATA_I2C_I;//DATA_I2C_B;
