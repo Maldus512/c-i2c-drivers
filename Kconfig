@@ -28,6 +28,11 @@ menu "I2C library"
             bool "PCF85063A"
             help
                 Enable the PCF85063A RTC driver
+
+        config I2C_DEVICES_RTC_M41T81
+            bool "M41T81"
+            help
+                Enable the M41T81 RTC driver
     endmenu
 
     config I2C_DEVICES_MCP4018

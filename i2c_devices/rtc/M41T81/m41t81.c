@@ -6,6 +6,7 @@
 
 #define BCD2BIN(x) ((((x) >> 4) & 0xF) * 10 + ((x)&0xF))
 #define BIN2BCD(x) ((((x) / 10) << 4) | ((x) % 10))
+#define STOP_BIT   0x80
 
 static volatile unsigned char ora_legale_auto_adjust_flag;
 static volatile unsigned char cPrevSec;
@@ -98,84 +99,90 @@ static void calc_day_of_week(rtc_time_t *pTime) {
 /*----------------------------------------------------------------------------*/
 /* Init_RTC                                                                   */
 /*----------------------------------------------------------------------------*/
-int M41T81_init(i2c_driver_t driver) {
-    unsigned char cData;
-    rtc_time_t    tCurrTime;
-    int           res;
+int m41t81_init(i2c_driver_t driver) {
+    uint8_t    seconds;
+    rtc_time_t rtc_time;
+    int        res;
 
     cPrevSec = 0;
 
     // controlla stop bit (oscillator stopped)
-    if ((res = i2c_read_register(driver, SEG_TIME, &cData, 1)))
+    if ((res = i2c_read_register(driver, SEG_TIME, &seconds, 1)))
         return res;
 
-    if (cData & 0x80) {
+    if (seconds & STOP_BIT) {
         // inizializza default
-        tCurrTime.sec  = BIN2BCD(0);
-        tCurrTime.min  = BIN2BCD(20);
-        tCurrTime.hour = BIN2BCD(12);
+        rtc_time.sec  = 0;
+        rtc_time.min  = 20;
+        rtc_time.hour = 12;
 
-        tCurrTime.wday = BIN2BCD(4);
+        rtc_time.wday = 4;
 
-        tCurrTime.day   = BIN2BCD(4);
-        tCurrTime.month = BIN2BCD(9);
-        tCurrTime.year  = BIN2BCD(20);
+        rtc_time.day   = 4;
+        rtc_time.month = 9;
+        rtc_time.year  = 20;
 
-        if ((res = m41t81_set_time(driver, &tCurrTime)))
+        if ((res = m41t81_set_time(driver, rtc_time)))
             return res;
     }
 
     // azzera halt update bit
-    if ((res = i2c_read_register(driver, SEG_TIME + 11, &cData, 1)))
+    if ((res = i2c_read_register(driver, SEG_TIME + 11, &seconds, 1)))
         return res;
 
-    cData &= ~'\x40';
+    seconds &= ~'\x40';
 
-    if ((res = i2c_write_register(driver, SEG_TIME + 11, &cData, 1)))
+    if ((res = i2c_write_register(driver, SEG_TIME + 11, &seconds, 1)))
         return res;
 
-    if ((res = i2c_read_register(driver, SEG_TIME + 11, &cData, 1)))
+    if ((res = i2c_read_register(driver, SEG_TIME + 11, &seconds, 1)))
         return res;
 
-    if (cData & '\x40')
+    if (seconds & '\x40')
         return -1;
 
     return 0;
 }
 
 
-int m41t81_set_time(i2c_driver_t driver, const rtc_time_t *pTime) {
-    if (pTime == NULL)
-        return -1;
+int m41t81_set_time(i2c_driver_t driver, rtc_time_t rtc_time) {
+    // calc_day_of_week((rtc_time_t *)pTime);
+    uint8_t buffer[7] = {
+        rtc_time.sec, rtc_time.min, rtc_time.hour, rtc_time.day, rtc_time.wday, rtc_time.month, rtc_time.year,
+    };
 
-    calc_day_of_week((rtc_time_t *)pTime);
+    for (size_t i = 0; i < sizeof(buffer); i++) {
+        buffer[i] = BIN2BCD(buffer[i]);
+    }
 
-    return i2c_write_register(driver, SEG_TIME, (unsigned char *)pTime, sizeof(rtc_time_t));
+    return i2c_write_register(driver, SEG_TIME, buffer, sizeof(buffer));
 }
 
 
-int m41t81_get_time(i2c_driver_t driver, rtc_time_t *pTime) {
+int m41t81_get_time(i2c_driver_t driver, rtc_time_t *rtc_time) {
     int err;
-    if (pTime == NULL)
+    if (rtc_time == NULL) {
         return -1;
+    }
 
-    if ((err = i2c_read_register(driver, SEG_TIME, (uint8_t *)pTime, sizeof(rtc_time_t))))
+    uint8_t buffer[7] = {0};
+
+    if ((err = i2c_read_register(driver, SEG_TIME, buffer, sizeof(buffer)))) {
         return err;
+    }
 
-    pTime->wday  = BCD2BIN(pTime->wday);
-    pTime->day   = BCD2BIN(pTime->day);
-    pTime->month = BCD2BIN(pTime->month);
-    pTime->year  = BCD2BIN(pTime->year);
-    pTime->hour  = BCD2BIN(pTime->hour);
-    pTime->min   = BCD2BIN(pTime->min);
-    pTime->sec   = BCD2BIN(pTime->sec);
+    rtc_time->sec   = BCD2BIN((buffer[0] & (~STOP_BIT)));
+    rtc_time->min   = BCD2BIN(buffer[1]);
+    rtc_time->hour  = BCD2BIN(buffer[2]);
+    rtc_time->day   = BCD2BIN(buffer[3]);
+    rtc_time->wday  = BCD2BIN(buffer[4]);
+    rtc_time->month = BCD2BIN(buffer[5]);
+    rtc_time->year  = BCD2BIN(buffer[6]);
 
     return 0;
 }
 
 #if 0
-
-
 
 int rtccmp(rtc_time_t t1, rtc_time_t t2) {
 

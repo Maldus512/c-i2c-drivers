@@ -7,8 +7,8 @@
 #define SEG_TIME               0x01
 
 
-int M41T81_init(i2c_driver_t driver);
-int m41t81_set_time(i2c_driver_t driver, const rtc_time_t *pTime);
+int m41t81_init(i2c_driver_t driver);
+int m41t81_set_time(i2c_driver_t driver, rtc_time_t pTime);
 int m41t81_get_time(i2c_driver_t driver, rtc_time_t *pTime);
 
 #if 0
