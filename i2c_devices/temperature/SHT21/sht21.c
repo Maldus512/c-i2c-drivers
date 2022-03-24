@@ -21,10 +21,11 @@ static uint8_t sht21_crc(uint8_t *data, uint8_t len) {
     for (int i = 0; i < len; i++) {
         crc ^= (data[i]);
         for (bit = 8; bit > 0; --bit) {
-            if (crc & 0x80)
+            if (crc & 0x80) {
                 crc = (crc << 1) ^ 0x131;
-            else
+            } else {
                 crc = (crc << 1);
+            }
         }
     }
     return crc;
@@ -82,16 +83,24 @@ int sht21_read(i2c_driver_t driver, double *temperature, double *humidity, unsig
 
     msdelay = msdelay > 100 ? 100 : msdelay;     // no point in waiting more than 100ms
 
-    if (temperature) {
+    if (temperature != NULL) {
         buffer[0] = TRIGGER_T_MEASUREMENT | NO_HOLD_MASTER_BIT;
-        driver.i2c_transfer(driver.device_address, buffer, 1, NULL, 0, driver.arg);
+        res = driver.i2c_transfer(driver.device_address, buffer, 1, NULL, 0, driver.arg);
+        if (res) {
+            return res;
+        }
 
         do {
-            driver.delay_ms(1);
+            driver.delay_ms(msdelay);
             res = driver.i2c_transfer(driver.device_address, NULL, 0, buffer, 3, driver.arg);
-        } while (res && counter++ < msdelay);
+            counter += msdelay;
+        } while (res && counter < 100);
 
-        if (res || sht21_crc(buffer, 2) != buffer[2]) {
+        if (res) {
+            return res;
+        }
+
+        if (sht21_crc(buffer, 2) != buffer[2]) {
             return -1;
         } else {
             uint16_t rawt = (((uint16_t)buffer[0] << 8) | (buffer[1] & (~0x3)));
@@ -99,7 +108,7 @@ int sht21_read(i2c_driver_t driver, double *temperature, double *humidity, unsig
         }
     }
 
-    if (humidity) {
+    if (humidity != NULL) {
         buffer[0] = TRIGGER_RH_MEASUREMENT | NO_HOLD_MASTER_BIT;
         driver.i2c_transfer(driver.device_address, buffer, 1, NULL, 0, driver.arg);
 

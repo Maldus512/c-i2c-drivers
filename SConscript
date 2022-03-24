@@ -7,6 +7,7 @@ components = [
     "temperature/SHT21",
     "rtc/PCF8523",
     "rtc/PCF85063A",
+    "rtc/DS1307",
     "LTR559ALS",
 ]
 ports = [

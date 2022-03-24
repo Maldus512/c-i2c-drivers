@@ -9,6 +9,9 @@
 #define I2C_READ_ADDR(x)  (x | 0x01)
 #define I2C_WRITE_ADDR(x) (x & 0xFE)
 
+#define BCD2BIN(x) ((((x) >> 4) & 0xF) * 10 + ((x)&0xF))
+#define BIN2BCD(x) ((((x) / 10) << 4) | ((x) % 10))
+
 
 typedef struct {
     // 8-bit Address of the device. The least significant bit should be zero, and it is used to distinguish

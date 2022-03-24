@@ -1,55 +1,8 @@
 #include <string.h>
-
 #include "../../../i2c_common/i2c_common.h"
-
 #include "m41t81.h"
 
-#define BCD2BIN(x) ((((x) >> 4) & 0xF) * 10 + ((x)&0xF))
-#define BIN2BCD(x) ((((x) / 10) << 4) | ((x) % 10))
 #define STOP_BIT   0x80
-
-static volatile unsigned char ora_legale_auto_adjust_flag;
-static volatile unsigned char cPrevSec;
-static volatile short         nMsec;
-static volatile short         nSec;
-static volatile short         nMin;
-static volatile short         nHour;
-static volatile short         nDayOfWeek;
-static volatile short         nDay;
-static volatile short         nMonth;
-static volatile short         nYear;
-
-const int nMonthOfYear[] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
-
-
-extern unsigned char stringa[64];
-
-
-unsigned char str_curr_time[13]   = "0000000000000";
-unsigned char str_date_display[9] = "GG/MM/AA";
-unsigned char str_time_display[9] = "hh:mm:ss";
-unsigned char str_prog_time[13]   = "0000000000000";
-
-rtc_time_t CurrTime; /* orologio di sitema */
-rtc_time_t ProgTime; /* orologio di sitema programmato */
-
-
-
-
-static void BCD_to_ASCII(char BCD, char *string) {
-    *string = (((unsigned int)BCD & 0xf0) >> 4) | 0x30;
-
-    if (*string < '0' || *string > '9') {
-        *string = '0';
-    }
-    string++;
-
-    *string = ((BCD & 0x0f)) | 0x30;
-
-    if (*string < '0' || *string > '9') {
-        *string = '0';
-    }
-}
 
 
 /*----------------------------------------------------------------------------*/
@@ -104,11 +57,10 @@ int m41t81_init(i2c_driver_t driver) {
     rtc_time_t rtc_time;
     int        res;
 
-    cPrevSec = 0;
-
     // controlla stop bit (oscillator stopped)
-    if ((res = i2c_read_register(driver, SEG_TIME, &seconds, 1)))
+    if ((res = i2c_read_register(driver, SEG_TIME, &seconds, 1))) {
         return res;
+    }
 
     if (seconds & STOP_BIT) {
         // inizializza default
@@ -130,16 +82,19 @@ int m41t81_init(i2c_driver_t driver) {
     if ((res = i2c_read_register(driver, SEG_TIME + 11, &seconds, 1)))
         return res;
 
-    seconds &= ~'\x40';
+    seconds &= ~0x40;
 
-    if ((res = i2c_write_register(driver, SEG_TIME + 11, &seconds, 1)))
+    if ((res = i2c_write_register(driver, SEG_TIME + 11, &seconds, 1))) {
         return res;
+    }
 
-    if ((res = i2c_read_register(driver, SEG_TIME + 11, &seconds, 1)))
+    if ((res = i2c_read_register(driver, SEG_TIME + 11, &seconds, 1))) {
         return res;
+    }
 
-    if (seconds & '\x40')
+    if (seconds & 0x40) {
         return -1;
+    }
 
     return 0;
 }

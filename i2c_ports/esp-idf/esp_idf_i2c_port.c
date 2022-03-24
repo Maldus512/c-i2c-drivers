@@ -64,6 +64,10 @@ int esp_idf_i2c_port_transfer(uint8_t devaddr, uint8_t *writebuf, size_t writele
 
         ret = i2c_master_cmd_begin(I2C_NUM_0, cmd, pdMS_TO_TICKS(10));
         i2c_cmd_link_delete(cmd);
+
+        if (ret != ESP_OK) {
+            ESP_LOGW(TAG, "Error while reading: 0x%03X", ret);
+        }
     }
 
     return ret;

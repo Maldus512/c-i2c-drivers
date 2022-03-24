@@ -9,6 +9,11 @@ menu "I2C library"
             bool "SHT3 temperature sensor"
             help
                 Enable the SHT3 I2C driver
+
+        config I2C_DEVICES_ZS05
+            bool "ZS05 temperature sensor"
+            help
+                Enable the ZS05 I2C driver
     endmenu
 
     menu "Eeproms"
@@ -24,6 +29,9 @@ menu "I2C library"
     endmenu
 
     menu "Real time clocks"
+        config I2C_DEVICES_STRUCT_TM_CONVERSION
+            bool "Enable struct tm to rtc_time_t conversion"
+
         config I2C_DEVICES_RTC_PCF85063A
             bool "PCF85063A"
             help
@@ -33,6 +41,11 @@ menu "I2C library"
             bool "M41T81"
             help
                 Enable the M41T81 RTC driver
+
+        config I2C_DEVICES_RTC_DS1307
+            bool "DS1307"
+            help
+                Enable the DS1307 RTC driver
     endmenu
 
     config I2C_DEVICES_MCP4018
