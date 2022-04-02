@@ -46,6 +46,11 @@ menu "I2C library"
             bool "DS1307"
             help
                 Enable the DS1307 RTC driver
+
+        config I2C_DEVICES_RTC_RX8010
+            bool "RX8010"
+            help
+                Enable the RX8010 RTC driver
     endmenu
 
     config I2C_DEVICES_MCP4018

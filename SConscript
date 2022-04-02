@@ -8,6 +8,7 @@ components = [
     "rtc/PCF8523",
     "rtc/PCF85063A",
     "rtc/DS1307",
+    "rtc/RX8010",
     "LTR559ALS",
 ]
 ports = [

@@ -8,7 +8,7 @@
 static const char *TAG = "I2C PORT";
 
 
-void esp_idf_i2c_scanner(void) {
+void esp_idf_i2c_scanner(i2c_port_t port) {
     ESP_LOGI(TAG, ">> i2cScanner");
     int       i;
     esp_err_t espRc;
@@ -20,7 +20,7 @@ void esp_idf_i2c_scanner(void) {
         i2c_master_write_byte(cmd, (i << 1) | I2C_MASTER_WRITE, 1 /* expect ack */);
         i2c_master_stop(cmd);
 
-        espRc = i2c_master_cmd_begin(I2C_NUM_0, cmd, 10 / portTICK_PERIOD_MS);
+        espRc = i2c_master_cmd_begin(port, cmd, 10 / portTICK_PERIOD_MS);
         if (i % 16 == 0) {
             printf("\n%.2x:", i);
         }
@@ -39,7 +39,7 @@ int esp_idf_i2c_port_transfer(uint8_t devaddr, uint8_t *writebuf, size_t writele
                               void *arg) {
     esp_err_t        ret = ESP_OK;
     i2c_cmd_handle_t cmd;
-    (void)arg;
+    i2c_port_t       port = (i2c_port_t)(uintptr_t)arg;
 
     if (writebuf != NULL && writelen > 0) {
         cmd = i2c_cmd_link_create();
@@ -48,11 +48,13 @@ int esp_idf_i2c_port_transfer(uint8_t devaddr, uint8_t *writebuf, size_t writele
         i2c_master_write(cmd, writebuf, writelen, 1);
         i2c_master_stop(cmd);
 
-        ret = i2c_master_cmd_begin(I2C_NUM_0, cmd, pdMS_TO_TICKS(10));
+        ret = i2c_master_cmd_begin(port, cmd, pdMS_TO_TICKS(10));
         i2c_cmd_link_delete(cmd);
 
-        if (ret != ESP_OK)
+        if (ret != ESP_OK) {
+            ESP_LOGW(TAG, "Error on I2C port %i while writing to device 0x%02X: 0x%03X", port, devaddr, ret);
             return ret;
+        }
     }
 
     if (readbuf != NULL && readlen > 0) {
@@ -62,11 +64,11 @@ int esp_idf_i2c_port_transfer(uint8_t devaddr, uint8_t *writebuf, size_t writele
         i2c_master_read(cmd, readbuf, readlen, I2C_MASTER_LAST_NACK);
         i2c_master_stop(cmd);
 
-        ret = i2c_master_cmd_begin(I2C_NUM_0, cmd, pdMS_TO_TICKS(10));
+        ret = i2c_master_cmd_begin(port, cmd, pdMS_TO_TICKS(10));
         i2c_cmd_link_delete(cmd);
 
         if (ret != ESP_OK) {
-            ESP_LOGW(TAG, "Error while reading: 0x%03X", ret);
+            ESP_LOGW(TAG, "Error on I2C port %i while reading from device 0x%02X: 0x%03X", port, devaddr, ret);
         }
     }
 
