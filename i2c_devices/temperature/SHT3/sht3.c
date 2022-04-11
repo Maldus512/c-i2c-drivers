@@ -13,21 +13,14 @@
 #define SINGLE_SHOT_NO_CLOCK_STRETCHING_LSB_LOW_REP  0x16
 
 
+#define CMD_SOFT_RESET           0x30A2
+#define CMD_HEATER_DISABLED      0x3066
+#define CMD_HEATER_ENABLE        0x306D
 #define CMD_READ_STATUS_REGISTER 0xF32D
 
 
-static uint8_t sht3_crc8(uint8_t *data, size_t len) {
-    uint8_t polynomial = 0x31;
-    uint8_t crc        = 0xFF;
-    size_t  i, j;
-    for (j = len; j; j--) {
-        crc ^= *data++;
-        for (i = 8; i; i--) {
-            crc = (crc & 0x80) ? (crc << 1) ^ polynomial : (crc << 1);
-        }
-    }
-    return crc;
-}
+static int     send_command(i2c_driver_t driver, uint16_t command);
+static uint8_t sht3_crc8(uint8_t *data, size_t len);
 
 
 int sht3_read_status_register(i2c_driver_t driver, uint16_t *status) {
@@ -38,6 +31,16 @@ int sht3_read_status_register(i2c_driver_t driver, uint16_t *status) {
     *status = (((uint16_t)readbuf[0]) << 8) | ((uint16_t)readbuf[1]);
 
     return res;
+}
+
+
+int sht3_disable_heater(i2c_driver_t driver) {
+    return send_command(driver, CMD_HEATER_DISABLED);
+}
+
+
+int sht3_soft_reset(i2c_driver_t driver) {
+    return send_command(driver, CMD_SOFT_RESET);
 }
 
 
@@ -81,4 +84,24 @@ int sht3_read_acquisition(i2c_driver_t driver, double *temperature, double *humi
         *humidity = 100 * (((double)hum) / ((double)(0x10000 - 1)));
 
     return 0;
+}
+
+
+static int send_command(i2c_driver_t driver, uint16_t command) {
+    uint8_t writebuf[] = {(command >> 8) & 0xFF, command & 0xFF};
+    return driver.i2c_transfer(driver.device_address, writebuf, sizeof(writebuf), NULL, 0, driver.arg);
+}
+
+
+static uint8_t sht3_crc8(uint8_t *data, size_t len) {
+    uint8_t polynomial = 0x31;
+    uint8_t crc        = 0xFF;
+    size_t  i, j;
+    for (j = len; j; j--) {
+        crc ^= *data++;
+        for (i = 8; i; i--) {
+            crc = (crc & 0x80) ? (crc << 1) ^ polynomial : (crc << 1);
+        }
+    }
+    return crc;
 }
