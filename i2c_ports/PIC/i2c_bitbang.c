@@ -25,7 +25,6 @@
 #include "../../i2c_common/i2c_common.h"
 
 
-
 #define HIGH       1
 #define LOW        0
 #define TRUE       1
@@ -34,15 +33,21 @@
 #define INPUT_PIN  1
 
 
-static unsigned int clock_delay = 10;
+#ifdef I2C_BITBANG_FIXED_CLOCK_DELAY
+#define CLOCK_DELAY I2C_BITBANG_FIXED_CLOCK_DELAY
+#else
+#define CLOCK_DELAY clock_delay
+#endif
 
+
+static volatile unsigned long clock_delay = 5;
 
 
 /*----------------------------------------------------------------------------*/
 /*  Init_I2C_b                                                                */
 /*----------------------------------------------------------------------------*/
 void i2c_bitbang_init(unsigned int delay) {
-    clock_delay = delay;
+    clock_delay = (unsigned long)delay;
 
     I2C_CLK      = 1; /* CLK I2C  */
     I2C_DATA_OUT = 1; /* DATI I2C */
@@ -62,17 +67,17 @@ void i2c_bitbang_init(unsigned int delay) {
 
 void CK_I2C(unsigned char ck) {
     I2C_CLK = ck;
-    __delay_us(clock_delay);
+    __delay_us(CLOCK_DELAY);
 }
 
 void startCondition() {
     I2C_DATA_TRIS = OUTPUT_PIN;
     I2C_DATA_OUT  = HIGH;
-    __delay_us(clock_delay);
+    __delay_us(CLOCK_DELAY);
     I2C_CLK = HIGH;
-    __delay_us(clock_delay);
+    __delay_us(CLOCK_DELAY);
     I2C_DATA_OUT = LOW;
-    __delay_us(clock_delay);
+    __delay_us(CLOCK_DELAY);
 }
 
 void restartCondition() {
