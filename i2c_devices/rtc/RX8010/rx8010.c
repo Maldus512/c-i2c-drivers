@@ -99,7 +99,7 @@ rtc_time_t rx8010_rtc_from_tm(struct tm tm) {
     rtc_time_t res = {
         .sec   = tm.tm_sec,
         .min   = tm.tm_min,
-        .hour  = tm.tm_hour,
+        .hour  = tm.tm_isdst ? tm.tm_hour - 1 : tm.tm_hour,
         .day   = tm.tm_mday,
         .month = tm.tm_mon + 1,
         .year  = tm.tm_year - 100,
