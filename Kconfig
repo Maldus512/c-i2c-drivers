@@ -32,6 +32,11 @@ menu "I2C library"
         config I2C_DEVICES_STRUCT_TM_CONVERSION
             bool "Enable struct tm to rtc_time_t conversion"
 
+        config I2C_DEVICES_RTC_PCF8523
+            bool "PCF8523"
+            help
+                Enable the PCF8523 RTC driver
+
         config I2C_DEVICES_RTC_PCF85063A
             bool "PCF85063A"
             help
