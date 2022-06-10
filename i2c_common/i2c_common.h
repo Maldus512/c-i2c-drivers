@@ -98,4 +98,16 @@ int i2c_write_register(i2c_driver_t driver, uint8_t reg, uint8_t *data, size_t l
  */
 int i2c_read_register(i2c_driver_t driver, uint8_t reg, uint8_t *data, size_t len);
 
+
+/**
+ * @brief Simple crc8 function
+ * 
+ * @param polynomial 
+ * @param crc 
+ * @param data 
+ * @param len 
+ * @return uint8_t 
+ */
+uint8_t i2c_common_crc8(uint8_t polynomial, uint8_t crc, uint8_t *data, size_t len);
+
 #endif

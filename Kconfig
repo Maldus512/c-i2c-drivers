@@ -6,9 +6,14 @@ menu "I2C library"
                 Enable the SHT21 I2C driver
                 
         config I2C_DEVICES_SHT3
-            bool "SHT3 temperature sensor"
+            bool "SHT3x temperature sensor"
             help
-                Enable the SHT3 I2C driver
+                Enable the SHT3x I2C driver
+
+        config I2C_DEVICES_SHT4
+            bool "SHT4x temperature sensor"
+            help
+                Enable the SHT4x I2C driver
 
         config I2C_DEVICES_ZS05
             bool "ZS05 temperature sensor"
@@ -26,6 +31,11 @@ menu "I2C library"
             bool "MCP24LC1025"
             help
                 Enable the MCP24LC1025 RTC driver
+
+        config I2C_DEVICES_EEPROM_24AA32
+            bool "MCP24AA32"
+            help
+                Enable the MCP24AA32 RTC driver
     endmenu
 
     menu "Real time clocks"
