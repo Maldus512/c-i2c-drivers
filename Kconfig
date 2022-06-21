@@ -1,5 +1,10 @@
 menu "I2C library"
     menu "Temperature sensors"
+        config I2C_DEVICES_MS5837
+            bool "MS5837 temperature (and pressure) sensor"
+            help
+                Enable the MS5837 I2C driver
+
         config I2C_DEVICES_SHT21
             bool "SHT21 temperature sensor"
             help
