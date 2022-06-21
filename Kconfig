@@ -73,11 +73,17 @@ menu "I2C library"
         help
             Enable the MCP4018 I2C driver
 
-    config I2C_DEVICES_LTR559ALS
-        bool "LTR559ALS optical sensor"
-        help
-            Enable the LTR559ALS I2C driver
-    
+    menu "Proximity and Ambient Light Sensors"
+        config I2C_DEVICES_LTR559ALS
+            bool "LTR559ALS optical sensor"
+            help
+                Enable the LTR559ALS I2C driver
+
+        config I2C_DEVICES_VCNL4010
+            bool "VCNL4010 optical sensor"
+            help
+                Enable the VCNL4010 I2C driver
+    endmenu
 
     menu "Ports"
         config I2C_DEVICES_PIC_BITBANG_PORT

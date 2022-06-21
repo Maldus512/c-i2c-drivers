@@ -11,7 +11,8 @@ components = [
     "rtc/PCF85063A",
     "rtc/DS1307",
     "rtc/RX8010",
-    "LTR559ALS",
+    "light_proximity/LTR559ALS",
+    "light_proximity/VCNL4010",
 ]
 ports = [
     "dummy", "posix"
