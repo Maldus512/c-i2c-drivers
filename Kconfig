@@ -1,5 +1,10 @@
 menu "I2C library"
     menu "Temperature sensors"
+        config I2C_DEVICES_MS5837
+            bool "MS5837 temperature (and pressure) sensor"
+            help
+                Enable the MS5837 I2C driver
+
         config I2C_DEVICES_SHT21
             bool "SHT21 temperature sensor"
             help
@@ -73,16 +78,23 @@ menu "I2C library"
         help
             Enable the MCP4018 I2C driver
 
-    config I2C_DEVICES_LTR559ALS
-        bool "LTR559ALS optical sensor"
-        help
-            Enable the LTR559ALS I2C driver
-
     menu "IO expanders"
         config I2C_DEVICES_MCP23008
             bool "MCP23008 IO port"
             help
                 Enable the MCP23008 I2C driver
+    endmenu
+
+    menu "Proximity and Ambient Light Sensors"
+        config I2C_DEVICES_LTR559ALS
+            bool "LTR559ALS optical sensor"
+            help
+                Enable the LTR559ALS I2C driver
+
+        config I2C_DEVICES_VCNL4010
+            bool "VCNL4010 optical sensor"
+            help
+                Enable the VCNL4010 I2C driver
     endmenu
 
     menu "Ports"
