@@ -21,15 +21,19 @@ typedef enum {
 
 #define MCP23008_DEFAULT_ADDR 0x40
 
-int mcp23008_init(i2c_driver_t driver, uint8_t address, int addressable);
 int mcp23008_set_gpio_polarity(i2c_driver_t driver, mcp23008_gpio_t gpio, int inverted);
 int mcp23008_set_gpio_direction(i2c_driver_t driver, mcp23008_gpio_t gpio, mcp23008_mode_t mode);
 int mcp23008_toggle_gpio(i2c_driver_t driver, mcp23008_gpio_t gpio);
 int mcp23008_set_gpio_direction_register(i2c_driver_t driver, uint8_t regvalue);
+int mcp23008_get_gpio_direction_register(i2c_driver_t driver, uint8_t *regvalue);
 int mcp23008_set_gpio_polarity_register(i2c_driver_t driver, uint8_t regvalue);
+int mcp23008_set_gppu_register(i2c_driver_t driver, uint8_t regvalue);
+int mcp23008_get_gppu_register(i2c_driver_t driver, uint8_t *regvalue);
 int mcp23008_set_gpio_register(i2c_driver_t driver, uint8_t regvalue);
 int mcp23008_get_gpio_register(i2c_driver_t driver, uint8_t *regvalue);
 int mcp23008_get_gpio_level(i2c_driver_t driver, mcp23008_gpio_t gpio, int *level);
 int mcp23008_set_gpio_level(i2c_driver_t driver, mcp23008_gpio_t gpio, int level);
+int mcp23008_set_olat_register(i2c_driver_t driver, uint8_t regvalue);
+int mcp23008_get_olat_register(i2c_driver_t driver, uint8_t *regvalue);
 
 #endif

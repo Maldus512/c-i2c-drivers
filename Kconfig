@@ -78,6 +78,13 @@ menu "I2C library"
         help
             Enable the MCP4018 I2C driver
 
+    menu "IO expanders"
+        config I2C_DEVICES_MCP23008
+            bool "MCP23008 IO port"
+            help
+                Enable the MCP23008 I2C driver
+    endmenu
+
     menu "Proximity and Ambient Light Sensors"
         config I2C_DEVICES_LTR559ALS
             bool "LTR559ALS optical sensor"

@@ -1,14 +1,21 @@
 #include "i2c_common/i2c_common.h"
 #include "mcp23008.h"
 
+
 #define EXPANDER_DIR_ADD   0x00
 #define EXPANDER_POL_ADD   0x01
 #define EXPANDER_IOCON_ADD 0x05
+#define EXPANDER_GPPU_ADD  0x06
 #define EXPANDER_GPIO_ADD  0x09
+#define EXPANDER_OLAT_ADD  0x0A
 
 #define SET_BIT(reg, index, val) (reg & (~(1 << index))) | ((val ? 1 : 0) << index)
 
+
 static int update_single_register_bit(i2c_driver_t driver, uint8_t regaddr, int index, int value);
+static int read_register(i2c_driver_t driver, uint8_t address, uint8_t *regvalue);
+static int write_register(i2c_driver_t driver, uint8_t address, uint8_t regvalue);
+
 
 int mcp23008_set_gpio_polarity(i2c_driver_t driver, mcp23008_gpio_t gpio, int inverted) {
     return update_single_register_bit(driver, EXPANDER_POL_ADD, gpio, inverted > 0);
@@ -28,40 +35,65 @@ int mcp23008_toggle_gpio(i2c_driver_t driver, mcp23008_gpio_t gpio) {
     return update_single_register_bit(driver, EXPANDER_GPIO_ADD, gpio, !level);
 }
 
+
+int mcp23008_set_gppu_register(i2c_driver_t driver, uint8_t regvalue) {
+    return write_register(driver, EXPANDER_GPPU_ADD, regvalue);
+}
+
+
+int mcp23008_get_gppu_register(i2c_driver_t driver, uint8_t *regvalue) {
+    return read_register(driver, EXPANDER_GPPU_ADD, regvalue);
+}
+
+
+int mcp23008_set_olat_register(i2c_driver_t driver, uint8_t regvalue) {
+    return write_register(driver, EXPANDER_OLAT_ADD, regvalue);
+}
+
+
+int mcp23008_get_olat_register(i2c_driver_t driver, uint8_t *regvalue) {
+    return read_register(driver, EXPANDER_OLAT_ADD, regvalue);
+}
+
+
 int mcp23008_set_gpio_direction_register(i2c_driver_t driver, uint8_t regvalue) {
-    uint8_t command[2] = {EXPANDER_DIR_ADD, regvalue};
+    uint8_t command[2]  = {EXPANDER_DIR_ADD, regvalue};
     uint8_t response[1] = {0};
-    int res = driver.i2c_transfer(driver.device_address, command, 2, response ,1, driver.arg);
+    int     res         = driver.i2c_transfer(driver.device_address, command, 2, response, 1, driver.arg);
+    return res;
+}
+
+
+int mcp23008_get_gpio_direction_register(i2c_driver_t driver, uint8_t *regvalue) {
+    uint8_t command[1]  = {EXPANDER_DIR_ADD};
+    uint8_t response[1] = {0};
+    int     res         = driver.i2c_transfer(driver.device_address, command, 1, response, 1, driver.arg);
+    *regvalue           = response[0];
     return res;
 }
 
 int mcp23008_set_gpio_polarity_register(i2c_driver_t driver, uint8_t regvalue) {
-     uint8_t command[2] = {EXPANDER_POL_ADD, regvalue};
+    uint8_t command[2]  = {EXPANDER_POL_ADD, regvalue};
     uint8_t response[1] = {0};
-    int res = driver.i2c_transfer(driver.device_address, command, 2, response ,1, driver.arg);
+    int     res         = driver.i2c_transfer(driver.device_address, command, 2, response, 1, driver.arg);
     return res;
 }
+
 
 int mcp23008_set_gpio_register(i2c_driver_t driver, uint8_t regvalue) {
-    
-    uint8_t command[2] = {EXPANDER_GPIO_ADD, regvalue};
-    uint8_t response[1] = {0};
-    int res = driver.i2c_transfer(driver.device_address, command, 2, response ,1, driver.arg);
-    return res;
+    return write_register(driver, EXPANDER_GPIO_ADD, regvalue);
 }
 
+
 int mcp23008_get_gpio_register(i2c_driver_t driver, uint8_t *regvalue) {
-    uint8_t command[1] = {EXPANDER_GPIO_ADD};
-    uint8_t response[1] = {0};
-    int res = driver.i2c_transfer(driver.device_address, command, 1, response, 1, driver.arg);
-    *regvalue = response[0];
-    return res;
+    return read_register(driver, EXPANDER_GPIO_ADD, regvalue);
 }
+
 
 int mcp23008_get_gpio_level(i2c_driver_t driver, mcp23008_gpio_t gpio, int *level) {
     uint8_t current = 0;
     int     res     = mcp23008_get_gpio_register(driver, &current);
-    *level = (current & (1 << gpio)) > 0;
+    *level          = (current & (1 << gpio)) > 0;
     return res;
 }
 
@@ -70,16 +102,34 @@ int mcp23008_set_gpio_level(i2c_driver_t driver, mcp23008_gpio_t gpio, int level
 }
 
 static int update_single_register_bit(i2c_driver_t driver, uint8_t regaddr, int index, int value) {
-    uint8_t command[2] = {regaddr,0};
+    uint8_t command[2]  = {regaddr, 0};
     uint8_t response[1] = {0};
-    int res = driver.i2c_transfer(driver.device_address, command, 1, response, 1, driver.arg);
+    int     res         = driver.i2c_transfer(driver.device_address, command, 1, response, 1, driver.arg);
     if (res) {
         return res;
     }
     uint8_t current = response[0];
     current         = SET_BIT(current, index, value);
-    command[0]= regaddr;
-    command[1] = current;
-    res = driver.i2c_transfer(driver.device_address, command, 2, NULL, 0, driver.arg);
+    command[0]      = regaddr;
+    command[1]      = current;
+    res             = driver.i2c_transfer(driver.device_address, command, 2, NULL, 0, driver.arg);
+    return res;
+}
+
+
+static int read_register(i2c_driver_t driver, uint8_t address, uint8_t *regvalue) {
+    uint8_t command[1]  = {address};
+    uint8_t response[1] = {0};
+    int     res =
+        driver.i2c_transfer(driver.device_address, command, sizeof(command), response, sizeof(response), driver.arg);
+    *regvalue = response[0];
+
+    return res;
+}
+
+
+static int write_register(i2c_driver_t driver, uint8_t address, uint8_t regvalue) {
+    uint8_t command[2] = {address, regvalue};
+    int     res        = driver.i2c_transfer(driver.device_address, command, sizeof(command), NULL, 0, driver.arg);
     return res;
 }
