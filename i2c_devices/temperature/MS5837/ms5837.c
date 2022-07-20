@@ -1,6 +1,5 @@
 #include "../../../i2c_common/i2c_common.h"
 #include "ms5837.h"
-#include "esp_log.h"
 
 
 #define RESET_CMD           0x1E
@@ -128,8 +127,6 @@ static int read_adc(i2c_driver_t driver, uint8_t cmd, int delay, uint32_t *adc) 
     uint8_t read_buffer[3] = {0};
     res = driver.i2c_transfer(driver.device_address, adc_buffer, sizeof(adc_buffer), read_buffer, sizeof(read_buffer),
                               driver.arg);
-
-    ESP_LOG_BUFFER_HEX("x", read_buffer, 3);
 
     *adc = (((uint32_t)read_buffer[0]) << 16) | (((uint32_t)read_buffer[1]) << 8) | read_buffer[2];
     return res;
