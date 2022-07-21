@@ -12,6 +12,10 @@
 #define BCD2BIN(x) ((((x) >> 4) & 0xF) * 10 + ((x)&0xF))
 #define BIN2BCD(x) ((((x) / 10) << 4) | ((x) % 10))
 
+#ifndef I2C_DEVICES_STRUCT_TM_CONVERSION
+#define I2C_DEVICES_STRUCT_TM_CONVERSION CONFIG_I2C_DEVICES_STRUCT_TM_CONVERSION
+#endif
+
 
 typedef struct {
     // 8-bit Address of the device. The least significant bit should be zero, and it is used to distinguish
@@ -101,12 +105,12 @@ int i2c_read_register(i2c_driver_t driver, uint8_t reg, uint8_t *data, size_t le
 
 /**
  * @brief Simple crc8 function
- * 
- * @param polynomial 
- * @param crc 
- * @param data 
- * @param len 
- * @return uint8_t 
+ *
+ * @param polynomial
+ * @param crc
+ * @param data
+ * @param len
+ * @return uint8_t
  */
 uint8_t i2c_common_crc8(uint8_t polynomial, uint8_t crc, uint8_t *data, size_t len);
 

@@ -23,10 +23,12 @@ int ee24aa32_sequential_write(i2c_driver_t driver, uint8_t block, uint8_t addres
     }
 
     while (len > 0) {
-        int pagesize = CACHE_SIZE - (address % CACHE_SIZE);
-        pagesize     = (len < pagesize) ? len : pagesize;
-        buffer[0]    = block;
-        buffer[1]    = address;
+        // TODO: Use the cache size
+        // size_t pagesize = CACHE_SIZE - (address % CACHE_SIZE);
+        size_t pagesize = PAGE_SIZE - (address % PAGE_SIZE);
+        pagesize        = (len < pagesize) ? len : pagesize;
+        buffer[0]       = block;
+        buffer[1]       = address;
         memcpy(&buffer[2], data, pagesize);
 
         int res = driver.i2c_transfer(controlbyte, buffer, pagesize + 2, NULL, 0, driver.arg);
@@ -55,6 +57,9 @@ int ee24aa32_sequential_write(i2c_driver_t driver, uint8_t block, uint8_t addres
 
         controlbyte &= 0xF1;
         controlbyte |= block << 1;
+
+        // TODO: wait for the written data, not just 1 byte
+        ee24aa32_wait_for_cache_flush(driver, 1);
     }
 
     return 0;

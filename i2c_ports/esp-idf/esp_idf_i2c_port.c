@@ -53,6 +53,7 @@ int esp_idf_i2c_port_transfer(uint8_t devaddr, uint8_t *writebuf, size_t writele
 
         if (ret != ESP_OK) {
             ESP_LOGW(TAG, "Error on I2C port %i while writing to device 0x%02X: 0x%03X", port, devaddr, ret);
+            ESP_LOG_BUFFER_HEX(TAG, writebuf, writelen);
             return ret;
         }
     }
