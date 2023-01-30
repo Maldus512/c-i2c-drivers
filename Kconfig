@@ -15,6 +15,12 @@ menu "I2C library"
             help
                 Enable the SHT3x I2C driver
 
+        config I2C_DEVICES_SHTC3
+            bool "SHTC3 temperature sensor"
+            help
+                Enable the SHTC3 I2C driver
+
+
         config I2C_DEVICES_SHT4
             bool "SHT4x temperature sensor"
             help
