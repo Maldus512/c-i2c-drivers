@@ -5,6 +5,7 @@ components = [
     "eeprom/24LC16",
     "eeprom/24AA32",
     "temperature/SHT3",
+    "temperature/SHTC3",
     "temperature/SHT21",
     "temperature/SHT4",
     "rtc/PCF8523",

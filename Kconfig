@@ -15,6 +15,12 @@ menu "I2C library"
             help
                 Enable the SHT3x I2C driver
 
+        config I2C_DEVICES_SHTC3
+            bool "SHTC3 temperature sensor"
+            help
+                Enable the SHTC3 I2C driver
+
+
         config I2C_DEVICES_SHT4
             bool "SHT4x temperature sensor"
             help
@@ -83,6 +89,11 @@ menu "I2C library"
             bool "MCP23008 IO port"
             help
                 Enable the MCP23008 I2C driver
+
+        config I2C_DEVICES_TCA9534
+            bool "TCA9534 IO port"
+            help
+                Enable the TCA9534 I2C driver
     endmenu
 
     menu "Proximity and Ambient Light Sensors"

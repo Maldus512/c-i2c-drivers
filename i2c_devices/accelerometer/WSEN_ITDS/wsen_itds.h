@@ -17,5 +17,4 @@ int wsen_itds_set_full_scale_2(i2c_driver_t driver);
 int wsen_itds_set_full_scale_4(i2c_driver_t driver);
 int wsen_itds_set_full_scale_8(i2c_driver_t driver);
 
-
 #endif
