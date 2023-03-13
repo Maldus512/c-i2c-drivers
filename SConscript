@@ -12,6 +12,7 @@ components = [
     "rtc/PCF85063A",
     "rtc/DS1307",
     "rtc/RX8010",
+    "io/MCP23008",
     "light_proximity/LTR559ALS",
     "light_proximity/VCNL4010",
 ]
