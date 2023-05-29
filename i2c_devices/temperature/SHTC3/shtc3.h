@@ -13,8 +13,8 @@
 int shtc3_sleep(i2c_driver_t driver);
 int shtc3_wakeup(i2c_driver_t driver);
 int shtc3_reset(i2c_driver_t driver);
-int shtc3_start_temperature_measurement(i2c_driver_t driver);
-int shtc3_read_temperature_measurement(i2c_driver_t driver, int16_t *temperature);
+int shtc3_start_temperature_humidity_measurement(i2c_driver_t driver);
+int shtc3_read_temperature_humidity_measurement(i2c_driver_t driver, int16_t *temperature, int16_t *humidity);
 
 
 #endif

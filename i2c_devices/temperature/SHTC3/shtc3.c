@@ -26,26 +26,38 @@ int shtc3_reset(i2c_driver_t driver) {
 }
 
 
-int shtc3_start_temperature_measurement(i2c_driver_t driver) {
+int shtc3_start_temperature_humidity_measurement(i2c_driver_t driver) {
     return send_command(driver, COMMAND_NORMAL_MEASUREMENT_CLOCK_STRETCHING_DISABLED_T_FIRST);
 }
 
 
-int shtc3_read_temperature_measurement(i2c_driver_t driver, int16_t *temperature) {
-    uint8_t buffer[3] = {0};
+int shtc3_read_temperature_humidity_measurement(i2c_driver_t driver, int16_t *temperature, int16_t *humidity) {
+    uint8_t buffer[6] = {0};
 
     int res = driver.i2c_transfer(driver.device_address, NULL, 0, buffer, sizeof(buffer), driver.arg);
     if (res) {
         return res;
     }
 
-    uint8_t crc_calc = shtc3_crc8(buffer, 2);
+    uint8_t crc_calc = shtc3_crc8(buffer, 2);     // Temperature CRC check
     if (crc_calc != buffer[2]) {
         return -1;
     }
 
-    uint32_t raw_temperature = (buffer[0] << 8) | buffer[1];
-    *temperature             = (int16_t)(-45 + (int32_t)((175 * raw_temperature) / (1 << 16)));
+    crc_calc = shtc3_crc8(&buffer[3], 2);     // Humidity CRC check
+    if (crc_calc != buffer[5]) {
+        return -1;
+    }
+
+    if (temperature != NULL) {
+        uint32_t raw_temperature = (buffer[0] << 8) | buffer[1];
+        *temperature             = (int16_t)(-45 + (int32_t)((175 * raw_temperature) / (1 << 16)));
+    }
+
+    if (humidity != NULL) {
+        uint32_t raw_humidity = (buffer[0] << 8) | buffer[1];
+        *humidity             = (int16_t)((100 * raw_humidity) / (1 << 16));
+    }
 
     return 0;
 }
