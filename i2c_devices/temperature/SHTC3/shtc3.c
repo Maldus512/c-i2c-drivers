@@ -30,7 +30,6 @@ int shtc3_start_temperature_humidity_measurement(i2c_driver_t driver) {
     return send_command(driver, COMMAND_NORMAL_MEASUREMENT_CLOCK_STRETCHING_DISABLED_T_FIRST);
 }
 
-
 int shtc3_read_temperature_humidity_measurement(i2c_driver_t driver, int16_t *temperature, int16_t *humidity) {
     uint8_t buffer[6] = {0};
 
@@ -55,7 +54,7 @@ int shtc3_read_temperature_humidity_measurement(i2c_driver_t driver, int16_t *te
     }
 
     if (humidity != NULL) {
-        uint32_t raw_humidity = (buffer[0] << 8) | buffer[1];
+        uint32_t raw_humidity = (buffer[3] << 8) | buffer[4];
         *humidity             = (int16_t)((100 * raw_humidity) / (1 << 16));
     }
 
