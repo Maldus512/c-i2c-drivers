@@ -6,8 +6,7 @@
 
 int wsen_itds_init(i2c_driver_t driver);
 int wsen_itds_get_full_scale(i2c_driver_t driver, uint8_t *scale);
-int wsen_itds_get_coord(i2c_driver_t driver, uint8_t reg_l, uint8_t reg_h,
-                        int16_t *coord);
+int wsen_itds_get_coord(i2c_driver_t driver, uint8_t reg_l, uint8_t reg_h, int16_t *coord);
 int wsen_itds_get_all_coords(i2c_driver_t driver, int16_t *coord);
 int wsen_itds_get_all_coords2(i2c_driver_t driver, int16_t *coord);
 int wsen_itds_get_x(i2c_driver_t driver, int16_t *coord);

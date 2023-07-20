@@ -1,4 +1,4 @@
-menu "I2C library"
+menu "I2C Drivers"
     menu "Temperature sensors"
         config I2C_DEVICES_MS5837
             bool "MS5837 temperature (and pressure) sensor"

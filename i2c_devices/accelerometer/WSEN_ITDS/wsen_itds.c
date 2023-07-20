@@ -2,7 +2,6 @@
 #include "../../../i2c_common/i2c_common.h"
 #include <stdint.h>
 #include <stdlib.h>
-#include <xc.h>
 
 #define REG_CTRL1 0x20
 #define REG_CTRL2 0x21
@@ -11,89 +10,88 @@
 #define REG_CTRL5 0x24
 #define REG_CTRL6 0x25
 
-#define REG_STATUS 0x27
-#define REG_X_OUT_L 0x28
-#define REG_X_OUT_H 0x29
-#define REG_Y_OUT_L 0x2A
-#define REG_Y_OUT_H 0x2B
-#define REG_Z_OUT_L 0x2C
-#define REG_Z_OUT_H 0x2D
+#define REG_STATUS    0x27
+#define REG_X_OUT_L   0x28
+#define REG_X_OUT_H   0x29
+#define REG_Y_OUT_L   0x2A
+#define REG_Y_OUT_H   0x2B
+#define REG_Z_OUT_L   0x2C
+#define REG_Z_OUT_H   0x2D
 #define REG_DEVICE_ID 0x0F
 
-#define REG_CTRL1_LP_MODE_MASK 0x3
-#define REG_CTRL1_LP_MODE_SHIFT 0
-#define REG_CTRL1_LP_MODE_LOW 0
+#define REG_CTRL1_LP_MODE_MASK   0x3
+#define REG_CTRL1_LP_MODE_SHIFT  0
+#define REG_CTRL1_LP_MODE_LOW    0
 #define REG_CTRL1_LP_MODE_NORMAL 2
 
-#define REG_CTRL1_MODE_MASK 0x3
-#define REG_CTRL1_MODE_SHIFT 2
-#define REG_CTRL1_MODE_NORMAL 0
+#define REG_CTRL1_MODE_MASK      0x3
+#define REG_CTRL1_MODE_SHIFT     2
+#define REG_CTRL1_MODE_NORMAL    0
 #define REG_CTRL1_MODE_HIGH_PERF 1
-#define REG_CTRL1_MODE_SDC 2
+#define REG_CTRL1_MODE_SDC       2
 
-#define REG_CTRL1_ORD_MASK 0xF0
+#define REG_CTRL1_ORD_MASK  0xF0
 #define REG_CTRL1_ORD_SHIFT 4
 // REG_CTRL1_ORD_{high performance hz}_{normal mode hz}_{low power mode}
-#define REG_CTRL1_ORD_12_5HZ_12_5HZ_1_6HZ 1
+#define REG_CTRL1_ORD_12_5HZ_12_5HZ_1_6HZ  1
 #define REG_CTRL1_ORD_12_5HZ_12_5HZ_12_5HZ 2
-#define REG_CTRL1_ORD_25HZ_25HZ_25HZ 3
-#define REG_CTRL1_ORD_50HZ_50HZ_50HZ 4
-#define REG_CTRL1_ORD_100HZ_100HZ_100HZ 5
-#define REG_CTRL1_ORD_200HZ_200HZ_200HZ 6
-#define REG_CTRL1_ORD_400HZ_200HZ_200HZ 7
-#define REG_CTRL1_ORD_800HZ_200HZ_200HZ 7
-#define REG_CTRL1_ORD_1600HZ_200HZ_200HZ 7
+#define REG_CTRL1_ORD_25HZ_25HZ_25HZ       3
+#define REG_CTRL1_ORD_50HZ_50HZ_50HZ       4
+#define REG_CTRL1_ORD_100HZ_100HZ_100HZ    5
+#define REG_CTRL1_ORD_200HZ_200HZ_200HZ    6
+#define REG_CTRL1_ORD_400HZ_200HZ_200HZ    7
+#define REG_CTRL1_ORD_800HZ_200HZ_200HZ    7
+#define REG_CTRL1_ORD_1600HZ_200HZ_200HZ   7
 
 #define REG_CTRL2_I2C_DISABLE 1
-#define REG_CTRL2_IF_ADD_INC 2
-#define REG_CTRL2_BDU 3
-#define REG_CTRL2_CP_PU_DISC 4
-#define REG_CTRL2_SOFT_RESET 6
-#define REG_CTRL2_BOOT 7
+#define REG_CTRL2_IF_ADD_INC  2
+#define REG_CTRL2_BDU         3
+#define REG_CTRL2_CP_PU_DISC  4
+#define REG_CTRL2_SOFT_RESET  6
+#define REG_CTRL2_BOOT        7
 
-#define REG_CTRL3_SLP_MODE_1 0
+#define REG_CTRL3_SLP_MODE_1   0
 #define REG_CTRL3_SLP_MODE_SEL 1
-#define REG_CTRL3_H_LACTIVE 3
-#define REG_CTRL3_LIR 4
-#define REG_CTRL3_PP_OD 5
-#define REG_CTRL3_ST 6
+#define REG_CTRL3_H_LACTIVE    3
+#define REG_CTRL3_LIR          4
+#define REG_CTRL3_PP_OD        5
+#define REG_CTRL3_ST           6
 
-#define REG_CTRL4_INT0_DRDY 0
-#define REG_CTRL4_INT0_FTH 1
-#define REG_CTRL4_INT0_DIFF5 2
-#define REG_CTRL4_INT0_TAP 3
-#define REG_CTRL4_INT0_FF 4
-#define REG_CTRL4_INT0_WU 5
+#define REG_CTRL4_INT0_DRDY       0
+#define REG_CTRL4_INT0_FTH        1
+#define REG_CTRL4_INT0_DIFF5      2
+#define REG_CTRL4_INT0_TAP        3
+#define REG_CTRL4_INT0_FF         4
+#define REG_CTRL4_INT0_WU         5
 #define REG_CTRL4_INT0_SINGLE_TAP 6
-#define REG_CTRL4_INT0_6D 7
+#define REG_CTRL4_INT0_6D         7
 
-#define REG_CTRL5_INT1_DRDY 0
-#define REG_CTRL5_INT1_FTH 1
-#define REG_CTRL5_INT1_DIFF5 2
-#define REG_CTRL5_INT1_OVR 3
-#define REG_CTRL5_INT1_DRDY_T 4
-#define REG_CTRL5_INT1_BOOT 5
-#define REG_CTRL5_INT1_SLEEP_CHG 6
+#define REG_CTRL5_INT1_DRDY        0
+#define REG_CTRL5_INT1_FTH         1
+#define REG_CTRL5_INT1_DIFF5       2
+#define REG_CTRL5_INT1_OVR         3
+#define REG_CTRL5_INT1_DRDY_T      4
+#define REG_CTRL5_INT1_BOOT        5
+#define REG_CTRL5_INT1_SLEEP_CHG   6
 #define REG_CTRL5_INT1_SLEEP_STATE 7
 
-#define REG_CTRL6_LOW_NOISE 2
-#define REG_CTRL6_FDS 3
-#define REG_CTRL6_FS 4
-#define REG_CTRL6_BW_FILT 5
-#define REG_CTRL6_FS_MASK 0x30
+#define REG_CTRL6_LOW_NOISE    2
+#define REG_CTRL6_FDS          3
+#define REG_CTRL6_FS           4
+#define REG_CTRL6_BW_FILT      5
+#define REG_CTRL6_FS_MASK      0x30
 #define REG_CTRL6_BW_FILT_MASK 0xC0
-#define REG_CTRL6_BW_FILT_2 0
-#define REG_CTRL6_BW_FILT_4 1
-#define REG_CTRL6_BW_FILT_10 2
-#define REG_CTRL6_BW_FILT_20 3
-#define REG_CTRL6_FS_2 0
-#define REG_CTRL6_FS_4 1
-#define REG_CTRL6_FS_8 2
-#define REG_CTRL6_FS_16 3
+#define REG_CTRL6_BW_FILT_2    0
+#define REG_CTRL6_BW_FILT_4    1
+#define REG_CTRL6_BW_FILT_10   2
+#define REG_CTRL6_BW_FILT_20   3
+#define REG_CTRL6_FS_2         0
+#define REG_CTRL6_FS_4         1
+#define REG_CTRL6_FS_8         2
+#define REG_CTRL6_FS_16        3
 
-int wsen_itds_update_register(i2c_driver_t driver, uint8_t reg, uint8_t mask,
-        uint8_t val) {
-    int res;
+int wsen_itds_update_register(i2c_driver_t driver, uint8_t reg, uint8_t mask, uint8_t val) {
+    int     res;
     uint8_t old_val;
     res = i2c_read_register(driver, reg, &old_val, 1);
     if (res)
@@ -101,44 +99,39 @@ int wsen_itds_update_register(i2c_driver_t driver, uint8_t reg, uint8_t mask,
 
     old_val &= ~mask;
     uint8_t new_val = old_val | val;
-    res = i2c_write_register(driver, reg, &new_val, 1);
+    res             = i2c_write_register(driver, reg, &new_val, 1);
 
     return res;
 }
 
-int wsen_itds_update_ctrl1(i2c_driver_t driver, uint8_t reg, uint8_t shift,
-        uint8_t mask) {
-    int res;
+int wsen_itds_update_ctrl1(i2c_driver_t driver, uint8_t reg, uint8_t shift, uint8_t mask) {
+    int     res;
     uint8_t val = reg << shift;
     val = res = wsen_itds_update_register(driver, REG_CTRL1, mask, val);
     return res;
 }
 
 int wsen_itds_set_normal_mode(i2c_driver_t driver) {
-    return wsen_itds_update_ctrl1(driver, REG_CTRL1_MODE_NORMAL,
-            REG_CTRL1_MODE_SHIFT, REG_CTRL1_MODE_MASK);
+    return wsen_itds_update_ctrl1(driver, REG_CTRL1_MODE_NORMAL, REG_CTRL1_MODE_SHIFT, REG_CTRL1_MODE_MASK);
 }
 
 int wsen_itds_set_high_performance_mode(i2c_driver_t driver) {
-    return wsen_itds_update_ctrl1(driver, REG_CTRL1_MODE_HIGH_PERF,
-            REG_CTRL1_MODE_SHIFT, REG_CTRL1_MODE_MASK);
+    return wsen_itds_update_ctrl1(driver, REG_CTRL1_MODE_HIGH_PERF, REG_CTRL1_MODE_SHIFT, REG_CTRL1_MODE_MASK);
 }
 
 int wsen_itds_set_single_data_conv_mode(i2c_driver_t driver) {
-    return wsen_itds_update_ctrl1(driver, REG_CTRL1_MODE_SDC,
-            REG_CTRL1_MODE_SHIFT, REG_CTRL1_MODE_MASK);
+    return wsen_itds_update_ctrl1(driver, REG_CTRL1_MODE_SDC, REG_CTRL1_MODE_SHIFT, REG_CTRL1_MODE_MASK);
 }
 
 int wsen_itds_set_ord(i2c_driver_t driver, uint8_t reg_val) {
-    return wsen_itds_update_ctrl1(driver, reg_val, REG_CTRL1_ORD_SHIFT,
-            REG_CTRL1_ORD_MASK);
+    return wsen_itds_update_ctrl1(driver, reg_val, REG_CTRL1_ORD_SHIFT, REG_CTRL1_ORD_MASK);
 }
 
 int wsen_itds_update_ctrl2(i2c_driver_t driver, uint8_t reg, uint8_t val) {
-    int res;
+    int     res;
     uint8_t shifted_val = val << reg;
-    uint8_t mask = 1 << reg;
-    res = wsen_itds_update_register(driver, REG_CTRL2, mask, shifted_val);
+    uint8_t mask        = 1 << reg;
+    res                 = wsen_itds_update_register(driver, REG_CTRL2, mask, shifted_val);
     return res;
 }
 
@@ -167,9 +160,9 @@ int wsen_itds_i2c_disable(i2c_driver_t driver, uint8_t val) {
 }
 
 int wsen_itds_update_ctrl3(i2c_driver_t driver, uint8_t reg, uint8_t val) {
-    int res;
+    int     res;
     uint8_t shifted_val = val << reg;
-    uint8_t mask = 1 << reg;
+    uint8_t mask        = 1 << reg;
     if (reg == REG_CTRL3_ST)
         mask += 1 << (reg + 1);
     res = wsen_itds_update_register(driver, REG_CTRL3, 0, shifted_val);
@@ -273,23 +266,19 @@ int wsen_itds_int1_sleep_state(i2c_driver_t driver, uint8_t val) {
 }
 
 int wsen_itds_low_noise(i2c_driver_t driver, uint8_t val) {
-    return wsen_itds_update_register(driver, REG_CTRL6, 1 << REG_CTRL6_LOW_NOISE,
-            val << REG_CTRL6_LOW_NOISE);
+    return wsen_itds_update_register(driver, REG_CTRL6, 1 << REG_CTRL6_LOW_NOISE, val << REG_CTRL6_LOW_NOISE);
 }
 
 int wsen_itds_fds(i2c_driver_t driver, uint8_t val) {
-    return wsen_itds_update_register(driver, REG_CTRL6, 1 << REG_CTRL6_FDS,
-            val << REG_CTRL6_FDS);
+    return wsen_itds_update_register(driver, REG_CTRL6, 1 << REG_CTRL6_FDS, val << REG_CTRL6_FDS);
 }
 
 int wsen_itds_fs(i2c_driver_t driver, uint8_t val) {
-    return wsen_itds_update_register(driver, REG_CTRL6, REG_CTRL6_FS_MASK,
-            val << REG_CTRL6_FS);
+    return wsen_itds_update_register(driver, REG_CTRL6, REG_CTRL6_FS_MASK, val << REG_CTRL6_FS);
 }
 
 int wsen_itds_bw_filt(i2c_driver_t driver, uint8_t val) {
-    return wsen_itds_update_register(driver, REG_CTRL6, REG_CTRL6_BW_FILT_MASK,
-            val << REG_CTRL6_BW_FILT);
+    return wsen_itds_update_register(driver, REG_CTRL6, REG_CTRL6_BW_FILT_MASK, val << REG_CTRL6_BW_FILT);
 }
 
 int wsen_itds_set_odr_2(i2c_driver_t driver) {
@@ -329,9 +318,9 @@ int wsen_itds_status_drdy(i2c_driver_t driver, uint8_t *val) {
 }
 
 int wsen_itds_get_full_scale(i2c_driver_t driver, uint8_t *scale) {
-    int res;
+    int     res;
     uint8_t reg = 0;
-    res = i2c_read_register(driver, REG_CTRL6, &reg, 1);
+    res         = i2c_read_register(driver, REG_CTRL6, &reg, 1);
     if (res)
         return res;
     *scale = (reg & REG_CTRL6_FS_MASK) >> REG_CTRL6_FS;
@@ -339,13 +328,13 @@ int wsen_itds_get_full_scale(i2c_driver_t driver, uint8_t *scale) {
 }
 
 int wsen_itds_get_sensitivity(i2c_driver_t driver, float *sens) {
-    int res;
+    int     res;
     uint8_t mode, scale;
     res = i2c_read_register(driver, REG_CTRL1, &mode, 1);
     if (res)
         return res;
     mode = (mode & REG_CTRL1_MODE_MASK) >> REG_CTRL1_MODE_SHIFT;
-    res = i2c_read_register(driver, REG_CTRL1, &mode, 1);
+    res  = i2c_read_register(driver, REG_CTRL1, &mode, 1);
     if (res)
         return res;
     res = wsen_itds_get_full_scale(driver, &scale);
@@ -397,13 +386,12 @@ int wsen_itds_init(i2c_driver_t driver) {
     return res;
 }
 
-int wsen_itds_get_coord(i2c_driver_t driver, uint8_t reg_l, uint8_t reg_h,
-        int16_t *coord) {
+int wsen_itds_get_coord(i2c_driver_t driver, uint8_t reg_l, uint8_t reg_h, int16_t *coord) {
     int res = 0;
 
     uint8_t high = 0, low = 0;
     uint8_t mode;
-    //float sens;
+    // float sens;
 
     //  res = wsen_itds_get_sensitivity(driver, &sens);
     //  if (res)
@@ -425,19 +413,15 @@ int wsen_itds_get_coord(i2c_driver_t driver, uint8_t reg_l, uint8_t reg_h,
 
 
     // 14 bits
-    int16_t c = ((uint16_t) (high << 8) | (uint16_t) (low)) >> 2;
-    int16_t m = 0x2000;
+    int16_t c    = ((uint16_t)(high << 8) | (uint16_t)(low)) >> 2;
+    int16_t m    = 0x2000;
     int16_t mask = 0x3FFF;
 
     if (mode == REG_CTRL1_LP_MODE_LOW) {
         // 12 bits in low power mode
-        c = c >> 2;
-        m = 0x800;
+        c    = c >> 2;
+        m    = 0x800;
         mask = mask >> 2;
-
-        Nop();
-        Nop();
-        Nop();
     }
 
     // is negative
@@ -453,40 +437,33 @@ int wsen_itds_get_coord(i2c_driver_t driver, uint8_t reg_l, uint8_t reg_h,
 
 int wsen_itds_get_all_coords2(i2c_driver_t driver, int16_t coord[3]) {
     uint8_t ready, mode;
-    int res;
+    int     res;
 
     wsen_itds_status_drdy(driver, &ready);
     // no data
     if (ready == 0)
         return 1;
 
-    uint8_t start = REG_X_OUT_L;
-    uint8_t data[6] = {0,0,0,0,0,0};
+    uint8_t start   = REG_X_OUT_L;
+    uint8_t data[6] = {0, 0, 0, 0, 0, 0};
 
     res = driver.i2c_transfer(driver.device_address, &start, 6, data, 6, NULL);
     if (res)
         return res;
-    Nop();
-    Nop();
-    Nop();
 
     res = i2c_read_register(driver, REG_CTRL1, &mode, 1);
     if (res)
         return res;
     mode = (mode & REG_CTRL1_LP_MODE_MASK) >> REG_CTRL1_LP_MODE_SHIFT;
 
-    int16_t m = 0x2000;
+    int16_t m    = 0x2000;
     int16_t mask = 0x3FFF;
 
     if (mode == REG_CTRL1_LP_MODE_LOW) {
         // 12 bits in low power mode
-        m = 0x800;
+        m    = 0x800;
         mask = mask >> 2;
     }
-    
-    Nop();
-    Nop();
-    Nop();
 
     int i;
     int j;
@@ -502,23 +479,16 @@ int wsen_itds_get_all_coords2(i2c_driver_t driver, int16_t coord[3]) {
         }
         j++;
     }
-    
-    Nop();
-    Nop();
-    Nop();
 
     return res;
 }
 
 int wsen_itds_get_all_coords(i2c_driver_t driver, int16_t *coord) {
-    int res = 0;
+    int     res   = 0;
     uint8_t ready = 0;
     wsen_itds_status_drdy(driver, &ready);
     // no data
     if (ready == 0) {
-        Nop();
-        Nop();
-        Nop();
         return 1;
     }
 
@@ -529,7 +499,7 @@ int wsen_itds_get_all_coords(i2c_driver_t driver, int16_t *coord) {
     res = wsen_itds_get_y(driver, &coord_y);
     if (res)
         return res;
-    res = wsen_itds_get_z(driver, &coord_z);
+    res      = wsen_itds_get_z(driver, &coord_z);
     coord[0] = coord_x;
     coord[1] = coord_y;
     coord[2] = coord_z;
