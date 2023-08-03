@@ -108,6 +108,13 @@ menu "I2C Drivers"
                 Enable the VCNL4010 I2C driver
     endmenu
 
+    menu "Touch sensors"
+        config I2C_DEVICES_GT1151Q
+            bool "GT1151Q capacitive touch screen reader"
+            help
+                Enable the GT1151Q I2C driver
+    endmenu
+
     menu "Ports"
         config I2C_DEVICES_PIC_BITBANG_PORT
             bool "PIC24 bitbang driver"
