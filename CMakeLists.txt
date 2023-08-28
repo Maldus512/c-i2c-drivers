@@ -70,10 +70,16 @@ if (CONFIG_I2C_DEVICES_ESP_IDF_PORT)
     list(APPEND MODULES "i2c_ports/esp-idf")
 endif()
 
-message(${MODULES})
+#message(${CONFIG_I2C_DEVICES_ESP_IDF_PORT})
+if (MODULES)
+    message(${MODULES})
+else()
+    message("No modules")
+endif()
 
 idf_component_register(
     SRC_DIRS ${MODULES}
     INCLUDE_DIRS .
+    REQUIRES driver
     )
 

@@ -15,6 +15,7 @@ components = [
     "io/MCP23008",
     "light_proximity/LTR559ALS",
     "light_proximity/VCNL4010",
+    "touch/GT1151Q",
 ]
 ports = [
     "dummy", "posix"
