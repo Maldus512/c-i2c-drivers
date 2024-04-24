@@ -42,8 +42,8 @@ void Init_I2C (void)
                                     /* leggere i dati in ingresso e ACK       */
                                     /* dall' I2C                              */
 #ifdef WRITE_PROTECT
-    WP_I2C_B        = 1;    /* WRITE PROTECT BIT */
-    DD_WP_I2C_B     = OUTPUT_PIN;   /* se H sono in WRITE PROTECT, se L -> WR */
+    WRITE_PROTECT        = 1;    /* WRITE PROTECT BIT */
+    WRITE_PROTECT_TRIS     = OUTPUT_PIN;   /* se H sono in WRITE PROTECT, se L -> WR */
 #endif
 }
 
