@@ -80,6 +80,9 @@ endif()
 idf_component_register(
     SRC_DIRS ${MODULES}
     INCLUDE_DIRS .
+<<<<<<< Updated upstream
     REQUIRES driver
+=======
+    PRIV_REQUIRES driver
+>>>>>>> Stashed changes
     )
-
