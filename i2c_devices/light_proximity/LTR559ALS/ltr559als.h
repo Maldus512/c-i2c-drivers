@@ -1,7 +1,7 @@
 #ifndef LTR559ALS_H_INCLUDED
 #define LTR559ALS_H_INCLUDED
 
-#include "../../i2c_common/i2c_common.h"
+#include "../../../i2c_common/i2c_common.h"
 #include <stdint.h>
 
 #define LTR_STATUS_ALS_DATA (1 << 2)

@@ -132,3 +132,33 @@ int pcf85063a_get_time(i2c_driver_t driver, rtc_time_t *pTime) {
     pTime->year = BCD_to_int(tmp, 4);
     return 0;
 }
+
+
+#ifdef I2C_DEVICES_STRUCT_TM_CONVERSION
+rtc_time_t pcf85063a_rtc_from_tm(struct tm tm) {
+    rtc_time_t res = {
+        .sec   = tm.tm_sec,
+        .min   = tm.tm_min,
+        .hour  = tm.tm_hour,
+        .day   = tm.tm_mday,
+        .month = tm.tm_mon + 1,
+        .year  = tm.tm_year % 100,
+        .wday  = tm.tm_wday,
+    };
+    return res;
+}
+
+
+struct tm pcf85063a_tm_from_rtc(rtc_time_t rtc) {
+    struct tm res = {
+        .tm_sec  = rtc.sec,
+        .tm_min  = rtc.min,
+        .tm_hour = rtc.hour,
+        .tm_mday = rtc.day,
+        .tm_mon  = rtc.month - 1,
+        .tm_wday = rtc.wday,
+        .tm_year = rtc.year + 100,
+    };
+    return res;
+}
+#endif

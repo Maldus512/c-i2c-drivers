@@ -1,14 +1,30 @@
-menu "I2C library"
+menu "I2C Drivers"
     menu "Temperature sensors"
+        config I2C_DEVICES_MS5837
+            bool "MS5837 temperature (and pressure) sensor"
+            help
+                Enable the MS5837 I2C driver
+
         config I2C_DEVICES_SHT21
             bool "SHT21 temperature sensor"
             help
                 Enable the SHT21 I2C driver
                 
         config I2C_DEVICES_SHT3
-            bool "SHT3 temperature sensor"
+            bool "SHT3x temperature sensor"
             help
-                Enable the SHT3 I2C driver
+                Enable the SHT3x I2C driver
+
+        config I2C_DEVICES_SHTC3
+            bool "SHTC3 temperature sensor"
+            help
+                Enable the SHTC3 I2C driver
+
+
+        config I2C_DEVICES_SHT4
+            bool "SHT4x temperature sensor"
+            help
+                Enable the SHT4x I2C driver
 
         config I2C_DEVICES_ZS05
             bool "ZS05 temperature sensor"
@@ -26,11 +42,21 @@ menu "I2C library"
             bool "MCP24LC1025"
             help
                 Enable the MCP24LC1025 RTC driver
+
+        config I2C_DEVICES_EEPROM_24AA32
+            bool "MCP24AA32"
+            help
+                Enable the MCP24AA32 RTC driver
     endmenu
 
     menu "Real time clocks"
         config I2C_DEVICES_STRUCT_TM_CONVERSION
             bool "Enable struct tm to rtc_time_t conversion"
+
+        config I2C_DEVICES_RTC_PCF8523
+            bool "PCF8523"
+            help
+                Enable the PCF8523 RTC driver
 
         config I2C_DEVICES_RTC_PCF85063A
             bool "PCF85063A"
@@ -58,11 +84,36 @@ menu "I2C library"
         help
             Enable the MCP4018 I2C driver
 
-    config I2C_DEVICES_LTR559ALS
-        bool "LTR559ALS optical sensor"
-        help
-            Enable the LTR559ALS I2C driver
-    
+    menu "IO expanders"
+        config I2C_DEVICES_MCP23008
+            bool "MCP23008 IO port"
+            help
+                Enable the MCP23008 I2C driver
+
+        config I2C_DEVICES_TCA9534
+            bool "TCA9534 IO port"
+            help
+                Enable the TCA9534 I2C driver
+    endmenu
+
+    menu "Proximity and Ambient Light Sensors"
+        config I2C_DEVICES_LTR559ALS
+            bool "LTR559ALS optical sensor"
+            help
+                Enable the LTR559ALS I2C driver
+
+        config I2C_DEVICES_VCNL4010
+            bool "VCNL4010 optical sensor"
+            help
+                Enable the VCNL4010 I2C driver
+    endmenu
+
+    menu "Touch sensors"
+        config I2C_DEVICES_GT1151Q
+            bool "GT1151Q capacitive touch screen reader"
+            help
+                Enable the GT1151Q I2C driver
+    endmenu
 
     menu "Ports"
         config I2C_DEVICES_PIC_BITBANG_PORT

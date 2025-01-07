@@ -23,4 +23,12 @@ int pcf85063a_init(i2c_driver_t driver, uint8_t cap_size);
 int pcf85063a_set_time(i2c_driver_t driver, const rtc_time_t *pTime);
 int pcf85063a_get_time(i2c_driver_t driver, rtc_time_t *pTime);
 
+
+#ifdef I2C_DEVICES_STRUCT_TM_CONVERSION
+#include <time.h>
+
+rtc_time_t pcf85063a_rtc_from_tm(struct tm tm);
+struct tm  pcf85063a_tm_from_rtc(rtc_time_t rtc);
+#endif
+
 #endif
