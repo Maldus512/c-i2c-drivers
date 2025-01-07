@@ -11,9 +11,9 @@
  * @brief Milliseconds needed to conclude a sensor read for each corresponding repeatibility level.
  *
  */
-#define SHT3_LOW_REPEATABILITY_MS_PERIOD    4
-#define SHT3_MEDIUM_REPEATABILITY_MS_PERIOD 6
-#define SHT3_HIGH_REPEATABILITY_MS_PERIOD   15
+#define SHT3_LOW_REPEATABILITY_MS_PERIOD    5
+#define SHT3_MEDIUM_REPEATABILITY_MS_PERIOD 7
+#define SHT3_HIGH_REPEATABILITY_MS_PERIOD   16
 
 
 /**
