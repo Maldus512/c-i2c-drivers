@@ -115,6 +115,18 @@ menu "I2C Drivers"
                 Enable the GT1151Q I2C driver
     endmenu
 
+    menu "Power"
+        config I2C_DEVICES_BQ27441_G1
+            bool "BQ27441-G1 fuel gauge"
+            help
+                Enable the BQ27441-G1 fuel gauge
+
+        config I2C_DEVICES_SGM41513D
+            bool "SGM41513D charging IC"
+            help
+                Enable the SGM41513D charging IC
+    endmenu
+
     menu "Ports"
         config I2C_DEVICES_PIC_BITBANG_PORT
             bool "PIC24 bitbang driver"
