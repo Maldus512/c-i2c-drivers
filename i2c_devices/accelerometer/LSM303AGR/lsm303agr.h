@@ -15,6 +15,12 @@ typedef struct {
     float z;
 } lsm303agr_vector_t;
 
+typedef struct {
+    int16_t x;
+    int16_t y;
+    int16_t z;
+} lsm303agr_raw_vector_t;
+
 typedef enum {
     LSM303AGR_ACCELEROMETER_MODE_LOW_POWER       = 0x02,
     LSM303AGR_ACCELEROMETER_MODE_NORMAL          = 0x00,
@@ -69,10 +75,12 @@ int lsm303agr_accelerometer_set_scale(i2c_driver_t driver, lsm303agr_acceleromet
 int lsm303agr_set_magnetometer_mode(i2c_driver_t driver, lsm303agr_magnetometer_mode_t mode);
 int lsm303agr_set_magnetometer_odr(i2c_driver_t driver, lsm303agr_magnetometer_odr_t odr);
 int lsm303agr_set_magnetometer_bdu(i2c_driver_t driver, uint8_t bdu);
-int lsm303agr_read_magnetometer_data(i2c_driver_t driver, lsm303agr_vector_t *data);
+int lsm303agr_read_magnetometer_data(i2c_driver_t driver, lsm303agr_vector_t *data, lsm303agr_raw_vector_t *raw_data);
 int lsm303agr_magnetometer_set_temperature_compensation(i2c_driver_t driver, uint8_t compensation);
 int lsm303agr_magnetometer_set_low_pass_filter(i2c_driver_t driver, uint8_t filter);
 int lsm303agr_magnetometer_set_offset_cancellation(i2c_driver_t driver, uint8_t cancellation);
+int lsm303agr_magnetometer_set_hard_iron_calbration(i2c_driver_t driver, lsm303agr_raw_vector_t calibration_data);
+int lsm303agr_magnetometer_get_configuration_registers(i2c_driver_t driver, uint8_t registers[static 3]);
 
 
 #endif

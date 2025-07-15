@@ -19,8 +19,14 @@
 #define OUT_Y_H_A        0x2B
 #define OUT_Z_L_A        0x2C
 #define OUT_Z_H_A        0x2D
+#define OFFSET_X_REG_L_M 0x45
+#define OFFSET_X_REG_H_M 0x46
+#define OFFSET_Y_REG_L_M 0x47
+#define OFFSET_Y_REG_H_M 0x48
+#define OFFSET_Z_REG_L_M 0x49
+#define OFFSET_Z_REG_H_M 0x4A
 #define CFG_REG_A_M      0x60
-#define CFG_REG_B_M      0x60
+#define CFG_REG_B_M      0x61
 #define CFG_REG_C_M      0x62
 #define OUTX_L_REG_M     0x68
 #define OUTX_H_REG_M     0x69
@@ -226,6 +232,21 @@ int lsm303agr_set_magnetometer_odr(i2c_driver_t driver, lsm303agr_magnetometer_o
 }
 
 
+int lsm303agr_magnetometer_get_configuration_registers(i2c_driver_t driver, uint8_t registers[static 3]) {
+    int res = i2c_read_register(driver, CFG_REG_A_M, &registers[0], 1);
+    if (res < 0) {
+        return res;
+    }
+
+    res = i2c_read_register(driver, CFG_REG_B_M, &registers[1], 1);
+    if (res < 0) {
+        return res;
+    }
+
+    return i2c_read_register(driver, CFG_REG_C_M, &registers[2], 1);
+}
+
+
 int lsm303agr_magnetometer_set_temperature_compensation(i2c_driver_t driver, uint8_t compensation) {
     uint8_t cfg = 0;
     int     res = i2c_read_register(driver, CFG_REG_A_M, &cfg, 1);
@@ -292,7 +313,7 @@ int lsm303agr_set_magnetometer_bdu(i2c_driver_t driver, uint8_t bdu) {
 }
 
 
-int lsm303agr_read_magnetometer_data(i2c_driver_t driver, lsm303agr_vector_t *data) {
+int lsm303agr_read_magnetometer_data(i2c_driver_t driver, lsm303agr_vector_t *data, lsm303agr_raw_vector_t *raw_data) {
     uint8_t request[6]  = {OUTX_L_REG_M, OUTX_H_REG_M, OUTY_L_REG_M, OUTY_H_REG_M, OUTZ_L_REG_M, OUTZ_H_REG_M};
     uint8_t response[6] = {0};
 
@@ -307,9 +328,34 @@ int lsm303agr_read_magnetometer_data(i2c_driver_t driver, lsm303agr_vector_t *da
     int16_t y = response[2] | (response[3] << 8);
     int16_t z = response[4] | (response[5] << 8);
 
-    data->x = ((float)x) * LIS2MDL_MAG_LSB * LIS2MDL_MILLIGAUSS_TO_MICROTESLA;
-    data->y = ((float)y) * LIS2MDL_MAG_LSB * LIS2MDL_MILLIGAUSS_TO_MICROTESLA;
-    data->z = ((float)z) * LIS2MDL_MAG_LSB * LIS2MDL_MILLIGAUSS_TO_MICROTESLA;
+    if (raw_data) {
+        raw_data->x = x;
+        raw_data->y = y;
+        raw_data->z = z;
+    }
+
+    if (data) {
+        data->x = ((float)x) * LIS2MDL_MAG_LSB * LIS2MDL_MILLIGAUSS_TO_MICROTESLA;
+        data->y = ((float)y) * LIS2MDL_MAG_LSB * LIS2MDL_MILLIGAUSS_TO_MICROTESLA;
+        data->z = ((float)z) * LIS2MDL_MAG_LSB * LIS2MDL_MILLIGAUSS_TO_MICROTESLA;
+    }
+
+    return 0;
+}
+
+
+int lsm303agr_magnetometer_set_hard_iron_calbration(i2c_driver_t driver, lsm303agr_raw_vector_t calibration_data) {
+    uint8_t raw_data[] = {
+        calibration_data.x & 0xFF,        (calibration_data.x >> 8) & 0xFF, calibration_data.y & 0xFF,
+        (calibration_data.y >> 8) & 0xFF, calibration_data.z & 0xFF,        (calibration_data.z >> 8) & 0xFF,
+    };
+
+    for (size_t i = 0; i < sizeof(raw_data) / sizeof(raw_data[0]); i++) {
+        int res = i2c_write_register(driver, OFFSET_X_REG_L_M + i, &raw_data[i], 1);
+        if (res < 0) {
+            return res;
+        }
+    }
 
     return 0;
 }
