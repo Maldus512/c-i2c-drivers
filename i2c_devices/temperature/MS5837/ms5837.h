@@ -32,8 +32,8 @@ typedef struct {
 int  ms5837_init(i2c_driver_t driver, ms5837_prom_t *prom);
 int  ms5837_read_pressure_adc(i2c_driver_t driver, ms5837_oversampling_ratio_t osr, uint32_t *adc);
 int  ms5837_read_temperature_adc(i2c_driver_t driver, ms5837_oversampling_ratio_t osr, uint32_t *adc);
-void ms5837_calculate(ms5837_prom_t prom, uint32_t adc_temperature, uint32_t adc_pressure, double *temperature,
-                      double *pressure);
+void ms5837_calculate(ms5837_prom_t prom, uint32_t adc_temperature, uint32_t adc_pressure, float *temperature,
+                      float *pressure);
 
 
 #endif

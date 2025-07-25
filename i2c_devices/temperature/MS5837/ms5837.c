@@ -72,8 +72,8 @@ int ms5837_read_temperature_adc(i2c_driver_t driver, ms5837_oversampling_ratio_t
 }
 
 
-void ms5837_calculate(ms5837_prom_t prom, uint32_t adc_temperature, uint32_t adc_pressure, double *temperature,
-                      double *pressure) {
+void ms5837_calculate(ms5837_prom_t prom, uint32_t adc_temperature, uint32_t adc_pressure, float *temperature,
+                      float *pressure) {
     volatile int32_t dT = ((int32_t)adc_temperature) - ((int32_t)(((uint32_t)prom.reference_temperature) << 8));
 
     volatile int32_t first_order_temperature =
@@ -105,11 +105,11 @@ void ms5837_calculate(ms5837_prom_t prom, uint32_t adc_temperature, uint32_t adc
     int64_t second_order_pressure    = (((adc_pressure * SENS2) / 2097152 /* 2^21 */) - OFF2) / (1ULL << 15);
 
     if (temperature != NULL) {
-        *temperature = ((double)second_order_temperature) / 100.;
+        *temperature = ((float)second_order_temperature) / 100.f;
     }
 
     if (pressure != NULL) {
-        *pressure = ((double)second_order_pressure) / 100.;
+        *pressure = ((float)second_order_pressure) / 100.f;
     }
 }
 
