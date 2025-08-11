@@ -70,5 +70,4 @@ void zephyr_i2c_port_scan(const struct device *i2c_dev) {
     }
     printk("|\n");
     printk("\nI2C device(s) found on the bus: %d\nScanning done.\n\n", i2c_dev_cnt);
-    printk("Find the registered I2C address on: https://i2cdevices.org/addresses\n\n");
 }
