@@ -1,0 +1,8 @@
+#ifndef DRV2605L_H_INCLUDED
+#define DRV2605L_H_INCLUDED
+
+
+#define DRV2605L_DEFAULT_ADDRESS (0x5A << 1)
+
+
+#endif

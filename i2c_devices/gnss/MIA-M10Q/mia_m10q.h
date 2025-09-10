@@ -10,6 +10,7 @@
 #define MIA_M10Q_CFG_I2COUTPROT_UBX_ID      0x10720001
 #define MIA_M10Q_CFG_I2COUTPROT_NMEA_ID     0x10720002
 #define MIA_M10Q_CFG_MSGOUT_UBX_NAV_PVT_I2C 0x20910006
+#define MIA_M10Q_CFG_MSGOUT_UBX_NAV_SAT_I2C 0x20910015
 
 #define MIA_M10Q_VALUE(KeyId, Value)                                                                                   \
     _Generic((Value), uint8_t                                                                                          \
@@ -27,6 +28,29 @@ enum mia_m10q_response {
     MIA_M10Q_RESPONSE_ERROR,
     MIA_M10Q_RESPONSE_I2C_ERROR,
     MIA_M10Q_RESPONSE_OOM,
+};
+
+
+enum mia_m10q_message_tag {
+    MIA_M10Q_MESSAGE_TAG_NAV_PVT = 0,
+    MIA_M10Q_MESSAGE_TAG_NAV_SAT,
+};
+
+
+struct mia_m10q_message {
+    enum mia_m10q_message_tag tag;
+    union {
+        struct {
+            int32_t longitude;
+            int32_t latitude;
+            uint8_t fix_type;
+            uint8_t flags;
+        } nav_pvt;
+        struct {
+            uint8_t num_svs;
+            uint8_t average_cno;
+        } nav_sat;
+    } as;
 };
 
 
@@ -68,10 +92,11 @@ int                    mia_m10q_receive_char_message_alloc(i2c_driver_t driver, 
 
 enum mia_m10q_response mia_m10q_cfg_valget(i2c_driver_t driver, struct mia_m10q_value *value);
 enum mia_m10q_response mia_m10q_cfg_valset(i2c_driver_t driver, struct mia_m10q_value value);
+enum mia_m10q_response mia_m10q_get_message(i2c_driver_t driver, struct mia_m10q_message *message);
 enum mia_m10q_response mia_m10q_get_position(i2c_driver_t driver, struct mia_m10q_pvt_data *pvt_data);
 enum mia_m10q_response mia_m10q_get_position_velocity_time(i2c_driver_t driver, struct mia_m10q_pvt_data *pvt_data);
 enum mia_m10q_response mia_m10q_get_versions(i2c_driver_t driver, struct mia_m10q_versions *versions);
-int                    mia_m10q_flush(i2c_driver_t driver);
+int                    mia_m10q_flush(i2c_driver_t driver, unsigned bytes);
 
 
 #endif

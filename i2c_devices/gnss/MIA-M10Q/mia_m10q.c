@@ -16,8 +16,9 @@
 #define ID_UBX_NACK        0x00
 #define ID_UBX_ACK         0x01
 #define ID_UBX_NAV_POS_LLH 0x02
-#define ID_UBX_NAV_PVT     0x07
 #define ID_UBX_MON_VER     0x04
+#define ID_UBX_NAV_PVT     0x07
+#define ID_UBX_NAV_SAT     0x35
 #define ID_UBX_CFG_VALSET  0x8A
 #define ID_UBX_CFG_VALGET  0x8B
 
@@ -165,6 +166,71 @@ enum mia_m10q_response mia_m10q_get_versions(i2c_driver_t driver, struct mia_m10
 }
 
 
+enum mia_m10q_response mia_m10q_get_message(i2c_driver_t driver, struct mia_m10q_message *message) {
+    uint8_t response[MIN_MESSAGE_LENGTH + 1024] = {};
+
+    int length = mia_m10q_receive_ubx_message(driver, sizeof(response), response, 0);
+
+    if (length > 0) {
+        int res = is_ubx_message_valid(length, response);
+
+        if (res != MIA_M10Q_RESPONSE_OK) {
+            return res;
+        } else if (response[2] == 1) {
+            switch (response[3]) {
+                case ID_UBX_NAV_PVT: {
+                    message->tag                  = MIA_M10Q_MESSAGE_TAG_NAV_PVT;
+                    message->as.nav_pvt.longitude = (response[MIN_MESSAGE_LENGTH - 2 + 24] & 0xFF) |
+                                                    ((response[MIN_MESSAGE_LENGTH - 2 + 25] & 0xFF) << 8) |
+                                                    ((response[MIN_MESSAGE_LENGTH - 2 + 26] & 0xFF) << 16) |
+                                                    ((response[MIN_MESSAGE_LENGTH - 2 + 27] & 0xFF) << 24);
+                    message->as.nav_pvt.latitude = (response[MIN_MESSAGE_LENGTH - 2 + 28] & 0xFF) |
+                                                   ((response[MIN_MESSAGE_LENGTH - 2 + 29] & 0xFF) << 8) |
+                                                   ((response[MIN_MESSAGE_LENGTH - 2 + 30] & 0xFF) << 16) |
+                                                   ((response[MIN_MESSAGE_LENGTH - 2 + 31] & 0xFF) << 24);
+                    message->as.nav_pvt.fix_type = response[MIN_MESSAGE_LENGTH - 2 + 20];
+                    message->as.nav_pvt.flags    = response[MIN_MESSAGE_LENGTH - 2 + 21];
+                    break;
+                }
+
+                case ID_UBX_NAV_SAT: {
+                    message->tag                = MIA_M10Q_MESSAGE_TAG_NAV_SAT;
+                    message->as.nav_sat.num_svs = response[MIN_MESSAGE_LENGTH - 2 + 5];
+
+                    uint16_t total = 0;
+                    uint16_t count = 0;
+
+                    for (size_t i = 0; i < message->as.nav_sat.num_svs && (MIN_MESSAGE_LENGTH + 8 + i * 12) < length;
+                         i++) {
+                        size_t  base_index = MIN_MESSAGE_LENGTH - 2 + 8 + i * 12;
+                        uint8_t flags      = response[base_index + 8];
+
+                        // Signal is used
+                        if (flags & (1 << 3)) {
+                            total += response[base_index + 2];
+                            count++;
+                        }
+                    }
+
+                    if (count > 0) {
+                        message->as.nav_sat.average_cno = total / count;
+                    } else {
+                        message->as.nav_sat.average_cno = 0;
+                    }
+                    break;
+                }
+            }
+
+            return MIA_M10Q_RESPONSE_OK;
+        } else {
+            return MIA_M10Q_RESPONSE_ERROR;
+        }
+    } else {
+        return MIA_M10Q_RESPONSE_INCOMPLETE;
+    }
+}
+
+
 enum mia_m10q_response mia_m10q_get_position_velocity_time(i2c_driver_t driver, struct mia_m10q_pvt_data *pvt_data) {
     int res = 0;
 
@@ -241,7 +307,7 @@ enum mia_m10q_response mia_m10q_get_position(i2c_driver_t driver, struct mia_m10
 }
 
 
-int mia_m10q_flush(i2c_driver_t driver) {
+int mia_m10q_flush(i2c_driver_t driver, unsigned bytes) {
     uint8_t command = DATA_STREAM_ADDRESS;
     int     res     = driver.i2c_transfer(driver.device_address, &command, 1, NULL, 0, driver.arg);
     if (res < 0) {
@@ -251,7 +317,7 @@ int mia_m10q_flush(i2c_driver_t driver) {
     size_t  bytes_read = 0;
     uint8_t byte       = 0;
 
-    while (res == 0 && byte != EOF_VALUE) {
+    while (res == 0 && ((bytes > 0 && bytes_read < bytes) || byte != EOF_VALUE)) {
         res = driver.i2c_transfer(driver.device_address, NULL, 0, &byte, 1, driver.arg);
         if (res < 0) {
             return res;
