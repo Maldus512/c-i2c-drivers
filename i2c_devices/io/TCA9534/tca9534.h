@@ -5,7 +5,8 @@
 #include "../../../i2c_common/i2c_common.h"
 
 
-#define TCA9534_DEFAULT_ADDR 0x40
+#define TCA9534_DEFAULT_ADDR  0x40
+#define TCA6408A_DEFAULT_ADDR 0x20
 
 
 typedef enum {
