@@ -55,19 +55,15 @@ int drv2605l_set_motor_type(i2c_driver_t driver, enum drv2605l_motor_type motor_
     return set_bit_in_register(driver, REGISTER_ADDRESS_FEEDBACK_CONTROL, 7, motor_type);
 }
 
-#include <stdio.h>
 
 static int set_bit_in_register(i2c_driver_t driver, uint8_t address, uint8_t position, bool value) {
-    const uint8_t mask = 1 << position;
+    const uint8_t mask = (uint8_t)(1 << position);
 
     uint8_t buffer = 0;
     int     res    = i2c_read_register(driver, address, &buffer, 1);
     if (res != 0) {
-        printf("Unable to read register 0x%02i - 0x%02i\n", address, buffer);
         return res;
     }
-
-    printf("0x%02i - 0x%02i\n", address, buffer);
 
     if (value) {
         buffer |= mask;
