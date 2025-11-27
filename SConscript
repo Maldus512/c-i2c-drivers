@@ -18,7 +18,7 @@ components = [
     "touch/GT1151Q",
 ]
 ports = [
-    "dummy", "posix"
+    "dummy", "posix", "linux"
 ]
 sources = {}
 

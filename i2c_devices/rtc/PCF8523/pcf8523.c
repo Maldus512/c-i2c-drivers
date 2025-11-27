@@ -67,7 +67,7 @@ int pcf8523_init(i2c_driver_t driver, uint8_t cap_size, uint8_t battery_control)
         val |= 0x10;
     }
     // add cap_size information to value written to register
-    val |= cap_size;
+    val |= cap_size > 0;
     if ((res = i2c_write_register(driver, REG_CTRL1, &val, 1))) {
         return res;
     }
@@ -86,7 +86,7 @@ int pcf8523_init(i2c_driver_t driver, uint8_t cap_size, uint8_t battery_control)
         pcf8523_set_time(driver, &pTime);
     }
     // write battery control to register control 3
-    val = battery_control << 5;
+    val = (battery_control > 0) << 5;
     if ((res = i2c_write_register(driver, REG_CTRL3, &val, 1))) {
         return res;
     }
